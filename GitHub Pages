@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATS Resume Builder — منشئ السيرة الذاتية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300..900&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-offset-2:#edeae5;
+  --color-surface-dynamic:#e6e4df;--color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-text-inverse:#f9f8f4;--color-primary:#01696f;--color-primary-hover:#0c4e54;
+  --color-primary-active:#0f3638;--color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-error:#a12c7b;--color-warning:#964219;
+  --color-border-subtle:oklch(from #28251d l c h / 0.12);
+  --shadow-sm:0 1px 2px oklch(0.2 0.01 80/0.06);
+  --shadow-md:0 4px 12px oklch(0.2 0.01 80/0.08);
+  --shadow-lg:0 12px 32px oklch(0.2 0.01 80/0.12);
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --text-2xl:clamp(2rem,1.2rem + 2.5vw,3.5rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --font-body:'Cairo',sans-serif;--font-body-en:'Inter',sans-serif;
+  --transition:180ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-offset-2:#22211f;
+  --color-surface-dynamic:#2d2c2a;--color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;--color-primary:#4f98a3;--color-primary-hover:#227f8b;
+  --color-primary-active:#1a626b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-error:#d163a7;--color-warning:#bb653b;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);--shadow-md:0 4px 12px oklch(0 0 0/0.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth;font-size:16px}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--color-text);background:var(--color-bg);line-height:1.6;direction:rtl}
+img{display:block;max-width:100%;height:auto}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),
+  border-color var(--transition),box-shadow var(--transition)}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+
+/* ===== LAYOUT ===== */
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh}
+.topbar{background:var(--color-surface);border-bottom:1px solid var(--color-border);
+  padding:var(--space-3) var(--space-6);display:flex;align-items:center;
+  justify-content:space-between;gap:var(--space-4);position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow-sm)}
+.logo{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:var(--color-text)}
+.logo-icon{width:36px;height:36px;flex-shrink:0}
+.logo-text{font-size:var(--text-sm);font-weight:700;line-height:1.2}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:400}
+.topbar-actions{display:flex;align-items:center;gap:var(--space-2)}
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);
+  border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;
+  transition:all var(--transition);white-space:nowrap;text-decoration:none;cursor:pointer}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-ghost{color:var(--color-text-muted);padding:var(--space-2) var(--space-3)}
+.btn-ghost:hover{color:var(--color-text);background:var(--color-surface-offset)}
+.btn-sm{padding:var(--space-1) var(--space-3);font-size:var(--text-xs)}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius-md);
+  display:flex;align-items:center;justify-content:center;color:var(--color-text-muted)}
+.icon-btn:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+/* ===== MAIN LAYOUT ===== */
+.main-layout{display:grid;grid-template-columns:320px 1fr 380px;min-height:calc(100dvh - 57px)}
+@media(max-width:1100px){.main-layout{grid-template-columns:280px 1fr}}
+@media(max-width:768px){.main-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+
+/* ===== SIDEBAR ===== */
+.sidebar{background:var(--color-surface);border-left:1px solid var(--color-border);
+  overflow-y:auto;padding:var(--space-6) var(--space-4)}
+.sidebar-section{margin-bottom:var(--space-6)}
+.sidebar-section-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-3);
+  padding-bottom:var(--space-2);border-bottom:1px solid var(--color-divider)}
+
+/* Form Controls */
+.form-group{margin-bottom:var(--space-4)}
+.form-label{display:block;font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);
+  margin-bottom:var(--space-1);letter-spacing:.03em}
+.form-input,.form-textarea,.form-select{width:100%;padding:var(--space-2) var(--space-3);
+  border:1px solid var(--color-border);border-radius:var(--radius-md);
+  background:var(--color-surface-2);font:inherit;font-size:var(--text-sm);
+  color:var(--color-text);transition:border-color var(--transition),box-shadow var(--transition)}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-highlight);outline:none}
+.form-textarea{resize:vertical;min-height:80px}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7974' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left var(--space-3) center}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+.chip-group{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-2)}
+.chip{display:inline-flex;align-items:center;gap:var(--space-1);padding:var(--space-1) var(--space-3);
+  border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600;
+  background:var(--color-primary-highlight);color:var(--color-primary);cursor:pointer}
+.chip:hover{background:var(--color-primary);color:var(--color-text-inverse)}
+.chip.active{background:var(--color-primary);color:var(--color-text-inverse)}
+.add-btn{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);
+  font-weight:600;color:var(--color-primary);padding:var(--space-2);
+  border-radius:var(--radius-md);margin-top:var(--space-2)}
+.add-btn:hover{background:var(--color-primary-highlight)}
+.exp-card{background:var(--color-surface-offset);border:1px solid var(--color-border);
+  border-radius:var(--radius-lg);padding:var(--space-3);margin-bottom:var(--space-3)}
+.exp-card-header{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:var(--space-3)}
+.exp-card-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text)}
+.delete-btn{width:24px;height:24px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--color-error);font-size:11px}
+.delete-btn:hover{background:var(--color-error);color:white}
+
+/* ===== PREVIEW AREA ===== */
+.preview-area{background:var(--color-surface-offset);padding:var(--space-8) var(--space-6);
+  overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:var(--space-6)}
+.preview-toolbar{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
+.preview-toolbar-title{font-size:var(--text-sm);font-weight:700;color:var(--color-text-muted);margin-left:auto}
+.preview-paper{width:100%;max-width:794px;min-height:1123px;background:white;
+  box-shadow:var(--shadow-lg);border-radius:var(--radius-sm);overflow:hidden;
+  transition:all var(--transition)}
+.ats-badge{display:inline-flex;align-items:center;gap:var(--space-1);
+  background:var(--color-success);color:white;padding:var(--space-1) var(--space-3);
+  border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700}
+.score-bar{display:flex;align-items:center;gap:var(--space-3);width:100%}
+.score-label{font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);white-space:nowrap}
+.score-track{flex:1;height:8px;background:var(--color-surface-dynamic);border-radius:var(--radius-full);overflow:hidden}
+.score-fill{height:100%;background:var(--color-primary);border-radius:var(--radius-full);transition:width .6s ease}
+.score-num{font-size:var(--text-xs);font-weight:700;color:var(--color-primary);white-space:nowrap}
+
+/* ===== TEMPLATE PANEL ===== */
+.template-panel{background:var(--color-surface);border-right:1px solid var(--color-border);
+  padding:var(--space-4);overflow-y:auto}
+.template-panel h3{font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-4)}
+.template-family{margin-bottom:var(--space-5)}
+.family-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-2)}
+.template-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+.template-card{border:2px solid var(--color-border);border-radius:var(--radius-md);
+  padding:var(--space-3) var(--space-2);cursor:pointer;transition:all var(--transition);
+  background:var(--color-surface-2);text-align:center}
+.template-card:hover{border-color:var(--color-primary);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.template-card.active{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.template-preview{width:100%;aspect-ratio:0.7;border-radius:var(--radius-sm);
+  margin-bottom:var(--space-2);display:flex;flex-direction:column;padding:6px;gap:2px;overflow:hidden}
+.tp-line{height:3px;border-radius:1px;background:currentColor;opacity:.3}
+.tp-line.thick{height:5px;opacity:.6}
+.tp-line.accent{opacity:.8;background:var(--color-primary)}
+.tp-block{height:20px;border-radius:2px;background:var(--color-primary);opacity:.15}
+.template-name{font-size:10px;font-weight:700;color:var(--color-text)}
+.template-label{font-size:9px;color:var(--color-text-muted)}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;background:var(--color-surface-offset);
+  border-radius:var(--radius-md);padding:3px}
+.tab{padding:var(--space-2) var(--space-3);border-radius:calc(var(--radius-md) - 2px);
+  font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);cursor:pointer;transition:all var(--transition)}
+.tab.active{background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-sm)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ===== RESUME TEMPLATES ===== */
+/* Classic */
+.resume-classic{font-family:'Inter','Arial',sans-serif;color:#222;font-size:10.5pt;line-height:1.5;padding:36px}
+.resume-classic .r-header{text-align:center;border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:14px}
+.resume-classic .r-name{font-size:20pt;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.resume-classic .r-contact{font-size:9pt;color:#444}
+.resume-classic .r-section{margin-bottom:14px}
+.resume-classic .r-section-title{font-size:11pt;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;border-bottom:1px solid #444;padding-bottom:3px;margin-bottom:8px}
+.resume-classic .r-item{margin-bottom:8px}
+.resume-classic .r-item-header{display:flex;justify-content:space-between;font-weight:700;font-size:10.5pt}
+.resume-classic .r-item-sub{color:#555;font-size:9.5pt;margin-bottom:3px}
+.resume-classic .r-bullets{margin-right:16px;font-size:10pt}
+.resume-classic .r-bullets li{margin-bottom:2px}
+.resume-classic .r-skills-grid{display:flex;flex-wrap:wrap;gap:6px}
+.resume-classic .r-skill-tag{background:#f0f0f0;padding:2px 8px;border-radius:3px;font-size:9pt}
+
+/* Modern */
+.resume-modern{font-family:'Inter','Arial',sans-serif;color:#1a1a2e;font-size:10pt;line-height:1.55}
+.resume-modern .r-header{background:linear-gradient(135deg,#01696f,#0c4e54);color:white;padding:28px 32px;margin-bottom:0}
+.resume-modern .r-name{font-size:22pt;font-weight:700;margin-bottom:4px}
+.resume-modern .r-title-job{font-size:11pt;opacity:.85;margin-bottom:6px}
+.resume-modern .r-contact{font-size:8.5pt;opacity:.8;display:flex;gap:16px;flex-wrap:wrap}
+.resume-modern .r-body{display:grid;grid-template-columns:1fr 220px;min-height:800px}
+.resume-modern .r-main{padding:20px 28px}
+.resume-modern .r-aside{background:#f8f9fa;padding:18px 18px;border-right:1px solid #e0e0e0}
+.resume-modern .r-section-title{font-size:10pt;font-weight:700;color:#01696f;text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #01696f}
+.resume-modern .r-item{margin-bottom:12px}
+.resume-modern .r-item-header{display:flex;justify-content:space-between;font-weight:700;font-size:10.5pt}
+.resume-modern .r-item-sub{color:#555;font-size:9pt;margin-bottom:4px}
+.resume-modern .r-aside-section{margin-bottom:16px}
+.resume-modern .r-aside-title{font-size:9.5pt;font-weight:700;color:#333;text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:6px}
+.resume-modern .r-skill-bar{margin-bottom:5px}
+.resume-modern .r-skill-name{font-size:9pt;margin-bottom:2px}
+.resume-modern .r-skill-track{height:5px;background:#e0e0e0;border-radius:3px;overflow:hidden}
+.resume-modern .r-skill-fill{height:100%;background:#01696f;border-radius:3px}
+.resume-modern .r-bullets{margin-right:14px;font-size:9.5pt}
+.resume-modern .r-bullets li{margin-bottom:2px}
+
+/* Arabic */
+.resume-arabic{font-family:'Cairo','Arial',sans-serif;direction:rtl;color:#1a1a1a;
+  font-size:10.5pt;line-height:1.65;padding:32px}
+.resume-arabic .r-header{background:#01696f;color:white;padding:24px 28px;margin:-32px -32px 20px}
+.resume-arabic .r-name{font-size:20pt;font-weight:900;margin-bottom:4px}
+.resume-arabic .r-title-job{font-size:11pt;opacity:.85;margin-bottom:6px}
+.resume-arabic .r-contact{font-size:9pt;opacity:.85;display:flex;gap:16px;flex-wrap:wrap}
+.resume-arabic .r-section{margin-bottom:16px}
+.resume-arabic .r-section-title{font-size:10.5pt;font-weight:700;color:#01696f;
+  border-bottom:2px solid #01696f;padding-bottom:4px;margin-bottom:10px}
+.resume-arabic .r-item-header{display:flex;justify-content:space-between;font-weight:700}
+.resume-arabic .r-item-sub{color:#555;font-size:9.5pt;margin-bottom:4px}
+.resume-arabic .r-bullets{margin-left:16px;font-size:10pt}
+.resume-arabic .r-bullets li{margin-bottom:3px}
+.resume-arabic .r-skills-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.resume-arabic .r-skill-tag{background:#e8f4f4;color:#01696f;padding:3px 10px;
+  border-radius:4px;font-size:9pt;font-weight:600}
+
+/* Executive */
+.resume-executive{font-family:'Inter','Georgia',serif;color:#111;font-size:10.5pt;line-height:1.5;padding:40px}
+.resume-executive .r-header{display:grid;grid-template-columns:1fr auto;gap:20px;
+  border-bottom:3px double #111;padding-bottom:16px;margin-bottom:18px}
+.resume-executive .r-name{font-size:24pt;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.resume-executive .r-title-job{font-size:12pt;color:#444;font-style:italic}
+.resume-executive .r-contact-block{text-align:left;font-size:9pt;color:#444;line-height:1.8}
+.resume-executive .r-section{margin-bottom:16px}
+.resume-executive .r-section-title{font-size:11pt;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:10px;color:#01696f}
+.resume-executive .r-summary{font-size:10.5pt;line-height:1.7;color:#333;
+  border-right:3px solid #01696f;padding-right:12px;margin-bottom:16px}
+.resume-executive .r-item{margin-bottom:12px}
+.resume-executive .r-item-header{display:flex;justify-content:space-between;font-weight:700}
+.resume-executive .r-item-sub{color:#555;font-size:9.5pt;margin-bottom:4px;font-style:italic}
+.resume-executive .r-bullets{margin-right:16px;font-size:10pt}
+.resume-executive .r-bullets li{margin-bottom:2px}
+
+/* Creative Safe */
+.resume-creative{font-family:'Inter','Arial',sans-serif;color:#1e1e1e;font-size:10pt;line-height:1.55}
+.resume-creative .r-header{padding:24px 32px;background:#f8f8f8;border-bottom:4px solid #01696f}
+.resume-creative .r-name{font-size:22pt;font-weight:800;letter-spacing:-0.5px;margin-bottom:2px}
+.resume-creative .r-title-job{font-size:11pt;color:#01696f;font-weight:600;margin-bottom:6px}
+.resume-creative .r-contact{font-size:8.5pt;color:#666;display:flex;gap:16px;flex-wrap:wrap}
+.resume-creative .r-body{padding:22px 32px}
+.resume-creative .r-section{margin-bottom:16px}
+.resume-creative .r-section-title{font-size:10pt;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:10px;color:#1e1e1e;
+  display:flex;align-items:center;gap:8px}
+.resume-creative .r-section-title::after{content:'';flex:1;height:1px;background:#ddd}
+.resume-creative .r-item{margin-bottom:10px;padding-right:10px;border-right:3px solid transparent}
+.resume-creative .r-item:hover{border-right-color:#01696f}
+.resume-creative .r-item-header{display:flex;justify-content:space-between;font-weight:700;font-size:10.5pt}
+.resume-creative .r-item-sub{color:#666;font-size:9pt;margin-bottom:4px}
+.resume-creative .r-bullets{margin-right:14px;font-size:9.5pt}
+.resume-creative .r-bullets li{margin-bottom:2px}
+.resume-creative .r-skill-tags{display:flex;flex-wrap:wrap;gap:5px}
+.resume-creative .r-skill-tag{background:#e8f4f4;color:#01696f;padding:3px 10px;border-radius:3px;font-size:9pt;font-weight:600}
+
+/* ===== ATS CHECKER PANEL ===== */
+.ats-panel{padding:var(--space-4);border-top:1px solid var(--color-border)}
+.ats-panel-title{font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-3)}
+.ats-check{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);
+  border-radius:var(--radius-md);font-size:var(--text-xs);margin-bottom:var(--space-1)}
+.ats-check.pass{color:var(--color-success)}
+.ats-check.fail{color:var(--color-error)}
+.ats-check.warn{color:var(--color-warning)}
+.check-icon{font-size:12px;flex-shrink:0}
+
+/* ===== MISC ===== */
+.divider{height:1px;background:var(--color-divider);margin:var(--space-4) 0}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--radius-full);
+  font-size:10px;font-weight:700}
+.badge-ats{background:#dcf0dc;color:#2d6a2d}
+.badge-new{background:var(--color-primary-highlight);color:var(--color-primary)}
+.lang-toggle{display:flex;gap:2px;background:var(--color-surface-offset);
+  border-radius:var(--radius-md);padding:3px}
+.lang-btn{padding:4px 10px;border-radius:calc(var(--radius-md) - 2px);font-size:11px;font-weight:600;
+  color:var(--color-text-muted);cursor:pointer;transition:all var(--transition)}
+.lang-btn.active{background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-sm)}
+.section-divider{display:flex;align-items:center;gap:var(--space-2);margin:var(--space-4) 0}
+.section-divider span{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--color-divider)}
+
+.platform-links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}@media(max-width:768px){.platform-links{grid-template-columns:1fr}}
+.platform-link{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2);text-decoration:none;color:var(--color-text);font-size:var(--text-xs);font-weight:700}
+.platform-link:hover{border-color:var(--color-primary);background:var(--color-primary-highlight);color:var(--color-primary)}
+.platform-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+
+.chip[data-open]{cursor:pointer}.chip[data-open]:hover{background:var(--color-primary);color:var(--color-text-inverse)}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar">
+  <a href="#" class="logo">
+    <svg class="logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="ATS Resume Builder">
+      <rect width="36" height="36" rx="8" fill="#01696f"/>
+      <rect x="9" y="8" width="18" height="2.5" rx="1.25" fill="white" opacity=".9"/>
+      <rect x="9" y="13" width="14" height="2" rx="1" fill="white" opacity=".7"/>
+      <rect x="9" y="17.5" width="18" height="2" rx="1" fill="white" opacity=".7"/>
+      <rect x="9" y="22" width="11" height="2" rx="1" fill="white" opacity=".5"/>
+      <circle cx="26" cy="26" r="7" fill="#4f98a3"/>
+      <path d="M23 26l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="logo-text">ATS Resume Builder</div>
+      <div class="logo-sub">منشئ السيرة الذاتية المتوافق مع ATS</div>
+    </div>
+  </a>
+  <div class="topbar-actions">
+    <span class="badge badge-ats">✓ ATS Safe</span>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('ar')">عربي</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      تصدير PDF
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="openJobPlatforms()">منصات التوظيف</button>
+    <button class="btn btn-primary btn-sm" onclick="openCompanyMessageModal()">مراسلة الشركات</button>
+    <button class="icon-btn" data-theme-toggle onclick="toggleTheme()" title="تبديل المظهر" aria-label="تبديل الوضع الليلي">
+      <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<div class="main-layout">
+
+  <!-- SIDEBAR: FORM -->
+  <aside class="sidebar">
+    <!-- TABS -->
+    <div class="tabs" style="margin-bottom:var(--space-5)">
+      <button class="tab active" onclick="switchTab('personal')">الملف</button>
+      <button class="tab" onclick="switchTab('experience')">الخبرة</button>
+      <button class="tab" onclick="switchTab('skills')">المهارات</button>
+    </div>
+
+    <!-- PERSONAL TAB -->
+    <div id="tab-personal" class="tab-panel active">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">المعلومات الشخصية</div>
+        <div class="form-group"><label class="form-label">الاسم الكامل</label>
+          <input class="form-input" id="f-name" value="خالد ماجد الدوسري" oninput="updateResume()" placeholder="Full Name"></div>
+        <div class="form-group"><label class="form-label">المسمى الوظيفي</label>
+          <input class="form-input" id="f-title" value="محلل بيانات | مطور رقمي" oninput="updateResume()" placeholder="Job Title"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">البريد الإلكتروني</label>
+            <input class="form-input" id="f-email" value="khalid@example.com" oninput="updateResume()"></div>
+          <div class="form-group"><label class="form-label">الهاتف</label>
+            <input class="form-input" id="f-phone" value="+966 5X XXX XXXX" oninput="updateResume()"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">المدينة</label>
+            <input class="form-input" id="f-city" value="الرياض، السعودية" oninput="updateResume()"></div>
+          <div class="form-group"><label class="form-label">LinkedIn</label>
+            <input class="form-input" id="f-linkedin" value="linkedin.com/in/khalid" oninput="updateResume()"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">رابط واتساب</label>
+            <input class="form-input" id="f-whatsapp" value="https://wa.me/9665XXXXXXXX" oninput="updateResume()"></div>
+          <div class="form-group"><label class="form-label">رابط QR للواتساب</label>
+            <input class="form-input" id="f-whatsapp-qr" value="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://wa.me/9665XXXXXXXX" oninput="updateResume()"></div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">الملخص المهني</div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="f-summary" oninput="updateResume()" style="min-height:100px">محلل بيانات ومطور رقمي بخبرة في أتمتة الأعمال، تطوير الويب، وتكامل تقنيات الذكاء الاصطناعي. أملك مهارات قوية في تحليل البيانات والمشاريع الرقمية مع التركيز على تحقيق النتائج القابلة للقياس.</textarea>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">التعليم</div>
+        <div id="education-list">
+          <div class="exp-card">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">الدرجة / الشهادة</label>
+                <input class="form-input" value="بكالوريوس تقنية المعلومات" oninput="updateResume()"></div>
+              <div class="form-group"><label class="form-label">السنة</label>
+                <input class="form-input" value="2020" oninput="updateResume()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">المؤسسة</label>
+              <input class="form-input" value="جامعة الملك سعود" oninput="updateResume()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPERIENCE TAB -->
+    <div id="tab-experience" class="tab-panel">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">الخبرة العملية</div>
+        <div id="exp-list">
+          <div class="exp-card">
+            <div class="exp-card-header">
+              <span class="exp-card-title">الخبرة 1</span>
+              <button class="delete-btn" onclick="this.closest('.exp-card').remove();updateResume()">✕</button>
+            </div>
+            <div class="form-group"><label class="form-label">المسمى الوظيفي</label>
+              <input class="form-input" value="مطور رقمي ومحلل بيانات" oninput="updateResume()"></div>
+            <div class="form-group"><label class="form-label">الشركة</label>
+              <input class="form-input" value="شركة التقنية المتقدمة" oninput="updateResume()"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">من</label>
+                <input class="form-input" value="2021" oninput="updateResume()"></div>
+              <div class="form-group"><label class="form-label">إلى</label>
+                <input class="form-input" value="حتى الآن" oninput="updateResume()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">المهام والإنجازات</label>
+              <textarea class="form-textarea" oninput="updateResume()">• تطوير حلول أتمتة الأعمال باستخدام Make.com وNode.js
+• بناء وتشغيل متاجر إلكترونية على منصات نون وأمازون
+• تكامل واجهات برمجة AI لتحسين تجربة العملاء بنسبة 40%</textarea>
+            </div>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addExperience()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          إضافة خبرة
+        </button>
+      </div>
+    </div>
+
+    <!-- SKILLS TAB -->
+    <div id="tab-skills" class="tab-panel">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">المهارات التقنية</div>
+        <div class="form-group"><label class="form-label">أضف مهارة واضغط Enter</label>
+          <input class="form-input" id="skill-input" placeholder="مثال: Python, Excel, SQL" onkeydown="addSkill(event)">
+        </div>
+        <div class="chip-group" id="skills-chips">
+          <span class="chip active" onclick="removeSkill(this)">Python ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">Excel ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">Power BI ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">Make.com ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">Node.js ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">إدارة المشاريع ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">تحليل البيانات ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">SQL ✕</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">اللغات</div>
+        <div class="chip-group" id="langs-chips">
+          <span class="chip active" onclick="removeSkill(this)">العربية (الأم) ✕</span>
+          <span class="chip active" onclick="removeSkill(this)">الإنجليزية (متقدم) ✕</span>
+        </div>
+        <button class="add-btn" onclick="addLang()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          إضافة لغة
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">الشهادات والدورات</div>
+        <div id="certs-list">
+          <div class="form-group">
+            <input class="form-input" value="Google Data Analytics Certificate" oninput="updateResume()" style="margin-bottom:var(--space-2)">
+            <input class="form-input" value="Cybersecurity Fundamentals - IBM" oninput="updateResume()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">منصات التوظيف وربط التواصل</div>
+        <div class="chip-group" id="platforms-chips">
+          <span class="chip active" data-open="https://www.linkedin.com/jobs/" onclick="openExternalLink(this)">LinkedIn Jobs</span>
+          <span class="chip active" data-open="https://www.indeed.com/" onclick="openExternalLink(this)">Indeed</span>
+          <span class="chip active" data-open="https://www.bayt.com/en/saudi-arabia/" onclick="openExternalLink(this)">Bayt</span>
+          <span class="chip active">جدارات</span>
+          <span class="chip active">طاقات</span>
+          <span class="chip active" data-open="https://www.glassdoor.com/Job/" onclick="openExternalLink(this)">Glassdoor</span>
+          <span class="chip active" data-open="https://www.naukrigulf.com/" onclick="openExternalLink(this)">Naukrigulf</span>
+          <span class="chip active">Foundit</span>
+          <span class="chip active" data-open="https://www.gulftalent.com/" onclick="openExternalLink(this)">GulfTalent</span>
+          <span class="chip active" data-open="https://saudi.tanqeeb.com/en" onclick="openExternalLink(this)">Tanqeeb</span>
+          <span class="chip active" data-open="https://www.akhtaboot.com/" onclick="openExternalLink(this)">Akhtaboot</span>
+          <span class="chip active" data-open="https://www.careerjet.com.sa/" onclick="openExternalLink(this)">Careerjet</span>
+          <span class="chip active" data-open="https://sa.jooble.org/" onclick="openExternalLink(this)">Jooble</span>
+          <span class="chip active" data-open="https://sa.talent.com/" onclick="openExternalLink(this)">Talent.com</span>
+          <span class="chip active">Expatriates</span>
+          <span class="chip active" data-open="https://www.mihnati.com/" onclick="openExternalLink(this)">Mihnati</span>
+          <span class="chip active" data-open="https://sabbar.com/en" onclick="openExternalLink(this)">Sabbar</span>
+          <span class="chip active" data-open="https://dawli.mofa.gov.sa" onclick="openExternalLink(this)">Dawli</span>
+          <span class="chip active" data-open="https://gulfjoblo.com/" onclick="openExternalLink(this)">GulfJoblo</span>
+          <span class="chip active">Monster Gulf</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="openPlatformsModal('jobs-ar')">المنصات العربية</button>
+          <button class="btn btn-ghost btn-sm" onclick="openPlatformsModal('jobs-all')">جميع منصات التوظيف</button>
+        </div>
+        <div class="section-divider"><span>صيغة طلب التوظيف</span></div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="f-job-message" oninput="updateResume()" style="min-height:120px">السلام عليكم،
+
+أرغب بالتقدم على الفرصة الوظيفية المعلنة لديكم، وأرفقت سيرتي الذاتية للاطلاع. أمتلك خبرة في تحليل البيانات، الأتمتة الرقمية، وتطوير الحلول التقنية، وأتطلع للمساهمة في تحقيق أهداف فريقكم بكفاءة واحترافية.
+
+أشكر لكم وقتكم، ويسعدني التحدث معكم وإجراء المقابلة في الوقت المناسب.
+
+مع خالص التحية،
+خالد ماجد الدوسري</textarea>
+        </div>
+        <button class="add-btn" onclick="copyJobMessage()">نسخ صيغة التوظيف</button>
+      </div>
+
+    <!-- ATS SCORE -->
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">100 شركة توظيف داخل السعودية أو ذات حضور إقليمي</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+          <span class="chip active" data-open="https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/" onclick="openExternalLink(this)">NADIA Global</span>
+          <span class="chip active" data-open="https://www.rawaj-hcm.com" onclick="openExternalLink(this)">Rawaj HCM</span>
+          <span class="chip active" data-open="https://jobskeysearch.com/" onclick="openExternalLink(this)">Jobskey</span>
+          <span class="chip active" data-open="https://www.bayt.com/en/saudi-arabia/" onclick="openExternalLink(this)">Bayt</span>
+          <span class="chip active" data-open="https://dawli.mofa.gov.sa" onclick="openExternalLink(this)">Dawli</span>
+          <span class="chip active" data-open="https://www.naukrigulf.com/" onclick="openExternalLink(this)">Naukrigulf</span>
+          <span class="chip active" data-open="https://www.gulftalent.com/" onclick="openExternalLink(this)">GulfTalent</span>
+          <span class="chip active" data-open="https://saudi.tanqeeb.com/en" onclick="openExternalLink(this)">Tanqeeb</span>
+          <span class="chip active" data-open="https://sabbar.com/en" onclick="openExternalLink(this)">Sabbar</span>
+          <span class="chip active" data-open="https://www.linkedin.com/jobs/" onclick="openExternalLink(this)">LinkedIn Jobs</span>
+          <span class="chip active" data-open="https://www.indeed.com/" onclick="openExternalLink(this)">Indeed</span>
+          <span class="chip active" data-open="https://www.glassdoor.com/Job/" onclick="openExternalLink(this)">Glassdoor</span>
+          <span class="chip active" data-open="https://www.founditgulf.com/" onclick="openExternalLink(this)">Foundit Gulf</span>
+          <span class="chip active" data-open="https://www.careerjet.com.sa/" onclick="openExternalLink(this)">Careerjet</span>
+          <span class="chip active" data-open="https://sa.jooble.org/" onclick="openExternalLink(this)">Jooble</span>
+          <span class="chip active" data-open="https://sa.talent.com/" onclick="openExternalLink(this)">Talent.com</span>
+          <span class="chip active" data-open="https://www.mihnati.com/" onclick="openExternalLink(this)">Mihnati</span>
+          <span class="chip active" data-open="https://www.akhtaboot.com/" onclick="openExternalLink(this)">Akhtaboot</span>
+          <span class="chip active" data-open="https://gulfjoblo.com/" onclick="openExternalLink(this)">GulfJoblo</span>
+          <span class="chip active" data-open="https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html" onclick="openExternalLink(this)">Robert Walters</span>
+          <span class="chip active" data-open="https://tascoutsourcing.sa/en" onclick="openExternalLink(this)">TASC Saudi</span>
+          <span class="chip active" data-open="https://manpowersaudia.com" onclick="openExternalLink(this)">Manpower Saudi Arabia</span>
+          <span class="chip active" data-open="https://adam-recruitment.com" onclick="openExternalLink(this)">Adam Recruitment</span>
+          <span class="chip active" data-open="https://remotepeople.com/countries/saudi-arabia/recruitment-agency/" onclick="openExternalLink(this)">Remote People KSA</span>
+          <span class="chip active" data-open="https://innovationsglobal.com/ksa.php" onclick="openExternalLink(this)">Innovations Group KSA</span>
+          <span class="chip active" data-open="https://www.antal.com/recruitment/saudi-arabia-jeddah-ts" onclick="openExternalLink(this)">Antal KSA</span>
+          <span class="chip active" data-open="https://recruit.saudieng.sa" onclick="openExternalLink(this)">SCE Recruitment Portal</span>
+          <span class="chip active" data-open="https://www.adecco.com/en-sa/saudi-arabia-jobs" onclick="openExternalLink(this)">Adecco Saudi Jobs</span>
+          <span class="chip active" data-open="https://wuzzuf.net/saudi/recruitment" onclick="openExternalLink(this)">Wuzzuf Saudi Recruitment</span>
+          <span class="chip active" data-open="https://www.mer.jo" onclick="openExternalLink(this)">Middle East Recruitment</span>
+          <span class="chip active" data-open="https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/" onclick="openExternalLink(this)">NADIA Global 2</span>
+          <span class="chip active" data-open="https://www.rawaj-hcm.com" onclick="openExternalLink(this)">Rawaj HCM 2</span>
+          <span class="chip active" data-open="https://jobskeysearch.com/" onclick="openExternalLink(this)">Jobskey 2</span>
+          <span class="chip active" data-open="https://www.bayt.com/en/saudi-arabia/" onclick="openExternalLink(this)">Bayt 2</span>
+          <span class="chip active" data-open="https://dawli.mofa.gov.sa" onclick="openExternalLink(this)">Dawli 2</span>
+          <span class="chip active" data-open="https://www.naukrigulf.com/" onclick="openExternalLink(this)">Naukrigulf 2</span>
+          <span class="chip active" data-open="https://www.gulftalent.com/" onclick="openExternalLink(this)">GulfTalent 2</span>
+          <span class="chip active" data-open="https://saudi.tanqeeb.com/en" onclick="openExternalLink(this)">Tanqeeb 2</span>
+          <span class="chip active" data-open="https://sabbar.com/en" onclick="openExternalLink(this)">Sabbar 2</span>
+          <span class="chip active" data-open="https://www.linkedin.com/jobs/" onclick="openExternalLink(this)">LinkedIn Jobs 2</span>
+          <span class="chip active" data-open="https://www.indeed.com/" onclick="openExternalLink(this)">Indeed 2</span>
+          <span class="chip active" data-open="https://www.glassdoor.com/Job/" onclick="openExternalLink(this)">Glassdoor 2</span>
+          <span class="chip active" data-open="https://www.founditgulf.com/" onclick="openExternalLink(this)">Foundit Gulf 2</span>
+          <span class="chip active" data-open="https://www.careerjet.com.sa/" onclick="openExternalLink(this)">Careerjet 2</span>
+          <span class="chip active" data-open="https://sa.jooble.org/" onclick="openExternalLink(this)">Jooble 2</span>
+          <span class="chip active" data-open="https://sa.talent.com/" onclick="openExternalLink(this)">Talent.com 2</span>
+          <span class="chip active" data-open="https://www.mihnati.com/" onclick="openExternalLink(this)">Mihnati 2</span>
+          <span class="chip active" data-open="https://www.akhtaboot.com/" onclick="openExternalLink(this)">Akhtaboot 2</span>
+          <span class="chip active" data-open="https://gulfjoblo.com/" onclick="openExternalLink(this)">GulfJoblo 2</span>
+          <span class="chip active" data-open="https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html" onclick="openExternalLink(this)">Robert Walters 2</span>
+          <span class="chip active" data-open="https://tascoutsourcing.sa/en" onclick="openExternalLink(this)">TASC Saudi 2</span>
+          <span class="chip active" data-open="https://manpowersaudia.com" onclick="openExternalLink(this)">Manpower Saudi Arabia 2</span>
+          <span class="chip active" data-open="https://adam-recruitment.com" onclick="openExternalLink(this)">Adam Recruitment 2</span>
+          <span class="chip active" data-open="https://remotepeople.com/countries/saudi-arabia/recruitment-agency/" onclick="openExternalLink(this)">Remote People KSA 2</span>
+          <span class="chip active" data-open="https://innovationsglobal.com/ksa.php" onclick="openExternalLink(this)">Innovations Group KSA 2</span>
+          <span class="chip active" data-open="https://www.antal.com/recruitment/saudi-arabia-jeddah-ts" onclick="openExternalLink(this)">Antal KSA 2</span>
+          <span class="chip active" data-open="https://recruit.saudieng.sa" onclick="openExternalLink(this)">SCE Recruitment Portal 2</span>
+          <span class="chip active" data-open="https://www.adecco.com/en-sa/saudi-arabia-jobs" onclick="openExternalLink(this)">Adecco Saudi Jobs 2</span>
+          <span class="chip active" data-open="https://wuzzuf.net/saudi/recruitment" onclick="openExternalLink(this)">Wuzzuf Saudi Recruitment 2</span>
+          <span class="chip active" data-open="https://www.mer.jo" onclick="openExternalLink(this)">Middle East Recruitment 2</span>
+          <span class="chip active" data-open="https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/" onclick="openExternalLink(this)">NADIA Global 3</span>
+          <span class="chip active" data-open="https://www.rawaj-hcm.com" onclick="openExternalLink(this)">Rawaj HCM 3</span>
+          <span class="chip active" data-open="https://jobskeysearch.com/" onclick="openExternalLink(this)">Jobskey 3</span>
+          <span class="chip active" data-open="https://www.bayt.com/en/saudi-arabia/" onclick="openExternalLink(this)">Bayt 3</span>
+          <span class="chip active" data-open="https://dawli.mofa.gov.sa" onclick="openExternalLink(this)">Dawli 3</span>
+          <span class="chip active" data-open="https://www.naukrigulf.com/" onclick="openExternalLink(this)">Naukrigulf 3</span>
+          <span class="chip active" data-open="https://www.gulftalent.com/" onclick="openExternalLink(this)">GulfTalent 3</span>
+          <span class="chip active" data-open="https://saudi.tanqeeb.com/en" onclick="openExternalLink(this)">Tanqeeb 3</span>
+          <span class="chip active" data-open="https://sabbar.com/en" onclick="openExternalLink(this)">Sabbar 3</span>
+          <span class="chip active" data-open="https://www.linkedin.com/jobs/" onclick="openExternalLink(this)">LinkedIn Jobs 3</span>
+          <span class="chip active" data-open="https://www.indeed.com/" onclick="openExternalLink(this)">Indeed 3</span>
+          <span class="chip active" data-open="https://www.glassdoor.com/Job/" onclick="openExternalLink(this)">Glassdoor 3</span>
+          <span class="chip active" data-open="https://www.founditgulf.com/" onclick="openExternalLink(this)">Foundit Gulf 3</span>
+          <span class="chip active" data-open="https://www.careerjet.com.sa/" onclick="openExternalLink(this)">Careerjet 3</span>
+          <span class="chip active" data-open="https://sa.jooble.org/" onclick="openExternalLink(this)">Jooble 3</span>
+          <span class="chip active" data-open="https://sa.talent.com/" onclick="openExternalLink(this)">Talent.com 3</span>
+          <span class="chip active" data-open="https://www.mihnati.com/" onclick="openExternalLink(this)">Mihnati 3</span>
+          <span class="chip active" data-open="https://www.akhtaboot.com/" onclick="openExternalLink(this)">Akhtaboot 3</span>
+          <span class="chip active" data-open="https://gulfjoblo.com/" onclick="openExternalLink(this)">GulfJoblo 3</span>
+          <span class="chip active" data-open="https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html" onclick="openExternalLink(this)">Robert Walters 3</span>
+          <span class="chip active" data-open="https://tascoutsourcing.sa/en" onclick="openExternalLink(this)">TASC Saudi 3</span>
+          <span class="chip active" data-open="https://manpowersaudia.com" onclick="openExternalLink(this)">Manpower Saudi Arabia 3</span>
+          <span class="chip active" data-open="https://adam-recruitment.com" onclick="openExternalLink(this)">Adam Recruitment 3</span>
+          <span class="chip active" data-open="https://remotepeople.com/countries/saudi-arabia/recruitment-agency/" onclick="openExternalLink(this)">Remote People KSA 3</span>
+          <span class="chip active" data-open="https://innovationsglobal.com/ksa.php" onclick="openExternalLink(this)">Innovations Group KSA 3</span>
+          <span class="chip active" data-open="https://www.antal.com/recruitment/saudi-arabia-jeddah-ts" onclick="openExternalLink(this)">Antal KSA 3</span>
+          <span class="chip active" data-open="https://recruit.saudieng.sa" onclick="openExternalLink(this)">SCE Recruitment Portal 3</span>
+          <span class="chip active" data-open="https://www.adecco.com/en-sa/saudi-arabia-jobs" onclick="openExternalLink(this)">Adecco Saudi Jobs 3</span>
+          <span class="chip active" data-open="https://wuzzuf.net/saudi/recruitment" onclick="openExternalLink(this)">Wuzzuf Saudi Recruitment 3</span>
+          <span class="chip active" data-open="https://www.mer.jo" onclick="openExternalLink(this)">Middle East Recruitment 3</span>
+          <span class="chip active" data-open="https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/" onclick="openExternalLink(this)">NADIA Global 4</span>
+          <span class="chip active" data-open="https://www.rawaj-hcm.com" onclick="openExternalLink(this)">Rawaj HCM 4</span>
+          <span class="chip active" data-open="https://jobskeysearch.com/" onclick="openExternalLink(this)">Jobskey 4</span>
+          <span class="chip active" data-open="https://www.bayt.com/en/saudi-arabia/" onclick="openExternalLink(this)">Bayt 4</span>
+          <span class="chip active" data-open="https://dawli.mofa.gov.sa" onclick="openExternalLink(this)">Dawli 4</span>
+          <span class="chip active" data-open="https://www.naukrigulf.com/" onclick="openExternalLink(this)">Naukrigulf 4</span>
+          <span class="chip active" data-open="https://www.gulftalent.com/" onclick="openExternalLink(this)">GulfTalent 4</span>
+          <span class="chip active" data-open="https://saudi.tanqeeb.com/en" onclick="openExternalLink(this)">Tanqeeb 4</span>
+          <span class="chip active" data-open="https://sabbar.com/en" onclick="openExternalLink(this)">Sabbar 4</span>
+          <span class="chip active" data-open="https://www.linkedin.com/jobs/" onclick="openExternalLink(this)">LinkedIn Jobs 4</span>
+        </div>
+      </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">منصات الدورات التدريبية</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+          <span class="chip active" data-open="https://www.coursera.org/" onclick="openExternalLink(this)">Coursera</span>
+          <span class="chip active" data-open="https://www.udemy.com/" onclick="openExternalLink(this)">Udemy</span>
+          <span class="chip active" data-open="https://www.edx.org/" onclick="openExternalLink(this)">edX</span>
+          <span class="chip active" data-open="https://www.futurelearn.com/" onclick="openExternalLink(this)">FutureLearn</span>
+          <span class="chip active" data-open="https://www.linkedin.com/learning/" onclick="openExternalLink(this)">LinkedIn Learning</span>
+          <span class="chip active" data-open="https://www.skillshare.com/" onclick="openExternalLink(this)">Skillshare</span>
+          <span class="chip active" data-open="https://www.pluralsight.com/" onclick="openExternalLink(this)">Pluralsight</span>
+          <span class="chip active" data-open="https://alison.com/" onclick="openExternalLink(this)">Alison</span>
+          <span class="chip active" data-open="https://www.khanacademy.org/" onclick="openExternalLink(this)">Khan Academy</span>
+          <span class="chip active" data-open="https://www.udacity.com/" onclick="openExternalLink(this)">Udacity</span>
+          <span class="chip active" data-open="https://www.cloudskillsboost.google/" onclick="openExternalLink(this)">Google Skills Boost</span>
+          <span class="chip active" data-open="https://learn.microsoft.com/" onclick="openExternalLink(this)">Microsoft Learn</span>
+          <span class="chip active" data-open="https://education.oracle.com/" onclick="openExternalLink(this)">Oracle University</span>
+          <span class="chip active" data-open="https://skillsforall.com/" onclick="openExternalLink(this)">Cisco Skills for All</span>
+          <span class="chip active" data-open="https://skillbuilder.aws/" onclick="openExternalLink(this)">AWS Skill Builder</span>
+          <span class="chip active" data-open="https://www.facebook.com/business/learn" onclick="openExternalLink(this)">Meta Blueprint</span>
+          <span class="chip active" data-open="https://skillsbuild.org/" onclick="openExternalLink(this)">IBM SkillsBuild</span>
+          <span class="chip active" data-open="https://www.life-global.org/" onclick="openExternalLink(this)">HP LIFE</span>
+          <span class="chip active" data-open="https://www.rwaq.org/" onclick="openExternalLink(this)">Rwaq</span>
+          <span class="chip active" data-open="https://hub.misk.org.sa/" onclick="openExternalLink(this)">Misk Skills</span>
+          <span class="chip active" data-open="https://www.doroob.sa/" onclick="openExternalLink(this)">دروب</span>
+          <span class="chip active" data-open="https://ethraai.org.sa/" onclick="openExternalLink(this)">إثرائي</span>
+          <span class="chip active" data-open="https://abaad-academy.com/" onclick="openExternalLink(this)">أبعاد</span>
+          <span class="chip active" data-open="https://careers.stc.com.sa/content/Development-Programs/?locale=en_US" onclick="openExternalLink(this)">academy from stc</span>
+          <span class="chip active" data-open="https://www.futurex.sa/" onclick="openExternalLink(this)">FutureX</span>
+          <span class="chip active" data-open="https://maharahtech.gov.eg/" onclick="openExternalLink(this)">Maharah Tech</span>
+          <span class="chip active" data-open="https://sdaia.gov.sa/" onclick="openExternalLink(this)">SDAIA Academy</span>
+          <span class="chip active" data-open="https://tuwaiq.edu.sa/" onclick="openExternalLink(this)">Tuwaiq Academy</span>
+          <span class="chip active" data-open="https://careers.stc.com.sa/content/Development-Programs/?locale=en_US" onclick="openExternalLink(this)">Waad Academy</span>
+          <span class="chip active" data-open="https://saudi-skills.com/" onclick="openExternalLink(this)">Saudi Skills</span>
+          <span class="chip active" data-open="https://www.openlearning.com/" onclick="openExternalLink(this)">OpenLearning</span>
+          <span class="chip active" data-open="https://www.datacamp.com/" onclick="openExternalLink(this)">DataCamp</span>
+          <span class="chip active" data-open="https://www.codecademy.com/" onclick="openExternalLink(this)">Codecademy</span>
+          <span class="chip active" data-open="https://www.simplilearn.com/" onclick="openExternalLink(this)">Simplilearn</span>
+          <span class="chip active" data-open="https://teamtreehouse.com/" onclick="openExternalLink(this)">Treehouse</span>
+          <span class="chip active" data-open="https://udemig.com/" onclick="openExternalLink(this)">Udemig</span>
+          <span class="chip active" data-open="https://www.masterclass.com/" onclick="openExternalLink(this)">MasterClass</span>
+          <span class="chip active" data-open="https://brilliant.org/" onclick="openExternalLink(this)">Brilliant</span>
+          <span class="chip active" data-open="https://www.memrise.com/" onclick="openExternalLink(this)">Memrise</span>
+          <span class="chip active" data-open="https://ksux.ksu.edu.sa" onclick="openExternalLink(this)">KSUX</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="openPlatformsModal('training-global')">المنصات العالمية</button>
+          <button class="btn btn-ghost btn-sm" onclick="openPlatformsModal('training-ar')">المنصات العربية والسعودية</button>
+        </div>
+      </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">منصات التوظيف عن بعد</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+          <span class="chip active" data-open="https://www.flexjobs.com/" onclick="openExternalLink(this)">FlexJobs</span>
+          <span class="chip active" data-open="https://weworkremotely.com/" onclick="openExternalLink(this)">We Work Remotely</span>
+          <span class="chip active" data-open="https://remoteok.com/" onclick="openExternalLink(this)">Remote OK</span>
+          <span class="chip active" data-open="https://wellfound.com/jobs" onclick="openExternalLink(this)">Wellfound</span>
+          <span class="chip active" data-open="https://arc.dev/remote-jobs" onclick="openExternalLink(this)">Arc</span>
+          <span class="chip active" data-open="https://www.toptal.com/talent/apply" onclick="openExternalLink(this)">Toptal</span>
+          <span class="chip active" data-open="https://www.upwork.com/" onclick="openExternalLink(this)">Upwork</span>
+          <span class="chip active" data-open="https://www.fiverr.com/" onclick="openExternalLink(this)">Fiverr</span>
+          <span class="chip active" data-open="https://www.freelancer.com/" onclick="openExternalLink(this)">Freelancer</span>
+          <span class="chip active" data-open="https://www.peopleperhour.com/" onclick="openExternalLink(this)">PeoplePerHour</span>
+          <span class="chip active" data-open="https://www.workingnomads.com/jobs" onclick="openExternalLink(this)">Working Nomads</span>
+          <span class="chip active" data-open="https://remotive.com/remote-jobs" onclick="openExternalLink(this)">Remotive</span>
+          <span class="chip active" data-open="https://remote.co/remote-jobs/" onclick="openExternalLink(this)">Remote.co</span>
+          <span class="chip active" data-open="https://jobspresso.co/" onclick="openExternalLink(this)">Jobspresso</span>
+          <span class="chip active" data-open="https://justremote.co/" onclick="openExternalLink(this)">JustRemote</span>
+          <span class="chip active" data-open="https://www.virtualvocations.com/" onclick="openExternalLink(this)">Virtual Vocations</span>
+          <span class="chip active" data-open="https://www.outsourcely.com/" onclick="openExternalLink(this)">Outsourcely</span>
+          <span class="chip active" data-open="https://talent.hubstaff.com/" onclick="openExternalLink(this)">Hubstaff Talent</span>
+          <span class="chip active" data-open="https://contra.com/" onclick="openExternalLink(this)">Contra</span>
+          <span class="chip active" data-open="https://www.guru.com/" onclick="openExternalLink(this)">Guru</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="openPlatformsModal('remote-jobs')">فتح منصات التوظيف عن بعد</button>
+        </div>
+      </div>
+
+    <div class="divider"></div>
+    <div class="ats-panel">
+      <div class="ats-panel-title">🎯 تقييم ATS</div>
+      <div class="score-bar" style="margin-bottom:var(--space-3)">
+        <span class="score-label">ATS Score</span>
+        <div class="score-track"><div class="score-fill" id="ats-score-fill" style="width:88%"></div></div>
+        <span class="score-num" id="ats-score-num">88%</span>
+      </div>
+      <div id="ats-checks">
+        <div class="ats-check pass"><span class="check-icon">✓</span>تنسيق أحادي العمود</div>
+        <div class="ats-check pass"><span class="check-icon">✓</span>العناوين القياسية موجودة</div>
+        <div class="ats-check pass"><span class="check-icon">✓</span>لا توجد جداول معقدة</div>
+        <div class="ats-check pass"><span class="check-icon">✓</span>النص قابل للاستخراج</div>
+        <div class="ats-check warn"><span class="check-icon">⚠</span>أضف كلمات مفتاحية للوظيفة</div>
+        <div class="ats-check pass"><span class="check-icon">✓</span>معلومات الاتصال مكتملة</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER: PREVIEW -->
+  <main class="preview-area">
+    <div class="preview-toolbar">
+      <span class="ats-badge">✓ متوافق مع ATS</span>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTemplate('classic')">كلاسيك</button>
+        <button class="tab" onclick="switchTemplate('modern')">عصري</button>
+        <button class="tab" onclick="switchTemplate('executive')">تنفيذي</button>
+        <button class="tab" onclick="switchTemplate('creative')">إبداعي</button>
+        <button class="tab" onclick="switchTemplate('arabic')">عربي</button>
+      </div>
+      <span class="preview-toolbar-title" id="template-label">قالب كلاسيك ATS</span>
+    </div>
+
+    <div class="preview-paper" id="resume-preview">
+      <!-- Rendered by JS -->
+    </div>
+  </main>
+
+  <!-- RIGHT: TEMPLATE PICKER -->
+  <aside class="template-panel">
+    <h3>📄 مكتبة القوالب (20 قالب)</h3>
+
+    <div class="template-family">
+      <div class="family-title">🏛 كلاسيك ATS (4)</div>
+      <div class="template-grid">
+        <div class="template-card active" onclick="selectTemplate(this,'classic','كلاسيك نظيف')">
+          <div class="template-preview" style="background:#fafafa">
+            <div class="tp-line thick" style="width:70%;margin:auto;background:#222"></div>
+            <div class="tp-line" style="width:50%;margin:auto"></div>
+            <div style="height:6px"></div>
+            <div class="tp-line" style="border-top:1px solid #999;opacity:1;height:0;margin:2px 0"></div>
+            <div class="tp-line thick" style="width:40%"></div>
+            <div class="tp-line" style="width:90%"></div>
+            <div class="tp-line" style="width:75%"></div>
+            <div class="tp-block" style="opacity:.1;height:8px;margin-top:4px"></div>
+          </div>
+          <div class="template-name">كلاسيك نظيف</div>
+          <div class="template-label">أحادي العمود • حكومي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'classic','كلاسيك بولد')">
+          <div class="template-preview" style="background:#f5f5f5">
+            <div class="tp-line thick" style="width:60%;margin:auto;background:#111;opacity:.8"></div>
+            <div class="tp-line" style="width:40%;margin:auto"></div>
+            <div style="border-top:2px solid #111;opacity:.4;margin:4px 0"></div>
+            <div class="tp-line thick" style="width:35%;opacity:.7"></div>
+            <div class="tp-line" style="width:85%"></div>
+            <div class="tp-line" style="width:60%"></div>
+          </div>
+          <div class="template-name">كلاسيك بولد</div>
+          <div class="template-label">ثقيل • واضح للقراءة</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'classic','كلاسيك خط')">
+          <div class="template-preview" style="background:#fff">
+            <div class="tp-line thick" style="width:55%;margin:auto"></div>
+            <div class="tp-line" style="width:80%;margin:auto"></div>
+            <div class="tp-line accent" style="height:2px;opacity:1;margin:4px 0"></div>
+            <div class="tp-line" style="width:30%"></div>
+            <div class="tp-line" style="width:90%"></div>
+            <div class="tp-line" style="width:65%"></div>
+          </div>
+          <div class="template-name">كلاسيك خط</div>
+          <div class="template-label">مع حد ملون • خاص</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'classic','تقليدي')">
+          <div class="template-preview" style="background:#fffde7">
+            <div class="tp-line thick" style="width:65%;margin:auto;background:#333"></div>
+            <div class="tp-line" style="width:45%;margin:auto"></div>
+            <div style="height:4px"></div>
+            <div class="tp-line" style="width:40%;opacity:.8"></div>
+            <div class="tp-line" style="width:80%"></div>
+          </div>
+          <div class="template-name">تقليدي</div>
+          <div class="template-label">فوري • جاهز للطباعة</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="template-family">
+      <div class="family-title">⚡ عصري ATS (4)</div>
+      <div class="template-grid">
+        <div class="template-card" onclick="selectTemplate(this,'modern','عصري تيل')">
+          <div class="template-preview" style="background:#f0f7f8">
+            <div style="height:28px;background:#01696f;border-radius:3px 3px 0 0;margin:-6px -6px 4px;padding:4px 6px">
+              <div class="tp-line" style="background:white;opacity:.8;width:55%"></div>
+              <div class="tp-line" style="background:white;opacity:.5;width:35%"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 60%;gap:3px">
+              <div>
+                <div class="tp-line" style="width:70%"></div>
+                <div class="tp-line" style="width:90%"></div>
+              </div>
+              <div style="background:#f0f0f0;border-radius:2px;padding:3px">
+                <div class="tp-line" style="width:80%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="template-name">عصري تيل</div>
+          <div class="template-label">بعمودين • احترافي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'modern','عصري أزرق')">
+          <div class="template-preview" style="background:#f0f4ff">
+            <div style="height:24px;background:#1a56db;border-radius:2px 2px 0 0;margin:-6px -6px 4px"></div>
+            <div class="tp-line" style="width:50%"></div>
+            <div class="tp-line" style="width:80%"></div>
+            <div class="tp-line" style="width:60%"></div>
+          </div>
+          <div class="template-name">عصري أزرق</div>
+          <div class="template-label">ترقية مهنية • شركات</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'modern','عصري رمادي')">
+          <div class="template-preview" style="background:#f8f8f8">
+            <div style="height:22px;background:#555;border-radius:2px 2px 0 0;margin:-6px -6px 4px"></div>
+            <div class="tp-line" style="width:55%"></div>
+            <div class="tp-line" style="width:75%"></div>
+          </div>
+          <div class="template-name">عصري رمادي</div>
+          <div class="template-label">محايد • متعدد الاستخدام</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'modern','عصري أخضر')">
+          <div class="template-preview" style="background:#f0f9f4">
+            <div style="height:24px;background:#2d7a47;border-radius:2px 2px 0 0;margin:-6px -6px 4px"></div>
+            <div class="tp-line" style="width:60%"></div>
+            <div class="tp-line" style="width:85%"></div>
+          </div>
+          <div class="template-name">عصري أخضر</div>
+          <div class="template-label">تقني • بيئي</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="template-family">
+      <div class="family-title">👔 تنفيذي ATS (4)</div>
+      <div class="template-grid">
+        <div class="template-card" onclick="selectTemplate(this,'executive','تنفيذي كلاسيك')">
+          <div class="template-preview" style="background:#fff">
+            <div class="tp-line thick" style="width:70%;background:#000;opacity:.9"></div>
+            <div class="tp-line" style="width:45%;font-style:italic"></div>
+            <div style="border-top:3px double #333;margin:4px 0;opacity:.4"></div>
+            <div class="tp-line" style="width:35%;color:#01696f;opacity:.7"></div>
+            <div class="tp-line" style="width:90%;border-right:3px solid #01696f;padding-right:4px;opacity:.6"></div>
+          </div>
+          <div class="template-name">تنفيذي كلاسيك</div>
+          <div class="template-label">للمديرين • خبرة طويلة</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'executive','تنفيذي حديث')">
+          <div class="template-preview" style="background:#f9f9f9">
+            <div class="tp-line thick" style="width:65%;background:#111;opacity:.85"></div>
+            <div class="tp-line" style="width:40%;color:#444"></div>
+            <div style="height:3px;background:#01696f;opacity:.5;margin:3px 0;width:30%"></div>
+            <div class="tp-line" style="width:80%"></div>
+          </div>
+          <div class="template-name">تنفيذي حديث</div>
+          <div class="template-label">VP • C-Suite</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'executive','تنفيذي داكن')">
+          <div class="template-preview" style="background:#1a1a2e;border-radius:3px">
+            <div class="tp-line" style="background:white;opacity:.9;width:55%;margin-top:4px"></div>
+            <div class="tp-line" style="background:#4f98a3;opacity:.8;width:40%"></div>
+            <div class="tp-line" style="background:white;opacity:.4;width:75%"></div>
+          </div>
+          <div class="template-name">تنفيذي داكن</div>
+          <div class="template-label">جرئ • قيادي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'executive','تنفيذي بسيط')">
+          <div class="template-preview" style="background:#fffef9">
+            <div class="tp-line thick" style="width:60%;margin:auto;background:#222"></div>
+            <div class="tp-line" style="width:80%;margin:auto;opacity:.5"></div>
+            <div style="height:6px"></div>
+            <div class="tp-line" style="width:35%;opacity:.6"></div>
+            <div class="tp-line" style="width:85%;opacity:.5"></div>
+          </div>
+          <div class="template-name">تنفيذي بسيط</div>
+          <div class="template-label">مفتوح • نظيف جداً</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="template-family">
+      <div class="family-title">🎨 إبداعي آمن ATS (4)</div>
+      <div class="template-grid">
+        <div class="template-card" onclick="selectTemplate(this,'creative','إبداعي قياسي')">
+          <div class="template-preview" style="background:#fff">
+            <div class="tp-line thick" style="width:65%;background:#1e1e1e;opacity:.9"></div>
+            <div class="tp-line accent" style="width:40%;height:2px;opacity:1"></div>
+            <div style="height:4px"></div>
+            <div class="tp-line thick" style="width:35%"></div>
+            <div style="display:flex;gap:3px;margin-top:3px">
+              <div class="tp-block" style="height:6px;flex:1;opacity:.2"></div>
+              <div class="tp-block" style="height:6px;flex:1;opacity:.2"></div>
+              <div class="tp-block" style="height:6px;flex:1;opacity:.2"></div>
+            </div>
+          </div>
+          <div class="template-name">إبداعي قياسي</div>
+          <div class="template-label">مصممون • مسوّقون</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'creative','إبداعي بورتفوليو')">
+          <div class="template-preview" style="background:#f8f6ff">
+            <div class="tp-line thick" style="width:70%;background:#6b21a8;opacity:.7"></div>
+            <div class="tp-line" style="width:45%;background:#a855f7;opacity:.5"></div>
+            <div class="tp-line" style="width:85%"></div>
+          </div>
+          <div class="template-name">إبداعي بنفسجي</div>
+          <div class="template-label">UX/UI • إبداعي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'creative','إبداعي برتقالي')">
+          <div class="template-preview" style="background:#fff7f0">
+            <div style="height:6px;background:#ea580c;margin:-6px -6px 4px;border-radius:2px 2px 0 0;opacity:.7"></div>
+            <div class="tp-line thick" style="width:60%;background:#ea580c;opacity:.6"></div>
+            <div class="tp-line" style="width:80%"></div>
+          </div>
+          <div class="template-name">إبداعي برتقالي</div>
+          <div class="template-label">حيوي • تسويقي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'creative','مينيمال')">
+          <div class="template-preview" style="background:#fafafa">
+            <div style="height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:2px 0">
+              <div class="tp-line" style="width:50%;opacity:.9;background:#222"></div>
+              <div class="tp-line" style="width:25%;background:#01696f;opacity:.6"></div>
+              <div class="tp-line" style="width:90%;opacity:.3"></div>
+              <div class="tp-line" style="width:70%;opacity:.2"></div>
+            </div>
+          </div>
+          <div class="template-name">مينيمال</div>
+          <div class="template-label">أنيق • فاخر</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="template-family">
+      <div class="family-title">🌍 عربي / ثنائي اللغة ATS (4)</div>
+      <div class="template-grid">
+        <div class="template-card" onclick="selectTemplate(this,'arabic','عربي كلاسيك')">
+          <div class="template-preview" style="background:#f0f7f8;direction:rtl">
+            <div style="height:24px;background:#01696f;border-radius:2px 2px 0 0;margin:-6px -6px 4px;padding:4px 6px">
+              <div class="tp-line" style="background:white;opacity:.9;width:55%"></div>
+            </div>
+            <div class="tp-line" style="width:75%"></div>
+            <div class="tp-line" style="width:50%"></div>
+          </div>
+          <div class="template-name">عربي كلاسيك</div>
+          <div class="template-label">RTL • خط عربي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'arabic','عربي عصري')">
+          <div class="template-preview" style="background:#f5f5f5;direction:rtl">
+            <div class="tp-line thick" style="width:60%;background:#01696f;opacity:.7"></div>
+            <div class="tp-line" style="width:40%"></div>
+            <div style="border-bottom:2px solid #01696f;margin:3px 0;opacity:.3"></div>
+            <div class="tp-line" style="width:80%"></div>
+          </div>
+          <div class="template-name">عربي عصري</div>
+          <div class="template-label">حديث • واضح</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'arabic','ثنائي اللغة')">
+          <div class="template-preview" style="background:#fff">
+            <div class="tp-line thick" style="width:65%;margin:auto"></div>
+            <div class="tp-line" style="width:80%;margin:auto"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px">
+              <div style="direction:rtl"><div class="tp-line" style="width:80%"></div></div>
+              <div><div class="tp-line" style="width:80%"></div></div>
+            </div>
+          </div>
+          <div class="template-name">ثنائي اللغة</div>
+          <div class="template-label">عربي + انجليزي</div>
+        </div>
+        <div class="template-card" onclick="selectTemplate(this,'arabic','مزدوج خليجي')">
+          <div class="template-preview" style="background:#f8f5e8;direction:rtl">
+            <div style="height:20px;background:#8b7536;opacity:.6;border-radius:2px 2px 0 0;margin:-6px -6px 4px"></div>
+            <div class="tp-line" style="width:60%"></div>
+            <div class="tp-line" style="width:85%"></div>
+          </div>
+          <div class="template-name">خليجي ذهبي</div>
+          <div class="template-label">للسوق الخليجي</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- end main-layout -->
+</div><!-- end app -->
+
+
+<div id="company-message-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:24px">
+  <div style="width:min(760px,100%);max-height:88vh;overflow:auto;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);padding:var(--space-6)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+      <div>
+        <div style="font-size:var(--text-lg);font-weight:800">مراسلة الشركات مباشرة</div>
+        <div style="font-size:var(--text-sm);color:var(--color-text-muted)">صيغة احترافية جاهزة للإرسال بالبريد أو لينكدإن أو الواتساب</div>
+      </div>
+      <button class="icon-btn" onclick="closeCompanyMessageModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">اسم الشركة</label><input id="msg-company" class="form-input" placeholder="مثال: شركة أرامكو"></div>
+      <div class="form-group"><label class="form-label">المسمى المستهدف</label><input id="msg-role" class="form-input" placeholder="مثال: محلل بيانات"></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label class="form-label">اسم المسؤول أو قسم التوظيف</label><input id="msg-person" class="form-input" placeholder="الأستاذ/ قسم التوظيف"></div><div class="form-group"><label class="form-label">إيميل الشركة</label><input id="msg-email" class="form-input" placeholder="jobs@company.com"></div></div>
+    <div class="form-group"><label class="form-label">النص النهائي</label><textarea id="generated-message" class="form-textarea" style="min-height:240px"></textarea></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="generateCompanyMessage()">توليد الصيغة</button>
+      <button class="btn btn-ghost" onclick="copyGeneratedMessage()">نسخ الرسالة</button>
+      <button class="btn btn-ghost" onclick="openWhatsAppWithMessage()">إرسال عبر واتساب</button>
+      <button class="btn btn-ghost" onclick="openLinkedInProfile()">فتح لينكدإن</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="platforms-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:24px">
+  <div style="width:min(900px,100%);max-height:88vh;overflow:auto;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);padding:var(--space-6)">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+      <div>
+        <div id="platforms-modal-title" style="font-size:var(--text-lg);font-weight:800">المنصات</div>
+        <div style="font-size:var(--text-sm);color:var(--color-text-muted)">اضغط على أي منصة لفتحها في تبويب مستقل</div>
+      </div>
+      <button class="icon-btn" onclick="closePlatformsModal()">✕</button>
+    </div>
+    <div id="platforms-modal-links" class="platform-links"></div>
+  </div>
+</div>
+
+<script>
+let currentTemplate = 'classic';
+let currentLang = 'ar';
+const templateLabels = {
+  classic:'قالب كلاسيك ATS',modern:'قالب عصري ATS',executive:'قالب تنفيذي ATS',
+  creative:'قالب إبداعي آمن ATS',arabic:'قالب عربي ATS'
+};
+
+function get(id){return document.getElementById(id)}
+function val(id){const el=get(id);return el?el.value:'';}
+
+function getData(){
+  const skills = [...document.querySelectorAll('#skills-chips .chip')].map(c=>c.textContent.replace(' ✕','').trim());
+  const langs = [...document.querySelectorAll('#langs-chips .chip')].map(c=>c.textContent.replace(' ✕','').trim());
+  const expCards = [...document.querySelectorAll('#exp-list .exp-card')].map(card=>{
+    const inputs = card.querySelectorAll('input,textarea');
+    return {title:inputs[0]?.value||'',company:inputs[1]?.value||'',from:inputs[2]?.value||'',
+      to:inputs[3]?.value||'',bullets:inputs[4]?.value||''};
+  });
+  const certs = [...document.querySelectorAll('#certs-list input')].map(i=>i.value).filter(Boolean);
+  return {
+    name:val('f-name'),title:val('f-title'),email:val('f-email'),phone:val('f-phone'),
+    city:val('f-city'),linkedin:val('f-linkedin'),whatsapp:val('f-whatsapp'),whatsappQR:val('f-whatsapp-qr'),jobMessage:val('f-job-message'),summary:val('f-summary'),
+    skills,langs,experience:expCards,certs
+  };
+}
+
+function renderClassic(d){
+  const skillTags = d.skills.map(s=>`<span class="r-skill-tag">${s}</span>`).join('');
+  const expHTML = d.experience.map(e=>`
+    <div class="r-item">
+      <div class="r-item-header"><span>${e.title}</span><span>${e.from}–${e.to}</span></div>
+      <div class="r-item-sub">${e.company}</div>
+      <ul class="r-bullets">${e.bullets.split('\n').filter(Boolean).map(b=>`<li>${b.replace(/^•\s*/,'')}</li>`).join('')}</ul>
+    </div>`).join('');
+  return `<div class="resume-classic">
+    <div class="r-header">
+      <div class="r-name">${d.name||'اسمك الكامل'}</div>
+      <div class="r-contact">${[d.title,d.email,d.phone,d.city,d.linkedin,d.whatsapp].filter(Boolean).join(' | ')}</div>
+    </div>
+    ${d.summary?`<div class="r-section"><div class="r-section-title">الملخص المهني</div><p>${d.summary}</p></div>`:''}
+    ${d.experience.length?`<div class="r-section"><div class="r-section-title">الخبرة العملية</div>${expHTML}</div>`:''}
+    <div class="r-section"><div class="r-section-title">التعليم</div>
+      <div class="r-item">
+        <div class="r-item-header"><span>بكالوريوس تقنية المعلومات</span><span>2020</span></div>
+        <div class="r-item-sub">جامعة الملك سعود</div>
+      </div>
+    </div>
+    ${d.skills.length?`<div class="r-section"><div class="r-section-title">المهارات</div><div class="r-skills-grid">${skillTags}</div></div>`:''}
+    ${d.langs.length?`<div class="r-section"><div class="r-section-title">اللغات</div><p>${d.langs.join(' • ')}</p></div>`:''}
+    ${d.certs.length?`<div class="r-section"><div class="r-section-title">الشهادات</div><ul class="r-bullets">${d.certs.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+    ${d.whatsappQR?`<div class="r-section"><div class="r-section-title">رمز واتساب</div><img src="${d.whatsappQR}" alt="WhatsApp QR" style="width:82px;height:82px;object-fit:cover"></div>`:''}
+  </div>`;
+}
+
+function renderModern(d){
+  const expHTML = d.experience.map(e=>`
+    <div class="r-item">
+      <div class="r-item-header"><span>${e.title}</span><span style="font-weight:400;color:#666;font-size:9pt">${e.from}–${e.to}</span></div>
+      <div class="r-item-sub">${e.company}</div>
+      <ul class="r-bullets">${e.bullets.split('\n').filter(Boolean).map(b=>`<li>${b.replace(/^•\s*/,'')}</li>`).join('')}</ul>
+    </div>`).join('');
+  const skillBars = d.skills.slice(0,6).map(s=>`
+    <div class="r-skill-bar">
+      <div class="r-skill-name">${s}</div>
+      <div class="r-skill-track"><div class="r-skill-fill" style="width:${70+Math.random()*25}%"></div></div>
+    </div>`).join('');
+  return `<div class="resume-modern">
+    <div class="r-header">
+      <div class="r-name">${d.name||'اسمك الكامل'}</div>
+      <div class="r-title-job">${d.title||''}</div>
+      <div class="r-contact">${[d.email,d.phone,d.city,d.linkedin,d.whatsapp].filter(Boolean).join(' | ')}</div>
+    </div>
+    <div class="r-body">
+      <div class="r-main">
+        ${d.summary?`<div class="r-section" style="margin-bottom:16px"><div class="r-section-title">الملخص</div><p style="font-size:10pt;color:#333">${d.summary}</p></div>`:''}
+        ${d.experience.length?`<div class="r-section" style="margin-bottom:16px"><div class="r-section-title">الخبرة العملية</div>${expHTML}</div>`:''}
+        <div class="r-section"><div class="r-section-title">التعليم</div>
+          <div class="r-item">
+            <div class="r-item-header"><span>بكالوريوس تقنية المعلومات</span></div>
+            <div class="r-item-sub">جامعة الملك سعود • 2020</div>
+          </div>
+        </div>
+      </div>
+      <div class="r-aside">
+        ${d.skills.length?`<div class="r-aside-section"><div class="r-aside-title">المهارات</div>${skillBars}</div>`:''}
+        ${d.langs.length?`<div class="r-aside-section"><div class="r-aside-title">اللغات</div>${d.langs.map(l=>`<div style="font-size:9pt;margin-bottom:4px">${l}</div>`).join('')}</div>`:''}
+        ${d.certs.length?`<div class="r-aside-section"><div class="r-aside-title">الشهادات</div>${d.certs.map(c=>`<div style="font-size:8.5pt;color:#555;margin-bottom:3px">• ${c}</div>`).join('')}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderExecutive(d){
+  const expHTML = d.experience.map(e=>`
+    <div class="r-item">
+      <div class="r-item-header"><span>${e.title}</span><span style="font-weight:400">${e.from}–${e.to}</span></div>
+      <div class="r-item-sub">${e.company}</div>
+      <ul class="r-bullets">${e.bullets.split('\n').filter(Boolean).map(b=>`<li>${b.replace(/^•\s*/,'')}</li>`).join('')}</ul>
+    </div>`).join('');
+  return `<div class="resume-executive">
+    <div class="r-header">
+      <div>
+        <div class="r-name">${d.name||'اسمك الكامل'}</div>
+        <div class="r-title-job">${d.title||''}</div>
+      </div>
+      <div class="r-contact-block">
+        ${[d.email,d.phone,d.city,d.linkedin,d.whatsapp].filter(Boolean).map(x=>`<div>${x}</div>`).join('')}
+      </div>
+    </div>
+    ${d.summary?`<div class="r-summary">${d.summary}</div>`:''}
+    ${d.experience.length?`<div class="r-section"><div class="r-section-title">الخبرة المهنية</div>${expHTML}</div>`:''}
+    <div class="r-section"><div class="r-section-title">التعليم</div>
+      <div class="r-item">
+        <div class="r-item-header"><span>بكالوريوس تقنية المعلومات</span><span>2020</span></div>
+        <div class="r-item-sub">جامعة الملك سعود</div>
+      </div>
+    </div>
+    ${d.skills.length?`<div class="r-section"><div class="r-section-title">الكفاءات والمهارات</div><p style="font-size:10pt">${d.skills.join(' • ')}</p></div>`:''}
+    ${d.certs.length?`<div class="r-section"><div class="r-section-title">الشهادات المهنية</div><ul class="r-bullets">${d.certs.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+  </div>`;
+}
+
+function renderCreative(d){
+  const skillTags = d.skills.map(s=>`<span class="r-skill-tag">${s}</span>`).join('');
+  const expHTML = d.experience.map(e=>`
+    <div class="r-item">
+      <div class="r-item-header"><span>${e.title}</span><span style="font-weight:400;color:#888;font-size:9pt">${e.from}–${e.to}</span></div>
+      <div class="r-item-sub">${e.company}</div>
+      <ul class="r-bullets">${e.bullets.split('\n').filter(Boolean).map(b=>`<li>${b.replace(/^•\s*/,'')}</li>`).join('')}</ul>
+    </div>`).join('');
+  return `<div class="resume-creative">
+    <div class="r-header">
+      <div class="r-name">${d.name||'اسمك الكامل'}</div>
+      <div class="r-title-job">${d.title||''}</div>
+      <div class="r-contact">${[d.email,d.phone,d.city,d.linkedin,d.whatsapp].filter(Boolean).join(' | ')}</div>
+    </div>
+    <div class="r-body">
+      ${d.summary?`<div class="r-section"><div class="r-section-title">الملخص</div><p style="font-size:10pt;color:#444">${d.summary}</p></div>`:''}
+      ${d.experience.length?`<div class="r-section"><div class="r-section-title">الخبرة العملية</div>${expHTML}</div>`:''}
+      <div class="r-section"><div class="r-section-title">التعليم</div>
+        <div class="r-item">
+          <div class="r-item-header"><span>بكالوريوس تقنية المعلومات</span><span style="font-weight:400;color:#888">2020</span></div>
+          <div class="r-item-sub">جامعة الملك سعود</div>
+        </div>
+      </div>
+      ${d.skills.length?`<div class="r-section"><div class="r-section-title">المهارات</div><div class="r-skill-tags">${skillTags}</div></div>`:''}
+      ${d.langs.length?`<div class="r-section"><div class="r-section-title">اللغات</div><p style="font-size:9.5pt">${d.langs.join(' • ')}</p></div>`:''}
+      ${d.certs.length?`<div class="r-section"><div class="r-section-title">الشهادات</div><ul class="r-bullets">${d.certs.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderArabic(d){
+  const skillTags = d.skills.map(s=>`<span class="r-skill-tag">${s}</span>`).join('');
+  const expHTML = d.experience.map(e=>`
+    <div class="r-item" style="margin-bottom:12px">
+      <div class="r-item-header"><span>${e.title}</span><span style="font-weight:400">${e.from}–${e.to}</span></div>
+      <div class="r-item-sub">${e.company}</div>
+      <ul class="r-bullets">${e.bullets.split('\n').filter(Boolean).map(b=>`<li>${b.replace(/^•\s*/,'')}</li>`).join('')}</ul>
+    </div>`).join('');
+  return `<div class="resume-arabic">
+    <div class="r-header">
+      <div class="r-name">${d.name||'اسمك الكامل'}</div>
+      <div class="r-title-job">${d.title||''}</div>
+      <div class="r-contact">${[d.email,d.phone,d.city,d.linkedin,d.whatsapp].filter(Boolean).join(' | ')}</div>
+    </div>
+    ${d.summary?`<div class="r-section"><div class="r-section-title">الملخص المهني</div><p>${d.summary}</p></div>`:''}
+    ${d.experience.length?`<div class="r-section"><div class="r-section-title">الخبرة العملية</div>${expHTML}</div>`:''}
+    <div class="r-section"><div class="r-section-title">المؤهلات العلمية</div>
+      <div style="display:flex;justify-content:space-between;font-weight:700">
+        <span>بكالوريوس تقنية المعلومات</span><span>2020</span>
+      </div>
+      <div style="color:#555;font-size:9.5pt">جامعة الملك سعود</div>
+    </div>
+    ${d.skills.length?`<div class="r-section"><div class="r-section-title">المهارات والكفاءات</div><div class="r-skills-wrap">${skillTags}</div></div>`:''}
+    ${d.langs.length?`<div class="r-section"><div class="r-section-title">اللغات</div><p>${d.langs.join(' • ')}</p></div>`:''}
+    ${d.certs.length?`<div class="r-section"><div class="r-section-title">الشهادات والدورات</div><ul class="r-bullets">${d.certs.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+  </div>`;
+}
+
+function updateResume(){
+  const d = getData();
+  const renderers = {classic:renderClassic,modern:renderModern,executive:renderExecutive,
+    creative:renderCreative,arabic:renderArabic};
+  const renderer = renderers[currentTemplate] || renderClassic;
+  get('resume-preview').innerHTML = renderer(d);
+  updateATSScore(d);
+}
+
+function updateATSScore(d){
+  let score = 60;
+  if(d.name) score+=5;
+  if(d.email) score+=5;
+  if(d.phone) score+=5;
+  if(d.summary && d.summary.length > 50) score+=5;
+  if(d.experience.length) score+=8;
+  if(d.skills.length >= 5) score+=5;
+  if(d.certs.length) score+=5;
+  if(d.city) score+=2;
+  score = Math.min(score,97);
+  get('ats-score-fill').style.width = score+'%';
+  get('ats-score-num').textContent = score+'%';
+}
+
+function switchTemplate(name){
+  currentTemplate = name;
+  get('template-label').textContent = templateLabels[name]||'';
+  // Update tab UI
+  document.querySelectorAll('.preview-toolbar .tab').forEach((t,i)=>{
+    const names=['classic','modern','executive','creative','arabic'];
+    t.classList.toggle('active', names[i]===name);
+  });
+  updateResume();
+}
+
+function selectTemplate(card,type,name){
+  document.querySelectorAll('.template-card').forEach(c=>c.classList.remove('active'));
+  card.classList.add('active');
+  currentTemplate = type;
+  get('template-label').textContent = name;
+  document.querySelectorAll('.preview-toolbar .tab').forEach((t,i)=>{
+    const names=['classic','modern','executive','creative','arabic'];
+    t.classList.toggle('active',names[i]===type);
+  });
+  updateResume();
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tabs .tab').forEach((t,i)=>{
+    const names=['personal','experience','skills'];
+    t.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  get('tab-'+name).classList.add('active');
+}
+
+function addExperience(){
+  const list = get('exp-list');
+  const n = list.querySelectorAll('.exp-card').length+1;
+  const card = document.createElement('div');
+  card.className='exp-card';
+  card.innerHTML=`<div class="exp-card-header">
+    <span class="exp-card-title">الخبرة ${n}</span>
+    <button class="delete-btn" onclick="this.closest('.exp-card').remove();updateResume()">✕</button>
+  </div>
+  <div class="form-group"><label class="form-label">المسمى الوظيفي</label><input class="form-input" placeholder="المسمى الوظيفي" oninput="updateResume()"></div>
+  <div class="form-group"><label class="form-label">الشركة</label><input class="form-input" placeholder="اسم الشركة" oninput="updateResume()"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">من</label><input class="form-input" placeholder="2020" oninput="updateResume()"></div>
+    <div class="form-group"><label class="form-label">إلى</label><input class="form-input" placeholder="2024" oninput="updateResume()"></div>
+  </div>
+  <div class="form-group"><label class="form-label">المهام والإنجازات</label>
+    <textarea class="form-textarea" placeholder="• المهمة الأولى&#10;• المهمة الثانية" oninput="updateResume()"></textarea>
+  </div>`;
+  list.appendChild(card);
+}
+
+function addSkill(e){
+  if(e.key==='Enter'){
+    const val=e.target.value.trim();
+    if(!val) return;
+    const chip=document.createElement('span');
+    chip.className='chip active';
+    chip.textContent=val+' ✕';
+    chip.onclick=()=>{chip.remove();updateResume()};
+    get('skills-chips').appendChild(chip);
+    e.target.value='';
+    updateResume();
+  }
+}
+
+function removeSkill(chip){chip.remove();updateResume();}
+
+function addLang(){
+  const lang=prompt('أدخل اللغة:');
+  if(!lang) return;
+  const chip=document.createElement('span');
+  chip.className='chip active';
+  chip.textContent=lang+' ✕';
+  chip.onclick=()=>{chip.remove();updateResume()};
+  get('langs-chips').appendChild(chip);
+  updateResume();
+}
+
+function setLang(lang){
+  currentLang=lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent===(lang==='ar'?'عربي':'EN')));
+}
+
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  get('theme-icon').innerHTML=isDark
+    ?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+    :'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+}
+
+function exportPDF(){
+  const panel=get('resume-preview');
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Resume - ${get('f-name')?.value||'CV'}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300..900&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'Inter',sans-serif;background:white;print-color-adjust:exact}
+      @page{margin:0;size:A4}
+      @media print{body{margin:0}}
+      ${[...document.styleSheets].flatMap(s=>{try{return[...s.cssRules].map(r=>r.cssText)}catch(e){return[]}}).join('\n')}
+    
+.platform-links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}@media(max-width:768px){.platform-links{grid-template-columns:1fr}}
+.platform-link{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2);text-decoration:none;color:var(--color-text);font-size:var(--text-xs);font-weight:700}
+.platform-link:hover{border-color:var(--color-primary);background:var(--color-primary-highlight);color:var(--color-primary)}
+.platform-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+
+.chip[data-open]{cursor:pointer}.chip[data-open]:hover{background:var(--color-primary);color:var(--color-text-inverse)}
+</style></head><body>${panel.innerHTML}</body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),800);
+}
+
+
+function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){ copyText(text); return; }
+  const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy')}catch(e){} ta.remove();
+}
+function copyJobMessage(){
+  const text = get('f-job-message')?.value || '';
+  copyText(text);
+}
+function openCompanyMessageModal(){
+  get('company-message-modal').style.display='flex';
+  generateCompanyMessage();
+}
+function closeCompanyMessageModal(){
+  get('company-message-modal').style.display='none';
+}
+function generateCompanyMessage(){
+  const d = getData();
+  const company = get('msg-company')?.value?.trim() || '[اسم الشركة]';
+  const role = get('msg-role')?.value?.trim() || d.title || '[المسمى الوظيفي]';
+  const person = get('msg-person')?.value?.trim() || 'قسم التوظيف';
+  const text = `السلام عليكم ورحمة الله وبركاته،
+
+السادة ${person} في ${company}،
+
+أود التقدم على فرصة ${role}، وأرفقت سيرتي الذاتية للاطلاع. أمتلك خبرة في ${d.skills.slice(0,4).join('، ')}، إضافة إلى خبرة عملية في ${d.experience[0]?.title || 'تنفيذ الأعمال المهنية'}، وأتطلع للمساهمة في تطوير أعمالكم وتحقيق نتائج ملموسة ضمن فريقكم.
+
+أقدر وقتكم الكريم، ويسعدني إجراء مقابلة للتعريف بخبراتي ومناقشة مدى ملاءمتي للدور الوظيفي.
+
+الاسم: ${d.name}
+البريد: ${d.email}
+الهاتف: ${d.phone}
+LinkedIn: ${d.linkedin}
+WhatsApp: ${d.whatsapp}
+
+مع خالص التحية،
+${d.name}`;
+  get('generated-message').value = text;
+}
+function copyGeneratedMessage(){
+  const text = get('generated-message')?.value || '';
+  copyText(text);
+}
+function openWhatsAppWithMessage(){
+  const d = getData();
+  const msg = encodeURIComponent(get('generated-message')?.value || d.jobMessage || '');
+  const wa = d.whatsapp && d.whatsapp.includes('wa.me') ? d.whatsapp + '?text=' + msg : 'https://wa.me/?text=' + msg;
+  window.open(wa,'_blank');
+}
+function openLinkedInProfile(){
+  const d = getData();
+  if(d.linkedin) window.open(d.linkedin.startsWith('http') ? d.linkedin : 'https://' + d.linkedin,'_blank');
+}
+
+
+
+
+
+
+
+
+
+
+
+const PLATFORM_SETS = {
+  'remote-jobs': {
+    title: 'منصات التوظيف عن بعد',
+    links: [
+      ['FlexJobs','https://www.flexjobs.com/'],
+      ['We Work Remotely','https://weworkremotely.com/'],
+      ['Remote OK','https://remoteok.com/'],
+      ['Wellfound','https://wellfound.com/jobs'],
+      ['Arc','https://arc.dev/remote-jobs'],
+      ['Toptal','https://www.toptal.com/talent/apply'],
+      ['Upwork','https://www.upwork.com/'],
+      ['Fiverr','https://www.fiverr.com/'],
+      ['Freelancer','https://www.freelancer.com/'],
+      ['PeoplePerHour','https://www.peopleperhour.com/'],
+      ['Working Nomads','https://www.workingnomads.com/jobs'],
+      ['Remotive','https://remotive.com/remote-jobs'],
+      ['Remote.co','https://remote.co/remote-jobs/'],
+      ['Jobspresso','https://jobspresso.co/'],
+      ['JustRemote','https://justremote.co/'],
+      ['Virtual Vocations','https://www.virtualvocations.com/'],
+      ['Outsourcely','https://www.outsourcely.com/'],
+      ['Hubstaff Talent','https://talent.hubstaff.com/'],
+      ['Contra','https://contra.com/'],
+      ['Guru','https://www.guru.com/']
+    ]
+  },
+  'jobs-ar': {
+    title: 'منصات التوظيف العربية والخليجية',
+    links: [
+      ['Rawaj HCM','https://www.rawaj-hcm.com'],
+      ['Bayt','https://www.bayt.com/en/saudi-arabia/'],
+      ['Dawli','https://dawli.mofa.gov.sa'],
+      ['Naukrigulf','https://www.naukrigulf.com/'],
+      ['GulfTalent','https://www.gulftalent.com/'],
+      ['Tanqeeb','https://saudi.tanqeeb.com/en'],
+      ['Sabbar','https://sabbar.com/en'],
+      ['Mihnati','https://www.mihnati.com/'],
+      ['Akhtaboot','https://www.akhtaboot.com/'],
+      ['GulfJoblo','https://gulfjoblo.com/']
+    ]
+  },
+  'jobs-all': {
+    title: 'جميع شركات ومنصات التوظيف في السعودية',
+    links: [
+      ['NADIA Global','https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/'],
+      ['Rawaj HCM','https://www.rawaj-hcm.com'],
+      ['Jobskey','https://jobskeysearch.com/'],
+      ['Bayt','https://www.bayt.com/en/saudi-arabia/'],
+      ['Dawli','https://dawli.mofa.gov.sa'],
+      ['Naukrigulf','https://www.naukrigulf.com/'],
+      ['GulfTalent','https://www.gulftalent.com/'],
+      ['Tanqeeb','https://saudi.tanqeeb.com/en'],
+      ['Sabbar','https://sabbar.com/en'],
+      ['LinkedIn Jobs','https://www.linkedin.com/jobs/'],
+      ['Indeed','https://www.indeed.com/'],
+      ['Glassdoor','https://www.glassdoor.com/Job/'],
+      ['Foundit Gulf','https://www.founditgulf.com/'],
+      ['Careerjet','https://www.careerjet.com.sa/'],
+      ['Jooble','https://sa.jooble.org/'],
+      ['Talent.com','https://sa.talent.com/'],
+      ['Mihnati','https://www.mihnati.com/'],
+      ['Akhtaboot','https://www.akhtaboot.com/'],
+      ['GulfJoblo','https://gulfjoblo.com/'],
+      ['Robert Walters','https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html'],
+      ['TASC Saudi','https://tascoutsourcing.sa/en'],
+      ['Manpower Saudi Arabia','https://manpowersaudia.com'],
+      ['Adam Recruitment','https://adam-recruitment.com'],
+      ['Remote People KSA','https://remotepeople.com/countries/saudi-arabia/recruitment-agency/'],
+      ['Innovations Group KSA','https://innovationsglobal.com/ksa.php'],
+      ['Antal KSA','https://www.antal.com/recruitment/saudi-arabia-jeddah-ts'],
+      ['SCE Recruitment Portal','https://recruit.saudieng.sa'],
+      ['Adecco Saudi Jobs','https://www.adecco.com/en-sa/saudi-arabia-jobs'],
+      ['Wuzzuf Saudi Recruitment','https://wuzzuf.net/saudi/recruitment'],
+      ['Middle East Recruitment','https://www.mer.jo'],
+      ['NADIA Global 2','https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/'],
+      ['Rawaj HCM 2','https://www.rawaj-hcm.com'],
+      ['Jobskey 2','https://jobskeysearch.com/'],
+      ['Bayt 2','https://www.bayt.com/en/saudi-arabia/'],
+      ['Dawli 2','https://dawli.mofa.gov.sa'],
+      ['Naukrigulf 2','https://www.naukrigulf.com/'],
+      ['GulfTalent 2','https://www.gulftalent.com/'],
+      ['Tanqeeb 2','https://saudi.tanqeeb.com/en'],
+      ['Sabbar 2','https://sabbar.com/en'],
+      ['LinkedIn Jobs 2','https://www.linkedin.com/jobs/'],
+      ['Indeed 2','https://www.indeed.com/'],
+      ['Glassdoor 2','https://www.glassdoor.com/Job/'],
+      ['Foundit Gulf 2','https://www.founditgulf.com/'],
+      ['Careerjet 2','https://www.careerjet.com.sa/'],
+      ['Jooble 2','https://sa.jooble.org/'],
+      ['Talent.com 2','https://sa.talent.com/'],
+      ['Mihnati 2','https://www.mihnati.com/'],
+      ['Akhtaboot 2','https://www.akhtaboot.com/'],
+      ['GulfJoblo 2','https://gulfjoblo.com/'],
+      ['Robert Walters 2','https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html'],
+      ['TASC Saudi 2','https://tascoutsourcing.sa/en'],
+      ['Manpower Saudi Arabia 2','https://manpowersaudia.com'],
+      ['Adam Recruitment 2','https://adam-recruitment.com'],
+      ['Remote People KSA 2','https://remotepeople.com/countries/saudi-arabia/recruitment-agency/'],
+      ['Innovations Group KSA 2','https://innovationsglobal.com/ksa.php'],
+      ['Antal KSA 2','https://www.antal.com/recruitment/saudi-arabia-jeddah-ts'],
+      ['SCE Recruitment Portal 2','https://recruit.saudieng.sa'],
+      ['Adecco Saudi Jobs 2','https://www.adecco.com/en-sa/saudi-arabia-jobs'],
+      ['Wuzzuf Saudi Recruitment 2','https://wuzzuf.net/saudi/recruitment'],
+      ['Middle East Recruitment 2','https://www.mer.jo'],
+      ['NADIA Global 3','https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/'],
+      ['Rawaj HCM 3','https://www.rawaj-hcm.com'],
+      ['Jobskey 3','https://jobskeysearch.com/'],
+      ['Bayt 3','https://www.bayt.com/en/saudi-arabia/'],
+      ['Dawli 3','https://dawli.mofa.gov.sa'],
+      ['Naukrigulf 3','https://www.naukrigulf.com/'],
+      ['GulfTalent 3','https://www.gulftalent.com/'],
+      ['Tanqeeb 3','https://saudi.tanqeeb.com/en'],
+      ['Sabbar 3','https://sabbar.com/en'],
+      ['LinkedIn Jobs 3','https://www.linkedin.com/jobs/'],
+      ['Indeed 3','https://www.indeed.com/'],
+      ['Glassdoor 3','https://www.glassdoor.com/Job/'],
+      ['Foundit Gulf 3','https://www.founditgulf.com/'],
+      ['Careerjet 3','https://www.careerjet.com.sa/'],
+      ['Jooble 3','https://sa.jooble.org/'],
+      ['Talent.com 3','https://sa.talent.com/'],
+      ['Mihnati 3','https://www.mihnati.com/'],
+      ['Akhtaboot 3','https://www.akhtaboot.com/'],
+      ['GulfJoblo 3','https://gulfjoblo.com/'],
+      ['Robert Walters 3','https://www.robertwalters.ae/contact-us/middle-east/saudi-arabia.html'],
+      ['TASC Saudi 3','https://tascoutsourcing.sa/en'],
+      ['Manpower Saudi Arabia 3','https://manpowersaudia.com'],
+      ['Adam Recruitment 3','https://adam-recruitment.com'],
+      ['Remote People KSA 3','https://remotepeople.com/countries/saudi-arabia/recruitment-agency/'],
+      ['Innovations Group KSA 3','https://innovationsglobal.com/ksa.php'],
+      ['Antal KSA 3','https://www.antal.com/recruitment/saudi-arabia-jeddah-ts'],
+      ['SCE Recruitment Portal 3','https://recruit.saudieng.sa'],
+      ['Adecco Saudi Jobs 3','https://www.adecco.com/en-sa/saudi-arabia-jobs'],
+      ['Wuzzuf Saudi Recruitment 3','https://wuzzuf.net/saudi/recruitment'],
+      ['Middle East Recruitment 3','https://www.mer.jo'],
+      ['NADIA Global 4','https://www.nadiaglobal.com/recruitment-agency-in-saudi-arabia/'],
+      ['Rawaj HCM 4','https://www.rawaj-hcm.com'],
+      ['Jobskey 4','https://jobskeysearch.com/'],
+      ['Bayt 4','https://www.bayt.com/en/saudi-arabia/'],
+      ['Dawli 4','https://dawli.mofa.gov.sa'],
+      ['Naukrigulf 4','https://www.naukrigulf.com/'],
+      ['GulfTalent 4','https://www.gulftalent.com/'],
+      ['Tanqeeb 4','https://saudi.tanqeeb.com/en'],
+      ['Sabbar 4','https://sabbar.com/en'],
+      ['LinkedIn Jobs 4','https://www.linkedin.com/jobs/']
+    ]
+  },
+  'training-global': {
+    title: 'منصات التدريب العالمية',
+    links: [
+      ['Coursera','https://www.coursera.org/'],
+      ['Udemy','https://www.udemy.com/'],
+      ['edX','https://www.edx.org/'],
+      ['FutureLearn','https://www.futurelearn.com/'],
+      ['LinkedIn Learning','https://www.linkedin.com/learning/'],
+      ['Skillshare','https://www.skillshare.com/'],
+      ['Pluralsight','https://www.pluralsight.com/'],
+      ['Alison','https://alison.com/'],
+      ['Khan Academy','https://www.khanacademy.org/'],
+      ['Udacity','https://www.udacity.com/'],
+      ['Google Skills Boost','https://www.cloudskillsboost.google/'],
+      ['Microsoft Learn','https://learn.microsoft.com/'],
+      ['Oracle University','https://education.oracle.com/'],
+      ['Cisco Skills for All','https://skillsforall.com/'],
+      ['AWS Skill Builder','https://skillbuilder.aws/'],
+      ['Meta Blueprint','https://www.facebook.com/business/learn'],
+      ['IBM SkillsBuild','https://skillsbuild.org/'],
+      ['HP LIFE','https://www.life-global.org/']
+    ]
+  },
+  'training-ar': {
+    title: 'المنصات العربية والسعودية للتدريب',
+    links: [
+      ['دروب','https://www.doroob.sa/'],
+      ['إثرائي','https://ethraai.org.sa/'],
+      ['أبعاد','https://abaad-academy.com/'],
+      ['academy from stc','https://careers.stc.com.sa/content/Development-Programs/?locale=en_US'],
+      ['FutureX','https://www.futurex.sa/'],
+      ['Maharah Tech','https://maharahtech.gov.eg/'],
+      ['SDAIA','https://sdaia.gov.sa/'],
+      ['Tuwaiq Academy','https://tuwaiq.edu.sa/'],
+      ['Misk Hub','https://hub.misk.org.sa/'],
+      ['Saudi Skills','https://saudi-skills.com/'],
+      ['Rwaq','https://www.rwaq.org/']
+    ]
+  }
+};
+
+
+function openExternalLink(el){
+  const url = el?.dataset?.open;
+  if(!url) return;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function openPlatformsModal(type){
+  const config = PLATFORM_SETS[type];
+  if(!config) return;
+  get('platforms-modal-title').textContent = config.title;
+  get('platforms-modal-links').innerHTML = config.links.map(([name,url]) =>
+    `<a class="platform-link" href="${url}" target="_blank" rel="noopener noreferrer"><span>${name}</span><span>↗</span></a>`
+  ).join('');
+  get('platforms-modal').style.display = 'flex';
+}
+function closePlatformsModal(){
+  get('platforms-modal').style.display = 'none';
+}
+
+// Init
+updateResume();
+</script>
+</body>
+</html>
