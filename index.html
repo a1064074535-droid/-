@@ -700,7 +700,10 @@ A.onended=()=>{if(!PL.on)return;
   if(n[0]!==PL.s)toast("سورة "+Q[n[0]-1][0]);PL.s=n[0];PL.a=n[1];PL.bas=PL.a===1&&PL.s!==1&&PL.s!==9;loadAyah();updPlayer()}
  else{if(PL.s>=114){stopPlayer();return}let s2=PL.s+1;while(s2<=114&&!audioUrl(s2))s2++;if(s2>114){stopPlayer();return}playFrom(s2,1);toast("سورة "+Q[s2-1][0])}};
 A.onerror=()=>{if(PL.on&&A.src)playErr()};
-function playErr(){$("plSub").textContent="تعذّر تشغيل التلاوة. تحقق من الاتصال بالإنترنت أو جرّب قارئاً آخر.";$("plPlay").textContent="▶"}
+const FULL="https://raw.githack.com/a1064074535-droid/-/rafiq-althikr/index.html";
+function playErr(){const sb=$("plSub");$("plPlay").textContent="▶";
+ if(location.hostname.indexOf("githack")<0&&location.hostname.indexOf("netlify")<0){sb.innerHTML='الصوت لا يعمل داخل Claude. <a target="_blank" rel="noopener">افتح النسخة الكاملة مع التلاوة</a>';sb.querySelector("a").href=FULL;sb.style.whiteSpace="normal"}
+ else sb.textContent="تعذّر تشغيل التلاوة. تحقق من الاتصال بالإنترنت أو جرّب قارئاً آخر."}
 A.onplay=A.onpause=updPlayer;
 A.ontimeupdate=()=>{let f=0;if(PL.mode==="surah"&&A.duration)f=A.currentTime/A.duration;else if(Q)f=(PL.a-1+(A.duration?A.currentTime/A.duration:0))/Q[PL.s-1][2].length;$("plBar").style.width=(f*100)+"%"};
 function updPlayer(){if(!PL.on||!Q)return;const sn=Q[PL.s-1][0];
