@@ -129,7 +129,7 @@ a{color:var(--green)}
 .sheet .links{font-size:12px;color:var(--muted)}
 /* mushaf pages: matte paper, fixed white in every theme */
 .mpage{background:#fdfcf8;border:1px solid #e4e0d4;border-radius:4px;overflow:hidden;touch-action:pan-y;max-width:560px;width:100%;margin:0 auto}
-.mpage img{transition:opacity .15s;display:block;width:100%;height:auto;aspect-ratio:510/729;max-width:100%;background:#fdfcf8;user-select:none;-webkit-user-drag:none}
+.mpage img{transition:opacity .15s;display:block;width:100%;height:auto;aspect-ratio:1000/1618;max-width:100%;background:#fdfcf8;user-select:none;-webkit-user-drag:none}
 .pbar{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .pbar .info{text-align:center;font-size:13px;color:var(--muted);flex:1;min-width:0}
 .pbar .info b{display:block;font-family:var(--f-quran);font-size:19px;color:var(--ink);font-weight:700}
@@ -169,6 +169,34 @@ body.has-player .toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .toast.show{opacity:1}
 .loading{padding:24px;text-align:center;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== the mushaf as a book ===== */
+:root{--pr:510/729;--prn:.6996}
+body.wide .wrap{max-width:1120px}
+.book{--leather:#123d2a;position:relative;display:flex;justify-content:center;align-items:stretch;padding:16px;margin-inline:auto;width:fit-content;max-width:100%;
+ background:radial-gradient(120% 90% at 50% 0%,#1a5038 0%,#0f3323 55%,#0a2619 100%);border-radius:12px;
+ box-shadow:inset 0 0 0 2px #b08a2e,inset 0 0 0 7px #0d2c1f,inset 0 0 0 8px rgba(214,178,94,.55),0 22px 44px rgba(20,14,4,.35);perspective:2000px;touch-action:pan-y;user-select:none}
+.book::before{content:"۞";position:absolute;top:-1px;left:50%;transform:translate(-50%,-50%);font-size:20px;color:#d6b25e;background:var(--bg);padding:0 8px;border-radius:50%;line-height:1.2}
+.leaf{position:relative;flex:0 1 auto;width:min(520px,calc((100vh - 210px) * var(--prn)));max-width:100%;background:#fbf7ec;cursor:pointer;transform-style:preserve-3d;backface-visibility:hidden}
+.leaf img{display:block;width:100%;height:auto;aspect-ratio:var(--pr);background:#fbf7ec;-webkit-user-drag:none;transition:opacity .15s}
+.leaf::after{content:"";position:absolute;inset:0;pointer-events:none}
+.leaf.right{border-radius:2px 6px 6px 2px;box-shadow:2px 0 0 #efe6cf,4px 0 0 #e3d7b8,6px 0 0 #efe6cf,8px 0 0 #d9cba6,0 4px 12px rgba(0,0,0,.25)}
+.leaf.right::after{background:linear-gradient(90deg,rgba(70,48,10,.30),rgba(70,48,10,.08) 5%,transparent 12%)}
+.leaf.left{border-radius:6px 2px 2px 6px;box-shadow:-2px 0 0 #efe6cf,-4px 0 0 #e3d7b8,-6px 0 0 #efe6cf,-8px 0 0 #d9cba6,0 4px 12px rgba(0,0,0,.25)}
+.leaf.left::after{background:linear-gradient(270deg,rgba(70,48,10,.30),rgba(70,48,10,.08) 5%,transparent 12%)}
+.spine{width:3px;flex:0 0 3px;background:linear-gradient(90deg,#4d3c14,#c9a75a,#4d3c14);box-shadow:0 0 10px rgba(0,0,0,.45);z-index:2}
+.book.single .spine,.book.single .leaf.off{display:none}
+.book.single .leaf{width:min(560px,100%)}
+.leaf.t-out-n{animation:tOutN .22s ease-in forwards}.leaf.t-in-n{animation:tInN .24s ease-out}
+.leaf.t-out-p{animation:tOutP .22s ease-in forwards}.leaf.t-in-p{animation:tInP .24s ease-out}
+.leaf.right.t-out-n,.leaf.right.t-in-n,.leaf.right.t-out-p,.leaf.right.t-in-p{transform-origin:left center}
+.leaf.left.t-out-n,.leaf.left.t-in-n,.leaf.left.t-out-p,.leaf.left.t-in-p{transform-origin:right center}
+@keyframes tOutN{to{transform:rotateY(-88deg);filter:brightness(.8)}}
+@keyframes tInN{from{transform:rotateY(88deg);filter:brightness(.8)}to{transform:none}}
+@keyframes tOutP{to{transform:rotateY(88deg);filter:brightness(.8)}}
+@keyframes tInP{from{transform:rotateY(-88deg);filter:brightness(.8)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.leaf{animation:none!important}}
+@media (max-width:420px){.book{padding:10px}.book::before{display:none}}
 /* ===== Islamic book theme ===== */
 body{background-color:var(--bg);background-image:var(--pat);background-size:72px 72px}
 .top-basmala{font-family:var(--f-mushaf);font-size:24px;text-align:center;color:var(--brass);line-height:1.6;margin-top:4px}
@@ -315,7 +343,7 @@ nav.tabs button[aria-selected="true"]{background:var(--btn);background-image:non
         <div class="chips" id="qGoals"></div>
         <div class="row"><label for="qPosIn" class="muted">موضعك في المصحف (1–604):</label><input id="qPosIn" type="number" min="1" max="604"></div>
       </div>
-      <div class="mode" role="group" aria-label="طريقة العرض"><button type="button" data-mode="text" aria-pressed="true">الآية وتحتها التفسير</button><button type="button" data-mode="page" aria-pressed="false">صفحات المصحف</button></div>
+      <div class="mode" role="group" aria-label="طريقة العرض"><button type="button" data-mode="page" aria-pressed="true">المصحف (كتاب)</button><button type="button" data-mode="text" aria-pressed="false">الآية وتحتها التفسير</button></div>
       <details class="card"><summary>الانتقال إلى جزء</summary><div class="juz" id="juzList"></div></details>
       <input id="sSearch" type="search" placeholder="ابحث عن سورة بالاسم أو الرقم" aria-label="بحث عن سورة">
       <div class="surahs" id="surahs"><div class="loading">جارٍ تحميل المصحف…</div></div>
@@ -326,7 +354,11 @@ nav.tabs button[aria-selected="true"]{background:var(--btn);background-image:non
         <div class="info"><b id="pSurah"></b><span id="pInfo"></span></div>
         <button class="btn ghost sm" id="pToText" type="button">نص وتفسير</button>
       </div>
-      <div class="mpage" id="pWrap"><img id="pImg" alt="صفحة من المصحف" width="510" height="729" decoding="async"></div>
+      <div class="book" id="pWrap">
+        <div class="leaf right" id="leafR"><img id="pImgR" alt="صفحة من المصحف" decoding="async"></div>
+        <div class="spine" aria-hidden="true"></div>
+        <div class="leaf left" id="leafL"><img id="pImgL" alt="صفحة من المصحف" decoding="async"></div>
+      </div>
       <div class="pnav">
         <button class="btn ghost" id="pPrev" type="button">→ السابقة</button>
         <input id="pNum" type="number" min="1" max="604" aria-label="رقم الصفحة">
@@ -337,12 +369,12 @@ nav.tabs button[aria-selected="true"]{background:var(--btn);background-image:non
         <button class="btn ghost sm" id="pListen" type="button">▶ استمع من هذه الصفحة</button>
         <button class="btn ghost sm" id="pDone" type="button">✓ قرأت هذه الصفحة</button>
       </div>
-      <div class="muted" style="text-align:center">اسحب الصفحة يميناً للتالية ويساراً للسابقة، كما تقلّب المصحف.</div>
+      <div class="muted" style="text-align:center">قلّب الصفحات كما في المصحف: اسحب الصفحة أو اضغط على الصفحة اليسرى للتالية واليمنى للسابقة.</div>
     </div>
     <div id="mRead" class="list" hidden>
       <div class="reader-head">
         <button class="btn ghost sm" id="rBack" type="button">→ فهرس السور</button>
-        <button class="btn ghost sm" id="rToPage" type="button">صفحات المصحف</button>
+        <button class="btn ghost sm" id="rToPage" type="button">📖 المصحف كتاب</button>
         <div class="fs"><button class="btn ghost sm" id="fMinus" type="button" aria-label="تصغير الخط">ا-</button><button class="btn ghost sm" id="fPlus" type="button" aria-label="تكبير الخط">ا+</button></div>
       </div>
       <div class="card shead" style="align-items:center;text-align:center">
@@ -622,6 +654,7 @@ const KEY="rafiq-dhikr-v1";
 let S={days:{},goal:4,pos:1,tk:"subhan",tc:0,cat:null,rec:"mishaari_raashid_al_3afaasee/",tf:"m",fs:24,last:null,mode:"text",page:1,rg:"الكل",pm:"ayah",ar:"Alafasy_128kbps",follow:true};
 try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
 if(!S.v4){S.mode="text";S.v4=1}
+if(!S.v5){S.mode="page";S.v5=1}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const dkey=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const day=()=>{const k=dkey();const d=S.days[k]||(S.days[k]={});d.adh=d.adh||{};
@@ -659,7 +692,7 @@ $("vNext").onclick=()=>{ri=(ri+1)%REMINDERS.length;showR()};showR();
 
 /* ===== التبويبات ===== */
 let curTab="today";
-function tab(name){curTab=name;setTimeout(()=>{try{highlight()}catch(e){}},0);document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name));
+function tab(name){curTab=name;if(name!=="mushaf")document.body.classList.remove("wide");else if(!$("mPage").hidden&&mqWide.matches)document.body.classList.add("wide");setTimeout(()=>{try{highlight()}catch(e){}},0);document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name));
  document.querySelectorAll("[data-view]").forEach(v=>v.hidden=v.dataset.view!==name);
  const tb=document.querySelector('nav.tabs button[data-tab="'+name+'"]');try{tb.scrollIntoView({inline:"center",block:"nearest"})}catch(e){}
  closeSheet();render()}
@@ -762,22 +795,42 @@ const gOf=(s,a)=>SST[s]+a-1;
 function saOf(g){let s=1;while(s<114&&SST[s+1]<=g)s++;return [s,g-SST[s]+1]}
 function pageOf(s,a){const g=gOf(s,a);let p=1;while(p<604&&PAGE[p+1]<=g)p++;return p}
 function juzOfPage(p){const g=PAGE[p];let j=1;while(j<30&&JUZ[j+1]<=g)j++;return j}
-function showView(id){["mList","mPage","mRead"].forEach(v=>$(v).hidden=v!==id)}
+function showView(id){["mList","mPage","mRead"].forEach(v=>$(v).hidden=v!==id);document.body.classList.toggle("wide",id==="mPage"&&mqWide.matches);if(id!=="mPage")lastP=0}
 function showIndex(){showView("mList");renderModes()}
 function renderModes(){document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.mode))}
 document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;save();renderModes()});
 let curP=1;const SVGB="https://raw.githubusercontent.com/batoulapps/quran-svg/main/svg/";const uC={};
-function pageURL(p){return uC[p]||(uC[p]=Promise.resolve(SVGB+pad3(p)+".svg"))}
-function openPage(p){if(!Q)return;p=Math.max(1,Math.min(604,p|0));curP=p;S.page=p;save();closeSheet();showView("mPage");
- const img=$("pImg");img.style.opacity=".35";
- pageURL(p).then(u=>{if(curP===p){img.onload=()=>{img.style.opacity=""};img.onerror=()=>{img.style.opacity="";toast("تعذّر تحميل الصفحة، تحقق من الاتصال")};img.src=u}});$("pNum").value=p;
- const [s,a]=saOf(PAGE[p]);curS=s;selA=a;
- const names=[];for(let g=PAGE[p];g<PAGE[p+1];g++){const n=Q[saOf(g)[0]-1][0];if(!names.includes(n))names.push(n)}
- $("pSurah").textContent=names.join(" · ");$("pInfo").textContent="صفحة "+ar(p)+" · الجزء "+ar(juzOfPage(p));
- setListen($("pListen"),s,a);$("pPrev").disabled=p===1;$("pNext").disabled=p===604;
- [p+1,p-1].forEach(x=>{if(x>=1&&x<=604){const im=new Image();im.src=SVGB+pad3(x)+".svg"}});
- window.scrollTo({top:0})}
-$("pPrev").onclick=()=>openPage(curP-1);$("pNext").onclick=()=>openPage(curP+1);
+function pageURL(p){if(!uC[p]){const u=SVGB+pad3(p)+".svg";const im=new Image();im.src=u;uC[p]=Promise.resolve(u)}return uC[p]}
+const mqWide=matchMedia("(min-width:780px)");
+function spreadOf(p){return p%2?p:p-1}
+function setLeaf(img,p){if(p<1||p>604){img.removeAttribute("src");img.parentNode.style.visibility="hidden";return}
+ img.parentNode.style.visibility="";img.dataset.p=p;img.style.opacity=".35";
+ pageURL(p).then(u=>{if(+img.dataset.p===p){img.onload=()=>{img.style.opacity=""};img.onerror=()=>{img.style.opacity="";toast("تعذّر تحميل الصفحة، تحقق من الاتصال")};img.src=u}}).catch(()=>{img.style.opacity=""})}
+let lastP=0;
+function openPage(p,anim){if(!Q)return;p=Math.max(1,Math.min(604,p|0));
+ const wide=mqWide.matches,bk=$("pWrap");bk.classList.toggle("single",!wide);document.body.classList.add("wide");
+ const r=spreadOf(p),dir=lastP?(p>lastP?"n":p<lastP?"p":""):"";
+ curP=wide?r:p;S.page=curP;save();closeSheet();showView("mPage");
+ const draw=()=>{if(wide){setLeaf($("pImgR"),r);setLeaf($("pImgL"),r+1);$("leafR").classList.remove("off");$("leafL").classList.remove("off")}
+  else{const odd=p%2===1;$("leafR").classList.toggle("off",!odd);$("leafL").classList.toggle("off",odd);setLeaf(odd?$("pImgR"):$("pImgL"),p)}};
+ const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+ const sameSpread=wide&&lastP&&spreadOf(lastP)===r;
+ if(!dir||reduce||sameSpread||anim===false){draw()}
+ else{const leaf=wide?(dir==="n"?$("leafL"):$("leafR")):(lastP%2?$("leafR"):$("leafL"));
+  leaf.classList.add("t-out-"+dir);setTimeout(()=>{leaf.classList.remove("t-out-"+dir);draw();
+   const nl=wide?(dir==="n"?$("leafR"):$("leafL")):(p%2?$("leafR"):$("leafL"));nl.classList.add("t-in-"+dir);setTimeout(()=>nl.classList.remove("t-in-"+dir),260)},220)}
+ lastP=p;$("pNum").value=curP;
+ const [s,a]=saOf(PAGE[curP]);curS=s;selA=a;const last=wide?Math.min(604,r+1):curP;
+ const names=[];for(let g=PAGE[curP];g<PAGE[last+1];g++){const n=Q[saOf(g)[0]-1][0];if(!names.includes(n))names.push(n)}
+ $("pSurah").textContent=names.join(" · ");$("pInfo").textContent=(wide&&r<604?"الصفحتان "+ar(r)+"–"+ar(r+1):"صفحة "+ar(curP))+" · الجزء "+ar(juzOfPage(curP));
+ setListen($("pListen"),s,a);$("pPrev").disabled=curP<=1;$("pNext").disabled=(wide?r+1:curP)>=604;
+ [1,2,3,-1,-2].forEach(d=>{const x=(wide?r:curP)+d+(d>0&&wide?1:0);if(x>=1&&x<=604)pageURL(x).catch(()=>{})});
+ requestAnimationFrame(()=>{const y=$("mPage").getBoundingClientRect().top+scrollY-64;window.scrollTo({top:Math.max(0,y)})})}
+const stepP=d=>{const wide=mqWide.matches;openPage(wide?spreadOf(curP)+2*d:curP+d)};
+mqWide.addEventListener&&mqWide.addEventListener("change",()=>{if(!$("mPage").hidden){lastP=0;openPage(curP)}});
+$("leafL").addEventListener("click",()=>{if(mqWide.matches)stepP(1);else stepP(1)});
+$("leafR").addEventListener("click",()=>{if(mqWide.matches)stepP(-1);else stepP(1)});
+$("pPrev").onclick=()=>stepP(-1);$("pNext").onclick=()=>stepP(1);
 $("pNum").onchange=e=>openPage(parseInt(e.target.value)||1);
 $("pBack").onclick=showIndex;
 $("pToText").onclick=()=>{const [s,a]=saOf(PAGE[curP]);S.mode="text";save();openSurah(s,a)};
@@ -785,11 +838,11 @@ $("pTafsir").onclick=()=>{const [s,a]=saOf(PAGE[curP]);openTafsir(a,s)};
 $("pDone").onclick=()=>{const d=day();d.pages++;S.pos=curP>=604?1:curP+1;buzz(15);save();
  if(curP>=604)toast("ختمت القرآن، بارك الله لك");else if(d.pages===S.goal)toast("أتممت وردك اليوم، ثبّتك الله");else toast("سُجّلت الصفحة. بقي "+ar(Math.max(0,S.goal-d.pages))+" على هدف اليوم");
  if(curP<604)openPage(curP+1)};
-(function(){let x0=null,y0=0;const w=$("pWrap");
+(function(){let x0=null,y0=0;const w=$("pWrap");w.addEventListener("click",e=>{if(w.dataset.sw==="1"){e.stopPropagation();w.dataset.sw=""}},true);
  w.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
- w.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
-  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)openPage(curP+(dx>0?1:-1))},{passive:true})})();
-document.addEventListener("keydown",e=>{if($("mPage").hidden||curTab!=="mushaf")return;if(e.key==="ArrowLeft")openPage(curP+1);if(e.key==="ArrowRight")openPage(curP-1)});
+ w.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>20)w.dataset.sw="1";
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)stepP(dx>0?1:-1)},{passive:true})})();
+document.addEventListener("keydown",e=>{if($("mPage").hidden||curTab!=="mushaf")return;if(e.key==="ArrowLeft")stepP(1);if(e.key==="ArrowRight")stepP(-1)});
 function renderJuz(){const b=$("juzList");if(b.children.length||!Q)return;for(let j=1;j<=30;j++){const x=document.createElement("button");x.type="button";x.textContent=ar(j);
  x.onclick=()=>{const [s,a]=saOf(JUZ[j]);S.mode==="page"?openPage(pageOf(s,a)):openSurah(s,a)};b.appendChild(x)}}
 
@@ -816,7 +869,7 @@ function loadAyah(){if(curAR().t)return loadTimed();A.src=PL.bas?ayUrl(1,1):ayUr
  const n=PL.bas?[PL.s,PL.a]:nextOf(PL.s,PL.a);if(n)NX.src=ayUrl(n[0],n[1])}
 function follow(){if(PL.mode!=="ayah")return highlight();
  if(curTab==="mushaf"&&!$("mRead").hidden&&curS!==PL.s)openSurah(PL.s);
- if(curTab==="mushaf"&&!$("mPage").hidden){const pg=pageOf(PL.s,PL.a);if(pg!==curP)openPage(pg)}
+ if(curTab==="mushaf"&&!$("mPage").hidden){const pg=pageOf(PL.s,PL.a);if((mqWide.matches?spreadOf(pg):pg)!==curP)openPage(pg)}
  highlight();S.last={s:PL.s,a:PL.a};save()}
 function highlight(){document.querySelectorAll(".ayb.playing").forEach(e=>e.classList.remove("playing"));
  if(!PL.on||PL.mode!=="ayah"||$("mRead").hidden||curS!==PL.s)return;const el=$("rText").querySelector('[data-a="'+PL.a+'"]');
