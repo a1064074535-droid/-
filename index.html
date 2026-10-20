@@ -1168,7 +1168,7 @@ $("shShare").onclick=async()=>{const t=shareBody(curS,selA);if(navigator.share){
 $("shPlay").onclick=()=>{try{playFrom(curS,selA)}catch(e){}};
 function wrapAr(c,txt,maxW){const w=txt.split(/\s+/),lines=[];let cur="";w.forEach(x=>{const t=cur?cur+" "+x:x;if(c.measureText(t).width>maxW&&cur){lines.push(cur);cur=x}else cur=t});if(cur)lines.push(cur);return lines}
 async function ayahImage(s,a){const W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const c=cv.getContext("2d");
- try{await document.fonts.load('60px "Hafs"');await document.fonts.load('700 40px "Aref Ruqaa"')}catch(e){}
+ try{await document.fonts.load('60px "Hafs"');await document.fonts.load('700 40px "Aref Ruqaa"');await document.fonts.load('700 36px "Amiri"')}catch(e){}
  const T=(typeof MSH!=="undefined"&&MSH[S.ms||"madina"])||{paper:"#fbf5e2",fr:["#1d6b4a","#d9b55a","#2a7f9e","#f3e2a6"],lab:"#1d5c3f",ink:"#1a1612"};
  const fr=T.rainbow?["#0f5132","#d4a017","#1d6fd8","#fff3c4"]:T.fr;
  c.fillStyle=fr[0];c.fillRect(0,0,W,H);
@@ -1176,11 +1176,11 @@ async function ayahImage(s,a){const W=1080,H=1350,cv=document.createElement("can
  const m=54;c.fillStyle=T.paper||"#fbf5e2";c.fillRect(m,m,W-2*m,H-2*m);c.strokeStyle=fr[1];c.lineWidth=6;c.strokeRect(m+14,m+14,W-2*m-28,H-2*m-28);c.lineWidth=2;c.strokeRect(m+26,m+26,W-2*m-52,H-2*m-52);
  c.direction="rtl";c.textAlign="center";c.textBaseline="middle";
  const hb=m+60;c.fillStyle=fr[0];c.fillRect(m+60,hb,W-2*m-120,88);c.fillStyle=T.paper||"#fff";c.beginPath();c.ellipse(W/2,hb+44,230,34,0,0,7);c.fill();
- c.fillStyle=T.lab||"#1d5c3f";c.font='46px "Hafs"';c.fillText("سورة "+Q[s-1][0],W/2,hb+48);
- const txt=ayTxt(s,a)+" "+ar(a);let fs=64,lines;const maxW=W-2*m-150,top=hb+150,bot=H-m-190;
+ c.fillStyle=T.lab||"#1d5c3f";c.font='700 44px "Amiri",serif';c.fillText("سورة "+Q[s-1][0],W/2,hb+48);
+ const txt=ayTxt(s,a)+" "+ar(a);let fs=80,lines;const maxW=W-2*m-150,top=hb+150,bot=H-m-190;
  for(;fs>=30;fs-=2){c.font=fs+'px "Hafs"';lines=wrapAr(c,txt,maxW);if(lines.length*fs*1.95<=bot-top)break}
  const lh=fs*1.95,y0=top+(bot-top-lines.length*lh)/2+lh/2;c.fillStyle=T.ink||"#1a1612";lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));
- c.fillStyle=T.lab||"#1d5c3f";c.font='34px "Hafs"';c.fillText("["+ayRef(s,a)+"]",W/2,bot+40);
+ c.fillStyle=T.lab||"#1d5c3f";c.font='700 36px "Amiri",serif';c.fillText("["+ayRef(s,a)+"]",W/2,bot+40);
  c.fillStyle=fr[0];c.font='700 40px "Aref Ruqaa",serif';c.fillText("رفيق الذكر",W/2,H-m-92);c.font='24px "IBM Plex Sans Arabic",sans-serif';c.fillStyle="#6b5a3a";c.fillText("برمجة وتطوير خالد بن ماجد الدوسري",W/2,H-m-52);
  return await new Promise(r=>cv.toBlob(r,"image/png"))}
 $("shImg").onclick=async()=>{const b=$("shImg");b.disabled=true;try{const blob=await ayahImage(curS,selA);const name="ayah-"+curS+"-"+selA+".png";const f=new File([blob],name,{type:"image/png"});
