@@ -382,6 +382,13 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .surahs button:hover{background:color-mix(in srgb,var(--sc) 7%,var(--surface))!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .surahs .nm,:root:not([data-theme="light"]) .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}}
 :root[data-theme="dark"] .surahs .nm,:root[data-theme="dark"] .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}
+
+/* ayah actions + page highlight */
+.shact{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.ahl{position:absolute;inset:0;pointer-events:none;z-index:2}
+.ahl i{position:absolute;display:block;border-radius:5px;background:rgba(245,190,40,.30);box-shadow:0 0 0 1.5px rgba(214,150,10,.55);mix-blend-mode:multiply;animation:ahlIn .25s ease-out}
+@keyframes ahlIn{from{opacity:0}to{opacity:1}}
+.pghint{text-align:center;font-size:12px;color:var(--muted);margin-top:4px}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -465,7 +472,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
         <div class="info"><b id="pSurah"></b><span id="pInfo"></span></div>
         <button class="btn ghost sm" id="pToText" type="button">نص وتفسير</button>
       </div>
-      <div class="row" style="justify-content:center"><button class="btn sm" id="pFull" type="button">⛶ قراءة بملء الشاشة</button></div><div class="mstyle" id="mStyle" role="group" aria-label="شكل المصحف"></div>
+      <div class="row" style="justify-content:center"><button class="btn sm" id="pFull" type="button">⛶ قراءة بملء الشاشة</button></div><div class="mstyle" id="mStyle" role="group" aria-label="شكل المصحف"></div><div class="pghint" id="pgHint">اضغط على أي آية في الصفحة لتظليلها وعرض تفسيرها ومشاركتها</div>
       <div class="book" id="pWrap"><button class="fsx" id="pFsX" type="button" aria-label="إغلاق ملء الشاشة">✕</button><div class="fsnav"><button type="button" id="fsPrev" aria-label="السابقة">‹</button><span id="fsNum"></span><button type="button" id="fsNext" aria-label="التالية">›</button></div>
         <div class="leaf right" id="leafR"><img id="pImgR" alt="صفحة من المصحف" decoding="async"></div>
         <div class="spine" aria-hidden="true"></div>
@@ -648,6 +655,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
     <div class="grip"></div>
     <div class="row" style="justify-content:space-between"><b id="shRef"></b><button class="btn ghost sm" id="shClose" type="button">إغلاق ✕</button></div>
     <div class="ayt" id="shAyah"></div>
+    <div class="shact" role="group" aria-label="إجراءات الآية"><button class="btn sm" id="shShare" type="button">↗ مشاركة الآية</button><button class="btn sm" id="shImg" type="button">🖼 صورة للنشر</button><button class="btn ghost sm" id="shCopy" type="button">⧉ نسخ</button><button class="btn ghost sm" id="shPlay" type="button">▶ استمع</button></div>
     <div class="row" style="justify-content:space-between"><button class="btn ghost sm" id="shPrev" type="button">→ الآية السابقة</button><button class="btn ghost sm" id="shNext" type="button">الآية التالية ←</button></div>
     <div class="chips scroll" id="shTafs"></div>
     <div class="tx" id="shText"></div>
@@ -986,12 +994,12 @@ function renderMStyle(){const box=$("mStyle");if(!box)return;box.innerHTML="";Ob
  b.onclick=()=>{if((S.ms||"madina")===k)return;S.ms=k;save();Object.keys(uC).forEach(p=>{uC[p].then(u=>{if(u.startsWith("blob:"))URL.revokeObjectURL(u)}).catch(()=>{});delete uC[p]});renderMStyle();try{openPage(curP)}catch(e){}};box.appendChild(b)})}
 setTimeout(renderMStyle,0);
 function pageURL(p){if(!uC[p]){const u=SVGB+pad3(p)+".svg";
- uC[p]=fetch(u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"})))
-  .catch(()=>fetch("https://cdn.jsdelivr.net/gh/batoulapps/quran-svg@main/svg/"+pad3(p)+".svg").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"}))))
+ uC[p]=fetch(u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{svgGeo(t,p);return URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"}))})
+  .catch(()=>fetch("https://cdn.jsdelivr.net/gh/batoulapps/quran-svg@main/svg/"+pad3(p)+".svg").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{svgGeo(t,p);return URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"}))}))
   .catch(()=>{delete uC[p];return u})}return uC[p]}
 const mqWide=matchMedia("(min-width:780px)");
 function spreadOf(p){return p%2?p:p-1}
-function setLeaf(img,p){if(p<1||p>604){img.removeAttribute("src");img.parentNode.style.visibility="hidden";return}
+function setLeaf(img,p){const _h=img.parentNode.querySelector(".ahl");if(_h)_h.innerHTML="";if(p<1||p>604){img.removeAttribute("src");img.parentNode.style.visibility="hidden";return}
  img.parentNode.style.visibility="";img.dataset.p=p;img.style.opacity=".35";
  pageURL(p).then(u=>{if(+img.dataset.p===p){img.onload=()=>{img.style.opacity=""};img.onerror=()=>{img.style.opacity="";toast("تعذّر تحميل الصفحة، تحقق من الاتصال")};img.src=u}}).catch(()=>{img.style.opacity=""})}
 let lastP=0;
@@ -1017,8 +1025,8 @@ function openPage(p,anim){if(!Q)return;p=Math.max(1,Math.min(604,p|0));
  requestAnimationFrame(()=>{const y=$("mPage").getBoundingClientRect().top+scrollY-64;window.scrollTo({top:Math.max(0,y)})})}
 const stepP=d=>{const wide=mqWide.matches;openPage(wide?spreadOf(curP)+2*d:curP+d)};
 mqWide.addEventListener&&mqWide.addEventListener("change",()=>{if(!$("mPage").hidden){lastP=0;openPage(curP)}});
-$("leafL").addEventListener("click",()=>{if(mqWide.matches)stepP(1);else stepP(1)});
-$("leafR").addEventListener("click",()=>{if(mqWide.matches)stepP(-1);else stepP(1)});
+$("leafL").addEventListener("click",e=>{if(pageTap(e,$("pImgL")))return;if(mqWide.matches)stepP(1);else stepP(1)});
+$("leafR").addEventListener("click",e=>{if(pageTap(e,$("pImgR")))return;if(mqWide.matches)stepP(-1);else stepP(1)});
 $("pPrev").onclick=()=>stepP(-1);$("pNext").onclick=()=>stepP(1);
 $("pNum").onchange=e=>openPage(parseInt(e.target.value)||1);
 $("pBack").onclick=showIndex;
@@ -1101,11 +1109,11 @@ async function getTafsir(s,k){const key=k+":"+s;if(!tC[key])tC[key]=(async()=>{
  if(!r.ok)throw 0;const d=await r.json();const N=Q[s-1][2].length,arr=Array(N).fill("");
  d.forEach(e=>{const a=e.ayah;if(a>=1&&a<=N)arr[a-1]=arr[a-1]?arr[a-1]+"\n\n"+e.text.trim():e.text.trim()});return arr})().catch(e=>{delete tC[key];throw e});
  return tC[key]}
-function closeSheet(){$("sheet").hidden=true;document.querySelectorAll(".ay.sel").forEach(e=>e.classList.remove("sel"))}
+function closeSheet(){$("sheet").hidden=true;try{clearHL()}catch(e){}document.querySelectorAll(".ay.sel").forEach(e=>e.classList.remove("sel"))}
 $("shClose").onclick=closeSheet;
 $("shPrev").onclick=()=>{if(selA>1)openTafsir(selA-1);else if(curS>1)openTafsir(Q[curS-2][2].length,curS-1)};
 $("shNext").onclick=()=>{if(selA<Q[curS-1][2].length)openTafsir(selA+1);else if(curS<114)openTafsir(1,curS+1)};
-async function openTafsir(a,s){if(s)curS=s;selA=a;const s0=curS;document.querySelectorAll(".ay.sel").forEach(e=>e.classList.remove("sel"));
+async function openTafsir(a,s){if(s)curS=s;selA=a;const s0=curS;try{pageHL(curS,a)}catch(e){}document.querySelectorAll(".ay.sel").forEach(e=>e.classList.remove("sel"));
  const el=$("mRead").hidden?null:$("rText").querySelector('[data-a="'+a+'"]');if(el)el.classList.add("sel");
  S.last={s:curS,a};save();
  $("sheet").hidden=false;$("shRef").textContent="سورة "+Q[curS-1][0]+" — الآية "+ar(a);
@@ -1118,6 +1126,67 @@ async function openTafsir(a,s){if(s)curS=s;selA=a;const s0=curS;document.querySe
   let t=arr[a-1],note="";if(!t){let p=a-1;while(p>0&&!arr[p-1])p--;if(p>0){t=arr[p-1];note="تفسير هذه الآية جاء ضمن تفسير الآية "+ar(p)+":\n\n"}}
   tx.textContent=t?note+t:"لا يوجد تفسير لهذه الآية في هذا الكتاب، جرّب تفسيراً آخر."}
  catch(e){tx.textContent="تعذّر تحميل التفسير. تحقق من الاتصال وحاول مرة أخرى."}}
+
+
+/* ===== تحديد الآية في صفحة المصحف ===== */
+const GEO={};const VBW=510.236,VBH=729.448,K=1.3333333;
+function svgGeo(t,p){try{const sp=p<=2,odd=p%2===1;
+ const G=sp?{y0:342,dy:21.3,x0:odd?100:112,x1:odd?222:240}:{y0:467.4,dy:26.88,x0:odd?47:93,x1:odd?280:326};
+ const marks=[],heads=[];const re=/translate\(([-\d.]+),([-\d.]+)\)"[^>]*>\s*<path\b([^>]*)>/g;let m;
+ while((m=re.exec(t))){const tag=m[3];if(tag.indexOf("fill:#bfe8c1")<0)continue;const d=/\sd="([^"]*)"/.exec(tag);const L=d?d[1].length:0;const x=+m[1],y=+m[2];
+  const k=Math.round((G.y0-y)/G.dy);
+  if(L>=2500&&L<15000){if(!sp&&y<G.y0+20)heads.push(k);continue}
+  if(L>=2500)continue;
+  if(x<G.x0-15||x>G.x1+15||y>G.y0+15||y<G.y0-14*G.dy-15)continue;
+  marks.push({x,y,k})}
+ marks.sort((a,b)=>a.k-b.k||b.x-a.x);G.marks=marks;G.heads=heads;GEO[p]=G}catch(e){}}
+function ptOf(e,img){const r=img.getBoundingClientRect();const vx=(e.clientX-r.left)/r.width*VBW,vy=(e.clientY-r.top)/r.height*VBH;return {x:vx/K,y:(VBH-vy)/K}}
+function hitAyah(e,img){const p=+img.dataset.p,G=GEO[p];if(!G||!G.marks.length||!Q)return null;const q=ptOf(e,img);
+ if(q.x<G.x0-8||q.x>G.x1+8||q.y>G.y0+G.dy/2+4||q.y<G.y0-14*G.dy-G.dy/2-4)return null;
+ const k=Math.round((G.y0-q.y)/G.dy);if(G.heads.includes(k))return null;
+ const i=G.marks.findIndex(mk=>mk.k>k||(mk.k===k&&mk.x<=q.x+4));if(i<0)return null;
+ const g=PAGE[p]+i;if(g>6236)return null;const [s,a]=saOf(g);return {p,i,s,a}}
+function drawHL(img,h){const leaf=img.parentNode;let L=leaf.querySelector(".ahl");if(!L){L=document.createElement("div");L.className="ahl";leaf.appendChild(L)}L.innerHTML="";if(!h)return;
+ const G=GEO[h.p];if(!G)return;const cur=G.marks[h.i],prev=h.i>0?G.marks[h.i-1]:null;
+ let sk,sx;if(prev){sk=prev.k;sx=prev.x-4}else{sk=0;sx=G.x1+4;while(G.heads.includes(sk))sk++}
+ const hs=G.heads.filter(x=>x>(prev?prev.k:-1)&&x<cur.k);if(hs.length){sk=Math.max(...hs)+1;sx=G.x1+4;if(h.a===1&&h.s!==1&&h.s!==9)sk++}
+ if(prev&&sx<G.x0+6){sk++;sx=G.x1+4}
+ for(let k=sk;k<=cur.k;k++){if(G.heads.includes(k))continue;const xr=k===sk?sx:G.x1+4,xl=k===cur.k?cur.x-5:G.x0-4;if(xr-xl<3)continue;
+  const yc=G.y0-k*G.dy,el=document.createElement("i");
+  el.style.left=(xl*K/VBW*100)+"%";el.style.width=((xr-xl)*K/VBW*100)+"%";el.style.top=((VBH-(yc+G.dy*.52)*K)/VBH*100)+"%";el.style.height=(G.dy*1.04*K/VBH*100)+"%";L.appendChild(el)}}
+function clearHL(){document.querySelectorAll(".ahl").forEach(x=>x.innerHTML="")}
+function pageTap(e,img){if(!img||!img.dataset.p)return false;const h=hitAyah(e,img);if(!h)return false;clearHL();drawHL(img,h);openTafsir(h.a,h.s);return true}
+function pageHL(s,a){if($("mPage").hidden)return;clearHL();const g=gOf(s,a);["pImgR","pImgL"].forEach(id=>{const img=$(id),p=+img.dataset.p;if(!p||img.parentNode.classList.contains("off")||!GEO[p])return;
+ if(g>=PAGE[p]&&(p===604||g<PAGE[p+1]))drawHL(img,{p,i:g-PAGE[p],s,a})})}
+/* مشاركة الآية */
+function ayTxt(s,a){return Q[s-1][2][a-1]}
+function ayRef(s,a){return "سورة "+Q[s-1][0]+" — الآية "+ar(a)}
+function shareBody(s,a){return "﴿"+ayTxt(s,a)+"﴾\n["+ayRef(s,a)+"]\n\nمن منصة رفيق الذكر\n"+FULL}
+async function copyTxt(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}x.remove();return ok}}
+$("shCopy").onclick=async()=>{toast(await copyTxt(shareBody(curS,selA))?"نُسخت الآية":"تعذّر النسخ")};
+$("shShare").onclick=async()=>{const t=shareBody(curS,selA);if(navigator.share){try{await navigator.share({title:ayRef(curS,selA),text:t});return}catch(e){if(e&&e.name==="AbortError")return}}toast(await copyTxt(t)?"نُسخت الآية، الصقها حيث تريد":"تعذّر النسخ")};
+$("shPlay").onclick=()=>{try{playFrom(curS,selA)}catch(e){}};
+function wrapAr(c,txt,maxW){const w=txt.split(/\s+/),lines=[];let cur="";w.forEach(x=>{const t=cur?cur+" "+x:x;if(c.measureText(t).width>maxW&&cur){lines.push(cur);cur=x}else cur=t});if(cur)lines.push(cur);return lines}
+async function ayahImage(s,a){const W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const c=cv.getContext("2d");
+ try{await document.fonts.load('60px "Hafs"');await document.fonts.load('700 40px "Aref Ruqaa"')}catch(e){}
+ const T=(typeof MSH!=="undefined"&&MSH[S.ms||"madina"])||{paper:"#fbf5e2",fr:["#1d6b4a","#d9b55a","#2a7f9e","#f3e2a6"],lab:"#1d5c3f",ink:"#1a1612"};
+ const fr=T.rainbow?["#0f5132","#d4a017","#1d6fd8","#fff3c4"]:T.fr;
+ c.fillStyle=fr[0];c.fillRect(0,0,W,H);
+ c.save();for(let y=0;y<H;y+=36)for(let x=0;x<W;x+=36){c.fillStyle=fr[1];c.beginPath();c.moveTo(x+18,y+3);c.lineTo(x+33,y+18);c.lineTo(x+18,y+33);c.lineTo(x+3,y+18);c.closePath();c.fill();c.fillStyle=fr[2];c.beginPath();c.moveTo(x+18,y+10);c.lineTo(x+26,y+18);c.lineTo(x+18,y+26);c.lineTo(x+10,y+18);c.closePath();c.fill()}c.restore();
+ const m=54;c.fillStyle=T.paper||"#fbf5e2";c.fillRect(m,m,W-2*m,H-2*m);c.strokeStyle=fr[1];c.lineWidth=6;c.strokeRect(m+14,m+14,W-2*m-28,H-2*m-28);c.lineWidth=2;c.strokeRect(m+26,m+26,W-2*m-52,H-2*m-52);
+ c.direction="rtl";c.textAlign="center";c.textBaseline="middle";
+ const hb=m+60;c.fillStyle=fr[0];c.fillRect(m+60,hb,W-2*m-120,88);c.fillStyle=T.paper||"#fff";c.beginPath();c.ellipse(W/2,hb+44,230,34,0,0,7);c.fill();
+ c.fillStyle=T.lab||"#1d5c3f";c.font='46px "Hafs"';c.fillText("سورة "+Q[s-1][0],W/2,hb+48);
+ const txt=ayTxt(s,a)+" "+ar(a);let fs=64,lines;const maxW=W-2*m-150,top=hb+150,bot=H-m-190;
+ for(;fs>=30;fs-=2){c.font=fs+'px "Hafs"';lines=wrapAr(c,txt,maxW);if(lines.length*fs*1.95<=bot-top)break}
+ const lh=fs*1.95,y0=top+(bot-top-lines.length*lh)/2+lh/2;c.fillStyle=T.ink||"#1a1612";lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));
+ c.fillStyle=T.lab||"#1d5c3f";c.font='34px "Hafs"';c.fillText("["+ayRef(s,a)+"]",W/2,bot+40);
+ c.fillStyle=fr[0];c.font='700 40px "Aref Ruqaa",serif';c.fillText("رفيق الذكر",W/2,H-m-92);c.font='24px "IBM Plex Sans Arabic",sans-serif';c.fillStyle="#6b5a3a";c.fillText("برمجة وتطوير خالد بن ماجد الدوسري",W/2,H-m-52);
+ return await new Promise(r=>cv.toBlob(r,"image/png"))}
+$("shImg").onclick=async()=>{const b=$("shImg");b.disabled=true;try{const blob=await ayahImage(curS,selA);const name="ayah-"+curS+"-"+selA+".png";const f=new File([blob],name,{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:ayRef(curS,selA),text:"﴿"+ayTxt(curS,selA)+"﴾ ["+ayRef(curS,selA)+"]"});return}catch(e){if(e&&e.name==="AbortError")return}}
+  const u=URL.createObjectURL(blob),x=document.createElement("a");x.href=u;x.download=name;document.body.appendChild(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("حُفظت صورة الآية")}
+ catch(e){toast("تعذّر إنشاء الصورة")}finally{b.disabled=false}};
 
 /* ===== القراء ===== */
 document.querySelectorAll("#rMode button").forEach(b=>b.onclick=()=>{S.pm=b.dataset.pm;S.rg="الكل";$("rGroups").innerHTML="";save();renderReciters()});
