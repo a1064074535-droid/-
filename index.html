@@ -268,6 +268,15 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--btn)}
 .gauge .sub{font-size:12px;color:var(--muted);max-width:150px}
 .gauge .trk{stroke:var(--line)}
 .gauge .ornt{fill:none;stroke:var(--line2);stroke-width:1;stroke-dasharray:2 4}
+
+/* ruqyah audio */
+.rulisten{display:flex;justify-content:center;margin-top:-4px}
+.rulisten button{border:1px solid var(--line2);background:var(--surface);color:var(--brass);font:inherit;font-family:var(--f-quran);font-size:14px;border-radius:0 0 6px 6px;border-top:0;padding:3px 14px;cursor:pointer}
+.dhikr.playing{background:var(--brass-soft);border-color:var(--brass)}
+.rurow{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.rurow:last-child{border-bottom:0}
+.rurow b{font-family:var(--f-quran);font-size:17px;color:var(--green)}
+.rurow .chips button.on{background:var(--btn);color:var(--on-green);border-color:var(--brass)}
 /* ===== Islamic book theme ===== */
 body{background-color:var(--bg);background-image:var(--pat);background-size:72px 72px}
 .top-basmala{font-family:var(--f-mushaf);font-size:24px;text-align:center;color:var(--brass);line-height:1.6;margin-top:4px}
@@ -549,6 +558,13 @@ nav.tabs button[aria-selected="true"]{background:var(--btn);background-image:non
         <li>داوم عليها مع المحافظة على الصلاة والأذكار، ولا تمنع الرقية من مراجعة الطبيب.</li>
       </ol>
     </div>
+    <div class="card">
+      <h2>استمع إلى الرقية</h2>
+      <div class="muted">آيات الرقية أدناه بصوت القارئ الذي تختاره، كل آية بعدد تكرارها، أو تسجيلات كاملة للرقية بأصوات القراء.</div>
+      <div class="row"><label for="ruRec" class="muted">القارئ:</label><select id="ruRec" style="flex:1;min-width:0"></select></div>
+      <div class="row"><button class="btn" id="ruPlayAll" type="button">▶ تشغيل الرقية القرآنية كاملة</button><button class="btn ghost" id="ruRadio" type="button">📻 إذاعة الرقية (بث مباشر)</button></div>
+    </div>
+    <div class="card"><h2>تسجيلات كاملة للرقية الشرعية</h2><div class="list" id="ruRecs"></div></div>
     <div class="row" style="justify-content:space-between"><span class="muted" id="ruProg"></span><button class="btn ghost sm" id="ruReset" type="button">إعادة البدء</button></div>
     <div class="list" id="ruList"><div class="loading">جارٍ تحميل الآيات…</div></div>
   </section>
@@ -840,7 +856,9 @@ $("aReset").onclick=()=>{day().adh[curCat()]={};save();renderAdhkar()};
 
 /* ===== الرقية ===== */
 function renderRuqya(){const d=day(),m=d.ruq||(d.ruq={});const box=$("ruList");box.innerHTML="";
- RUQYA.forEach((x,i)=>box.appendChild(dhikrCard(x,m[i]||0,()=>{if((m[i]||0)>=x.n)return;m[i]=(m[i]||0)+1;buzz(15);save();renderRuqya()})));
+ RUQYA.forEach((x,i)=>{const c=dhikrCard(x,m[i]||0,()=>{if((m[i]||0)>=x.n)return;m[i]=(m[i]||0)+1;buzz(15);save();renderRuqya()});c.dataset.ri=i;box.appendChild(c);
+  if(x.q){const w=document.createElement("div");w.className="rulisten";const b=document.createElement("button");b.type="button";b.textContent="▶ استمع"+(x.n>1?" ("+ar(x.n)+" مرات)":"");b.onclick=()=>ruPlay([i]);w.appendChild(b);box.appendChild(w)}});
+ if(typeof renderRuOn==="function")renderRuOn();
  const n=RUQYA.filter((x,i)=>(m[i]||0)>=x.n).length;$("ruProg").textContent=ar(n)+" من "+ar(RUQYA.length)+" مكتملة"}
 $("ruReset").onclick=()=>{day().ruq={};save();renderRuqya()};
 
@@ -995,7 +1013,7 @@ function follow(){if(PL.mode!=="ayah")return highlight();
 function highlight(){document.querySelectorAll(".ayb.playing").forEach(e=>e.classList.remove("playing"));
  if(!PL.on||PL.mode!=="ayah"||$("mRead").hidden||curS!==PL.s)return;const el=$("rText").querySelector('[data-a="'+PL.a+'"]');
  if(el){el.classList.add("playing");if(S.follow){const r=el.getBoundingClientRect();if(r.top<70||r.top>innerHeight*.55)el.scrollIntoView({block:"start",behavior:"smooth"})}}}
-A.onended=()=>{if(!PL.on)return;if(PL.mode==="clip"){stopPlayer();return}if(PL.mode==="radio"){setTimeout(()=>{if(PL.on&&PL.mode==="radio"){A.src=PL.url;start()}},1500);return}
+A.onended=()=>{if(!PL.on)return;if(PL.mode==="queue"){if(PL.i+1<PL.items.length)qGo(PL.i+1);else{stopPlayer();toast("انتهت الرقية، شفاك الله وعافاك")}return}if(PL.mode==="clip"){stopPlayer();return}if(PL.mode==="radio"){setTimeout(()=>{if(PL.on&&PL.mode==="radio"){A.src=PL.url;start()}},1500);return}
  if(PL.mode==="ayah"){if(PL.bas){PL.bas=false;return loadAyah()}const n=nextOf(PL.s,PL.a);if(!n){stopPlayer();return toast("ختمت الاستماع، تقبّل الله")}
   if(n[0]!==PL.s)toast("سورة "+Q[n[0]-1][0]);PL.s=n[0];PL.a=n[1];PL.bas=PL.a===1&&PL.s!==1&&PL.s!==9;loadAyah();updPlayer()}
  else{if(PL.s>=114){stopPlayer();return}let s2=PL.s+1;while(s2<=114&&!audioUrl(s2))s2++;if(s2>114){stopPlayer();return}playFrom(s2,1);toast("سورة "+Q[s2-1][0])}};
@@ -1005,9 +1023,10 @@ function playErr(){const sb=$("plSub");$("plPlay").textContent="▶";
  if(!/githack|netlify|github\.io/.test(location.hostname)){sb.innerHTML='الصوت لا يعمل داخل Claude. <a target="_blank" rel="noopener">افتح النسخة الكاملة</a>';sb.querySelector("a").href=FULL;sb.style.whiteSpace="normal"}
  else sb.textContent=PL.mode==="radio"?"تعذّر الاتصال بالإذاعة. تحقق من الإنترنت أو جرّب إذاعة أخرى.":"تعذّر تشغيل التلاوة. تحقق من الاتصال بالإنترنت أو جرّب قارئاً آخر."}
 A.onplay=A.onpause=updPlayer;
-A.ontimeupdate=()=>{if(PL.mode==="radio"){$("plBar").style.width="100%";return}if(PL.mode==="clip"){$("plBar").style.width=(A.duration?A.currentTime/A.duration*100:0)+"%";return}if(PL.on&&PL.mode==="ayah"&&PL.tm&&curAR().t){const ms=A.currentTime*1000;const c=PL.tm.find(x=>ms>=x.st&&ms<x.en);if(c&&c.a!==PL.a){PL.a=c.a;follow();updPlayer()}}
+A.ontimeupdate=()=>{if(PL.mode==="radio"){$("plBar").style.width="100%";return}if(PL.mode==="clip"){$("plBar").style.width=(A.duration?A.currentTime/A.duration*100:0)+"%";return}if(PL.mode==="queue"){$("plBar").style.width=((PL.i+(A.duration?A.currentTime/A.duration:0))/PL.items.length*100)+"%";return}if(PL.on&&PL.mode==="ayah"&&PL.tm&&curAR().t){const ms=A.currentTime*1000;const c=PL.tm.find(x=>ms>=x.st&&ms<x.en);if(c&&c.a!==PL.a){PL.a=c.a;follow();updPlayer()}}
  let f=0;if(PL.mode==="surah"&&A.duration)f=A.currentTime/A.duration;else if(Q)f=(PL.a-1+(A.duration?A.currentTime/A.duration:0))/Q[PL.s-1][2].length;$("plBar").style.width=(f*100)+"%"};
-function updPlayer(){if(PL.on&&PL.mode==="clip"){$("plTitle").textContent=PL.name;if(!A.paused&&A.currentTime>0||A.paused)$("plSub").textContent=PL.sub;$("plPlay").textContent=A.paused?"▶":"❚❚";try{navigator.mediaSession.metadata=new MediaMetadata({title:PL.name,artist:PL.sub,album:"رفيق الذكر"})}catch(e){}renderAdhOn();return}
+function updPlayer(){if(PL.on&&PL.mode==="queue"){const it=PL.items[PL.i];$("plTitle").textContent=PL.name;$("plSub").textContent=it.l+" · "+ar(PL.i+1)+" من "+ar(PL.items.length);$("plPlay").textContent=A.paused?"▶":"❚❚";renderRuOn();return}
+ if(PL.on&&PL.mode==="clip"){$("plTitle").textContent=PL.name;if(!A.paused&&A.currentTime>0||A.paused)$("plSub").textContent=PL.sub;$("plPlay").textContent=A.paused?"▶":"❚❚";try{navigator.mediaSession.metadata=new MediaMetadata({title:PL.name,artist:PL.sub,album:"رفيق الذكر"})}catch(e){}renderAdhOn();return}
  if(PL.on&&PL.mode==="radio"){$("plTitle").textContent=PL.name;$("plSub").textContent=A.paused?"متوقفة":"بث مباشر";$("plPlay").textContent=A.paused?"▶":"❚❚";
   try{navigator.mediaSession.metadata=new MediaMetadata({title:PL.name,artist:"بث مباشر",album:"رفيق الذكر"})}catch(e){}renderRadioOn();return}
  if(!PL.on||!Q)return;const sn=Q[PL.s-1][0];
@@ -1015,11 +1034,11 @@ function updPlayer(){if(PL.on&&PL.mode==="clip"){$("plTitle").textContent=PL.nam
  $("plSub").textContent=recName()+(PL.mode==="ayah"?(PL.bas?" · البسملة":""):" · السورة كاملة");
  $("plPlay").textContent=A.paused?"▶":"❚❚";
  try{if("mediaSession" in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:$("plTitle").textContent,artist:recName(),album:"رفيق الذكر"})}}catch(e){}}
-function stopPlayer(){const wasR=PL.mode==="radio"||PL.mode==="clip";PL.on=false;PL.mode="";if(wasR)setTimeout(()=>{renderRadioOn();renderAdhOn()},0);A.pause();A.removeAttribute("src");$("player").hidden=true;document.body.classList.remove("has-player");highlight()}
-$("plPlay").onclick=()=>{if(!PL.on)return;if(PL.mode==="clip"){A.paused?start():A.pause();return}if(PL.mode==="radio"){if(A.paused){A.src=PL.url;start()}else{A.pause();A.removeAttribute("src");updPlayer()}return}if(A.paused){if(!A.src)playFrom(PL.s,PL.a);else start()}else A.pause()};
+function stopPlayer(){const wasR=PL.mode==="radio"||PL.mode==="clip"||PL.mode==="queue";PL.on=false;PL.mode="";if(wasR)setTimeout(()=>{renderRadioOn();renderAdhOn();renderRuOn()},0);A.pause();A.removeAttribute("src");$("player").hidden=true;document.body.classList.remove("has-player");highlight()}
+$("plPlay").onclick=()=>{if(!PL.on)return;if(PL.mode==="queue"){A.paused?start():A.pause();return}if(PL.mode==="clip"){A.paused?start():A.pause();return}if(PL.mode==="radio"){if(A.paused){A.src=PL.url;start()}else{A.pause();A.removeAttribute("src");updPlayer()}return}if(A.paused){if(!A.src)playFrom(PL.s,PL.a);else start()}else A.pause()};
 $("plClose").onclick=stopPlayer;
-$("plNext").onclick=()=>{if(PL.mode==="clip")return adhStep(1);if(PL.mode==="radio")return radStep(1);if(PL.mode==="ayah"){const n=nextOf(PL.s,PL.a);if(n){PL.s=n[0];PL.a=n[1];PL.bas=false;loadAyah();updPlayer()}}else if(PL.s<114)playFrom(PL.s+1,1)};
-$("plPrev").onclick=()=>{if(PL.mode==="clip")return adhStep(-1);if(PL.mode==="radio")return radStep(-1);if(PL.mode==="ayah"){const n=prevOf(PL.s,PL.a);if(n){PL.s=n[0];PL.a=n[1];PL.bas=false;loadAyah();updPlayer()}}else if(PL.s>1)playFrom(PL.s-1,1)};
+$("plNext").onclick=()=>{if(PL.mode==="queue"){if(PL.i+1<PL.items.length)qGo(PL.i+1);return}if(PL.mode==="clip")return adhStep(1);if(PL.mode==="radio")return radStep(1);if(PL.mode==="ayah"){const n=nextOf(PL.s,PL.a);if(n){PL.s=n[0];PL.a=n[1];PL.bas=false;loadAyah();updPlayer()}}else if(PL.s<114)playFrom(PL.s+1,1)};
+$("plPrev").onclick=()=>{if(PL.mode==="queue"){if(PL.i>0)qGo(PL.i-1);return}if(PL.mode==="clip")return adhStep(-1);if(PL.mode==="radio")return radStep(-1);if(PL.mode==="ayah"){const n=prevOf(PL.s,PL.a);if(n){PL.s=n[0];PL.a=n[1];PL.bas=false;loadAyah();updPlayer()}}else if(PL.s>1)playFrom(PL.s-1,1)};
 try{navigator.mediaSession.setActionHandler("nexttrack",()=>$("plNext").onclick());navigator.mediaSession.setActionHandler("previoustrack",()=>$("plPrev").onclick());
  navigator.mediaSession.setActionHandler("play",()=>start());navigator.mediaSession.setActionHandler("pause",()=>A.pause())}catch(e){}
 
@@ -1113,7 +1132,7 @@ function renderPrayer(){const t=prTimes(S.adhCity);const n=nextPr(S.adhCity);
 $("todayPr").onclick=()=>tab("adhan");
 let clipTO=0;function playClip(x){PL={on:true,mode:"clip",name:x.n,sub:x.l+" · "+x.g.split(" — ")[0],url:x.u};A.src=x.u;start();$("plSub").textContent="جارٍ تحميل الأذان…";clearTimeout(clipTO);clipTO=setTimeout(()=>{if(PL.on&&PL.mode==="clip"&&PL.url===x.u&&A.currentTime<.1)$("plSub").textContent="التسجيل يتأخر في التحميل من مصدره، انتظر قليلاً أو جرّب تسجيلاً آخر."},15000);document.body.classList.add("has-player");$("player").hidden=false;updPlayer()}
 function adhStep(d){let i=ADH_FLAT.findIndex(x=>x.u===PL.url);playClip(ADH_FLAT[(i+d+ADH_FLAT.length)%ADH_FLAT.length])}
-function renderAdhOn(){document.querySelectorAll("[data-au]").forEach(b=>b.classList.toggle("on",PL.on&&PL.mode==="clip"&&b.dataset.au===PL.url))}
+function renderAdhOn(){document.querySelectorAll("[data-au]").forEach(b=>b.classList.toggle("on",PL.on&&PL.mode==="clip"&&b.dataset.au===PL.url));if(typeof renderRuOn==="function")renderRuOn()}
 function renderAdhan(){const box=$("adhList");if(box.children.length)return renderAdhOn();
  ADH.forEach(g=>{const h=document.createElement("div");h.className="adhg";h.textContent=g.g;box.appendChild(h);
   g.m.forEach(m=>{const c=document.createElement("div");c.className="mu";const b=document.createElement("b");b.textContent=m.n;const ch=document.createElement("div");ch.className="chips";
@@ -1146,6 +1165,23 @@ function renderGauges(){const box=$("gauges");if(!box)return;const D=gaugeData()
   setTimeout(()=>{ring.style.strokeDashoffset=d.v>0?"0":"295.3"},30);
   if(reduce){num.textContent=ar(d.v);return}const t0=performance.now(),T=1400;
   (function step(){const k=Math.min(1,(performance.now()-t0)/T),e=1-Math.pow(1-k,3);if(GV[d.k]!==d.v)return;num.textContent=ar(Math.round(from+(d.v-from)*e));if(k<1)setTimeout(step,30)})()})}
+
+/* ===== صوت الرقية ===== */
+const RUQ_REC=[{"n":"مشاري راشد العفاسي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/Alroqyah_Mshary.mp3"],["الرقية كاملة (نسخة ثانية)","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahMisharyAlAfasy.mp3"]]},{"n":"ماهر المعيقلي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/02-maher.mp3"],["نسخة ثانية","https://archive.org/download/alroqya/maher_elmeeqly.mp3"]]},{"n":"سعد الغامدي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/Alroqyah_Alqamdy.mp3"]]},{"n":"أحمد بن علي العجمي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/Alroqyah_Al3gmy.mp3"],["الرقية كاملة (نسخة ثانية)","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahAhmedAlAjamy.mp3"],["آية الكرسي مكررة","https://archive.org/download/way2sona_20160320_1433/alkorsi-ajmi.mp3"]]},{"n":"ناصر القطامي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/07-NassrQatami.mp3"],["نسخة ثانية","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahNasserAlQatami.mp3"]]},{"n":"ياسر الدوسري","r":[["الرقية الشرعية كاملة","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahYasserAlDosary.mp3"]]},{"n":"فارس عباد","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/01-Fares.mp3"]]},{"n":"إدريس أبكر","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/03-Abkar.mp3"],["من الكتاب والسنة","https://archive.org/download/alroqya/edrees_abkar.mp3"]]},{"n":"خالد القحطاني","r":[["الرقية الشرعية كاملة","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahKhaledAlKahtani.mp3"]]},{"n":"عبدالباسط عبدالصمد","r":[["الرقية الشرعية كاملة","https://archive.org/download/AlRuqyahAlShariahBySheikh/AlRuqiahAbdelBaset.mp3"]]},{"n":"محمد المحيسني","r":[["الرقية الشرعية","https://archive.org/download/alroqya/mohammed_almhesny.mp3"]]},{"n":"محمد اللحيدان","r":[["رقية إبطال السحر","https://archive.org/download/alroqya/mohammed_allahedan.mp3"]]},{"n":"محمد جبريل","r":[["الرقية الشرعية","https://archive.org/download/alroqya/mohammed_gebreel.mp3"]]},{"n":"محمد صديق المنشاوي","r":[["رقية العين","https://archive.org/download/way2sona_20160320_1433/43_Minshawe.mp3"]]},{"n":"عبدالله الخليفة","r":[["الرقية الشرعية","https://archive.org/download/alroqya/abduAllah_alkhalefa.mp3"]]},{"n":"عبدالله كامل","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/Roqya-abdullah-kaml.mp3"]]},{"n":"خالد الحبشي","r":[["الرقية الشرعية الشاملة","https://archive.org/download/alroqya/khaled_alhabashy.mp3"]]},{"n":"خالد العوفي","r":[["الرقية الشرعية الشاملة","https://archive.org/download/way2sona_20160320_1433/kaled-al-3oufe.mp3"]]},{"n":"نبيل العوضي","r":[["الرقية الشرعية","https://archive.org/download/way2sona_20160320_1433/06-_Nabil-Alawadi.mp3"]]},{"n":"رقى متنوعة","r":[["آيات الشفاء والحفظ والسكينة","https://archive.org/download/way2sona_20160320_1433/Ruqya-shefaa.mp3"],["رقية العين","https://archive.org/download/way2sona_20160320_1433/Rogya_al3ayn1.mp3"],["رقية المس","https://archive.org/download/way2sona_20160320_1433/Rogya_almas1.mp3"]]}];
+const RUQ_FLAT=[];RUQ_REC.forEach(m=>m.r.forEach(r=>RUQ_FLAT.push({n:m.n,l:r[0],u:r[1],g:"الرقية الشرعية — "})));
+function ruReciters(){return AYR.filter(r=>!r.t)}
+function ruRec(){const L=ruReciters();return L.find(r=>r.id===S.ruRec)||L.find(r=>r.id==="Alafasy_128kbps")||L[0]}
+function qGo(i){PL.i=i;const it=PL.items[i];A.src=it.u;start();updPlayer();const el=document.querySelector('#ruList [data-ri="'+it.ri+'"]');if(el&&curTab==="ruqya"){const r=el.getBoundingClientRect();if(r.top<80||r.bottom>innerHeight-120)el.scrollIntoView({block:"center",behavior:"smooth"})}}
+function ruPlay(idxs){const rc=ruRec(),items=[];
+ idxs.forEach(i=>{const x=RUQYA[i];if(!x.q)return;const [s0,a,b]=x.q;for(let k=0;k<x.n;k++)for(let v=a;v<=b;v++)items.push({u:EA+rc.id+"/"+pad3(s0)+pad3(v)+".mp3",l:(x.l||qRef(x.q))+(x.n>1?" — المرة "+ar(k+1):""),ri:i})});
+ if(!items.length)return;PL={on:true,mode:"queue",name:"الرقية الشرعية — "+rc.n,items,i:0};document.body.classList.add("has-player");$("player").hidden=false;qGo(0)}
+function renderRuOn(){const cur=PL.on&&PL.mode==="queue"?PL.items[PL.i].ri:-1;document.querySelectorAll("#ruList .dhikr").forEach(e=>e.classList.toggle("playing",+e.dataset.ri===cur));
+ document.querySelectorAll("[data-ruu]").forEach(b=>b.classList.toggle("on",PL.on&&PL.mode==="clip"&&b.dataset.ruu===PL.url))}
+(function(){const sel=$("ruRec");ruReciters().forEach(r=>{const o=document.createElement("option");o.value=r.id;o.textContent=r.n;sel.appendChild(o)});sel.value=ruRec().id;sel.onchange=()=>{S.ruRec=sel.value;save()};
+ $("ruPlayAll").onclick=()=>ruPlay(RUQYA.map((x,i)=>i));
+ $("ruRadio").onclick=()=>playRadio({n:"إذاعة الرقية الشرعية",u:"https://backup.qurango.net/radio/roqiah"});
+ const box=$("ruRecs");RUQ_REC.forEach(m=>{const r=document.createElement("div");r.className="rurow";const b=document.createElement("b");b.textContent=m.n;const ch=document.createElement("div");ch.className="chips";
+  m.r.forEach(x=>{const f=RUQ_FLAT.find(y=>y.u===x[1]);const bt=document.createElement("button");bt.type="button";bt.dataset.ruu=x[1];bt.textContent="▶ "+x[0];bt.onclick=()=>{playClip({n:m.n,l:x[0],u:x[1],g:"الرقية الشرعية"})};ch.appendChild(bt)});r.append(b,ch);box.appendChild(r)})})();
 /* ===== الإذاعات ===== */
 const RAD_FEAT=[
  {n:"إذاعة القرآن الكريم من المملكة العربية السعودية",d:"البث الرسمي من الرياض",u:"https://stream.radiojar.com/0tpy1h0kxtzuv",ic:"۞"},
