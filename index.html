@@ -373,6 +373,15 @@ nav.tabs .ti svg{width:17px;height:17px}
 nav.tabs button:hover .ti{transform:scale(1.1) rotate(-6deg)}
 nav.tabs button[aria-selected="true"]{background:var(--tc)!important;background-image:linear-gradient(135deg,color-mix(in srgb,var(--tc) 100%,#fff 0%),color-mix(in srgb,var(--tc) 70%,#000))!important;border-color:var(--tc)!important;color:#fff!important;box-shadow:0 3px 10px color-mix(in srgb,var(--tc) 40%,transparent)!important}
 nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255,.22);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+
+/* coloured surah names */
+.surahs button{border-inline-start:4px solid var(--sc,var(--line2))!important}
+.surahs .nm{color:var(--sc,var(--green))!important}
+.surahs .no{border-color:color-mix(in srgb,var(--sc) 55%,transparent)!important;background:color-mix(in srgb,var(--sc) 12%,transparent)!important}
+.surahs .no::after{color:var(--sc,var(--brass))!important}
+.surahs button:hover{background:color-mix(in srgb,var(--sc) 7%,var(--surface))!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .surahs .nm,:root:not([data-theme="light"]) .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}}
+:root[data-theme="dark"] .surahs .nm,:root[data-theme="dark"] .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}
 </style>
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -901,9 +910,10 @@ $("qPosIn").onchange=e=>{S.pos=Math.max(1,Math.min(604,parseInt(e.target.value)|
 
 /* ===== المصحف ===== */
 const strip=s=>s.replace(/[ً-ٰٟۖ-ۭـ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه");
+const SCOL=["#0b7a3e","#c2410c","#1d4ed8","#b91c1c","#7e22ce","#0f766e","#be185d","#a16207","#4338ca","#0369a1","#9d174d","#4d7c0f"];
 function renderSurahs(){if(!Q)return;const qv=strip($("sSearch").value.trim());const box=$("surahs");box.innerHTML="";
  Q.forEach((s,i)=>{if(qv&&!strip(s[0]).includes(qv)&&String(i+1)!==qv&&ar(i+1)!==qv)return;
-  const b=document.createElement("button");b.type="button";
+  const b=document.createElement("button");b.type="button";b.style.setProperty("--sc",SCOL[i%SCOL.length]);
   b.innerHTML='<span class="no" data-n="'+ar(i+1)+'"></span><span><span class="nm"></span><br><span class="inf">'+(s[1]==="meccan"?"مكية":"مدنية")+" · "+ar(s[2].length)+" آية</span></span>";
   b.querySelector(".nm").textContent=s[0];b.onclick=()=>S.mode==="page"?openPage(pageOf(i+1,1)):openSurah(i+1);box.appendChild(b)})}
 $("sSearch").oninput=renderSurahs;
