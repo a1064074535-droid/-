@@ -263,11 +263,16 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--btn)}
 .gauge .ring{position:relative;width:min(132px,36vw);aspect-ratio:1;max-width:100%}
 .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
 .gauge .ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
-.gauge .num{font-family:var(--f-quran);font-weight:700;font-size:clamp(19px,5.6vw,24px);color:var(--green);font-variant-numeric:tabular-nums}
-.gauge .unit{font-family:var(--f-quran);font-size:14px;color:var(--brass)}
+.gauge .num{font-family:var(--f-quran);font-weight:700;font-size:clamp(19px,5.6vw,24px);color:var(--gd,var(--green));font-variant-numeric:tabular-nums}
+.gauge .unit{font-family:var(--f-quran);font-size:14px;font-weight:700;color:var(--g1,var(--brass))}
 .gauge .sub{font-size:12px;color:var(--muted);max-width:150px}
-.gauge .trk{stroke:var(--line)}
-.gauge .ornt{fill:none;stroke:var(--line2);stroke-width:1;stroke-dasharray:2 4}
+.gauge .trk{stroke:var(--g1,var(--line));stroke-opacity:.16}
+.gauge .bgc{fill:var(--g2);fill-opacity:.09}
+.gauge .val{filter:drop-shadow(0 0 4px var(--g1)) drop-shadow(0 0 1px var(--g2))}
+.gauge .ring{transition:transform .25s}.gauge:hover .ring,.gauge:focus-visible .ring{transform:scale(1.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gauge .num{color:var(--g2)}}
+:root[data-theme="dark"] .gauge .num{color:var(--g2)}
+.gauge .ornt{fill:none;stroke:var(--g2,var(--line2));stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:2 4}
 
 /* ruqyah audio */
 .rulisten{display:flex;justify-content:center;margin-top:-4px}
@@ -1152,13 +1157,13 @@ function gaugeData(){const nm=n=>strip(String(n).split(" — ")[0]).replace(/^(�
  const rads=(typeof RAD_FEAT!=="undefined"?RAD_FEAT.length:0)+(typeof RAD_LIST!=="undefined"?RAD_LIST.length:0);
  const muz=typeof ADH!=="undefined"?ADH.reduce((a,g)=>a+g.m.filter(m=>!/^تسجيل/.test(m.n)).length,0):0;
  return [
-  {k:"h",v:hTot,u:"حديثاً",s:"من "+ar(hBooks)+" كتاباً من كتب السنة",t:"hadith",c:["#0f5132","#2a8459"]},
-  {k:"r",v:recNames.size,u:"قارئاً",s:ar(RECITERS.length+AYR.length)+" تلاوة بـ"+ar(new Set(RECITERS.map(r=>r.g)).size)+" رواية",t:"reciters",c:["#9c7419","#dcb85e"]},
-  {k:"q",v:rads,u:"إذاعة",s:"بث مباشر على مدار الساعة",t:"radio",c:["#1d6b47","#9c7419"]},
-  {k:"m",v:muz,u:"مؤذناً",s:"من المسجد الحرام والمسجد النبوي",t:"adhan",c:["#7a5a12","#0f5132"]}]}
+  {k:"h",v:hTot,u:"حديثاً",s:"من "+ar(hBooks)+" كتاباً من كتب السنة",t:"hadith",c:["#00c853","#aeea00"],d:"#00873a"},
+  {k:"r",v:recNames.size,u:"قارئاً",s:ar(RECITERS.length+AYR.length)+" تلاوة بـ"+ar(new Set(RECITERS.map(r=>r.g)).size)+" رواية",t:"reciters",c:["#ff6d00","#ffc400"],d:"#d35400"},
+  {k:"q",v:rads,u:"إذاعة",s:"بث مباشر على مدار الساعة",t:"radio",c:["#2962ff","#00e5ff"],d:"#1e56d6"},
+  {k:"m",v:muz,u:"مؤذناً",s:"من المسجد الحرام والمسجد النبوي",t:"adhan",c:["#d500f9","#ff4081"],d:"#b0129e"}]}
 function renderGauges(){const box=$("gauges");if(!box)return;const D=gaugeData();const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
- if(!box.children.length)D.forEach(d=>{const b=document.createElement("button");b.type="button";b.className="gauge";b.dataset.k=d.k;
-  b.innerHTML='<div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="gg'+d.k+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+d.c[0]+'"/><stop offset="1" stop-color="'+d.c[1]+'"/></linearGradient></defs><circle class="ornt" cx="60" cy="60" r="56"/><circle class="trk" cx="60" cy="60" r="47" fill="none" stroke-width="9"/><circle class="val" cx="60" cy="60" r="47" fill="none" stroke="url(#gg'+d.k+')" stroke-width="9" stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="295.3" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"/></svg><div><span class="num">٠</span><span class="unit"></span></div></div><span class="sub"></span>';
+ if(!box.children.length)D.forEach(d=>{const b=document.createElement("button");b.type="button";b.className="gauge";b.dataset.k=d.k;b.style.setProperty("--g1",d.c[0]);b.style.setProperty("--g2",d.c[1]);b.style.setProperty("--gd",d.d);
+  b.innerHTML='<div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="gg'+d.k+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+d.c[0]+'"/><stop offset="1" stop-color="'+d.c[1]+'"/></linearGradient></defs><circle class="ornt" cx="60" cy="60" r="56"/><circle class="bgc" cx="60" cy="60" r="42"/><circle class="trk" cx="60" cy="60" r="47" fill="none" stroke-width="10"/><circle class="val" cx="60" cy="60" r="47" fill="none" stroke="url(#gg'+d.k+')" stroke-width="10" stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="295.3" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"/></svg><div><span class="num">٠</span><span class="unit"></span></div></div><span class="sub"></span>';
   b.querySelector(".unit").textContent=d.u;b.onclick=()=>tab(d.t);box.appendChild(b)});
  D.forEach(d=>{const b=box.querySelector('[data-k="'+d.k+'"]');b.querySelector(".sub").textContent=d.s;b.setAttribute("aria-label",ar(d.v)+" "+d.u+"، "+d.s);
   const from=GV[d.k]||0;if(from===d.v)return;GV[d.k]=d.v;const ring=b.querySelector(".val"),num=b.querySelector(".num");
