@@ -1143,9 +1143,9 @@ function renderGauges(){const box=$("gauges");if(!box)return;const D=gaugeData()
   b.querySelector(".unit").textContent=d.u;b.onclick=()=>tab(d.t);box.appendChild(b)});
  D.forEach(d=>{const b=box.querySelector('[data-k="'+d.k+'"]');b.querySelector(".sub").textContent=d.s;b.setAttribute("aria-label",ar(d.v)+" "+d.u+"، "+d.s);
   const from=GV[d.k]||0;if(from===d.v)return;GV[d.k]=d.v;const ring=b.querySelector(".val"),num=b.querySelector(".num");
-  requestAnimationFrame(()=>{ring.style.strokeDashoffset=d.v>0?"0":"295.3"});
+  setTimeout(()=>{ring.style.strokeDashoffset=d.v>0?"0":"295.3"},30);
   if(reduce){num.textContent=ar(d.v);return}const t0=performance.now(),T=1400;
-  (function step(t){const k=Math.min(1,(t-t0)/T),e=1-Math.pow(1-k,3);num.textContent=ar(Math.round(from+(d.v-from)*e));if(k<1)requestAnimationFrame(step)})(t0)})}
+  (function step(){const k=Math.min(1,(performance.now()-t0)/T),e=1-Math.pow(1-k,3);if(GV[d.k]!==d.v)return;num.textContent=ar(Math.round(from+(d.v-from)*e));if(k<1)setTimeout(step,30)})()})}
 /* ===== الإذاعات ===== */
 const RAD_FEAT=[
  {n:"إذاعة القرآن الكريم من المملكة العربية السعودية",d:"البث الرسمي من الرياض",u:"https://stream.radiojar.com/0tpy1h0kxtzuv",ic:"۞"},
