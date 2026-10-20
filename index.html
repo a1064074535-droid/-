@@ -255,6 +255,19 @@ body.reading .player{z-index:80}
 .mu .chips button{display:inline-flex;gap:6px;align-items:center}
 .mu .chips button.on{background:var(--btn);color:var(--on-green);border-color:var(--brass)}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--btn)}
+
+/* content gauges */
+.gauges{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:560px){.gauges{grid-template-columns:repeat(4,1fr)}}
+.gauge{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;background:none;border:0;font:inherit;color:inherit;padding:4px}
+.gauge .ring{position:relative;width:min(132px,36vw);aspect-ratio:1;max-width:100%}
+.gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge .ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.gauge .num{font-family:var(--f-quran);font-weight:700;font-size:clamp(19px,5.6vw,24px);color:var(--green);font-variant-numeric:tabular-nums}
+.gauge .unit{font-family:var(--f-quran);font-size:14px;color:var(--brass)}
+.gauge .sub{font-size:12px;color:var(--muted);max-width:150px}
+.gauge .trk{stroke:var(--line)}
+.gauge .ornt{fill:none;stroke:var(--line2);stroke-width:1;stroke-dasharray:2 4}
 /* ===== Islamic book theme ===== */
 body{background-color:var(--bg);background-image:var(--pat);background-size:72px 72px}
 .top-basmala{font-family:var(--f-mushaf);font-size:24px;text-align:center;color:var(--brass);line-height:1.6;margin-top:4px}
@@ -372,6 +385,7 @@ nav.tabs button[aria-selected="true"]{background:var(--btn);background-image:non
   <!-- اليوم -->
   <section data-view="today" class="list">
     <button class="nextpr" id="todayPr" type="button" hidden></button>
+    <div class="card"><h2>محتوى المنصة</h2><div class="gauges" id="gauges"></div></div>
     <div class="card next"><h2 id="nextTitle"></h2><div id="nextBody" class="muted"></div><div class="row"><button class="btn" id="nextGo" type="button"></button></div></div>
     <div class="stats">
       <div class="stat"><span class="v" id="sSabah">—</span><span class="l">أذكار الصباح</span></div>
@@ -1110,6 +1124,28 @@ function renderAdhan(){const box=$("adhList");if(box.children.length)return rend
 let adhPlayed=null;
 setInterval(()=>{renderPrayer();if(!S.adhAuto)return;const t=prTimes(S.adhCity);if(!t)return;const now=Date.now();
  for(const k of ["fajr","dhuhr","asr","maghrib","isha"]){const d=now-t[k].getTime();const key=dkey()+k;if(d>=0&&d<90e3&&adhPlayed!==key){adhPlayed=key;const x=ADH_FLAT.find(f=>f.u===S.adhUrl)||ADH_FLAT[0];playClip(x);toast("حان الآن موعد صلاة "+PRN[k]+" في "+CITIES[S.adhCity][0]);break}}},15000);
+
+/* ===== دوائر محتوى المنصة ===== */
+const GV={};
+function gaugeData(){const nm=n=>strip(String(n).split(" — ")[0]).replace(/^(شيخ|الشيخ|القارئ)\s+/,"").replace(/\s+بن\s+/g," ").replace(/[ی]/g,"ي").replace(/\s+/g,"");
+ const recNames=new Set(RECITERS.map(r=>nm(r.n)).concat(AYR.map(r=>nm(r.n))));
+ const hTot=HI?HI.reduce((a,b)=>a+b.n,0):50759,hBooks=HI?HI.length:17;
+ const rads=(typeof RAD_FEAT!=="undefined"?RAD_FEAT.length:0)+(typeof RAD_LIST!=="undefined"?RAD_LIST.length:0);
+ const muz=typeof ADH!=="undefined"?ADH.reduce((a,g)=>a+g.m.filter(m=>!/^تسجيل/.test(m.n)).length,0):0;
+ return [
+  {k:"h",v:hTot,u:"حديثاً",s:"من "+ar(hBooks)+" كتاباً من كتب السنة",t:"hadith",c:["#0f5132","#2a8459"]},
+  {k:"r",v:recNames.size,u:"قارئاً",s:ar(RECITERS.length+AYR.length)+" تلاوة بـ"+ar(new Set(RECITERS.map(r=>r.g)).size)+" رواية",t:"reciters",c:["#9c7419","#dcb85e"]},
+  {k:"q",v:rads,u:"إذاعة",s:"بث مباشر على مدار الساعة",t:"radio",c:["#1d6b47","#9c7419"]},
+  {k:"m",v:muz,u:"مؤذناً",s:"من المسجد الحرام والمسجد النبوي",t:"adhan",c:["#7a5a12","#0f5132"]}]}
+function renderGauges(){const box=$("gauges");if(!box)return;const D=gaugeData();const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+ if(!box.children.length)D.forEach(d=>{const b=document.createElement("button");b.type="button";b.className="gauge";b.dataset.k=d.k;
+  b.innerHTML='<div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="gg'+d.k+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+d.c[0]+'"/><stop offset="1" stop-color="'+d.c[1]+'"/></linearGradient></defs><circle class="ornt" cx="60" cy="60" r="56"/><circle class="trk" cx="60" cy="60" r="47" fill="none" stroke-width="9"/><circle class="val" cx="60" cy="60" r="47" fill="none" stroke="url(#gg'+d.k+')" stroke-width="9" stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="295.3" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"/></svg><div><span class="num">٠</span><span class="unit"></span></div></div><span class="sub"></span>';
+  b.querySelector(".unit").textContent=d.u;b.onclick=()=>tab(d.t);box.appendChild(b)});
+ D.forEach(d=>{const b=box.querySelector('[data-k="'+d.k+'"]');b.querySelector(".sub").textContent=d.s;b.setAttribute("aria-label",ar(d.v)+" "+d.u+"، "+d.s);
+  const from=GV[d.k]||0;if(from===d.v)return;GV[d.k]=d.v;const ring=b.querySelector(".val"),num=b.querySelector(".num");
+  requestAnimationFrame(()=>{ring.style.strokeDashoffset=d.v>0?"0":"295.3"});
+  if(reduce){num.textContent=ar(d.v);return}const t0=performance.now(),T=1400;
+  (function step(t){const k=Math.min(1,(t-t0)/T),e=1-Math.pow(1-k,3);num.textContent=ar(Math.round(from+(d.v-from)*e));if(k<1)requestAnimationFrame(step)})(t0)})}
 /* ===== الإذاعات ===== */
 const RAD_FEAT=[
  {n:"إذاعة القرآن الكريم من المملكة العربية السعودية",d:"البث الرسمي من الرياض",u:"https://stream.radiojar.com/0tpy1h0kxtzuv",ic:"۞"},
@@ -1130,7 +1166,7 @@ function renderRadio(){const f=$("radFeat");if(!f.children.length)RAD_FEAT.forEa
  RAD_LIST.filter(r=>!q||strip(r.n).includes(q)).forEach(r=>{const b=document.createElement("button");b.type="button";b.className="radrow";b.dataset.ru=r.u;b.innerHTML='<b></b><span class="muted">▶ استمع</span>';b.querySelector("b").textContent=r.n;b.onclick=()=>playRadio(r);box.appendChild(b)});
  if(!box.children.length)box.innerHTML='<div class="loading">لا توجد إذاعة بهذا الاسم.</div>';renderRadioOn()}
 $("radQ").oninput=renderRadio;
-fetch("https://mp3quran.net/api/v3/radios?language=ar").then(r=>r.json()).then(d=>{const fu=new Set(RAD_FEAT.map(x=>x.u));RAD_LIST=d.radios.filter(x=>!fu.has(x.url)).map(x=>({n:x.name.replace(/[-\s]+$/,"").trim(),u:x.url.replace(/^http:/,"https:")})).sort((a,b)=>a.n.localeCompare(b.n,"ar"));renderRadio()}).catch(()=>{$("radList").innerHTML='<div class="loading">قائمة إذاعات القراء تعمل في النسخة المنشورة من المنصة.</div>'});
+fetch("https://mp3quran.net/api/v3/radios?language=ar").then(r=>r.json()).then(d=>{const fu=new Set(RAD_FEAT.map(x=>x.u));RAD_LIST=d.radios.filter(x=>!fu.has(x.url)).map(x=>({n:x.name.replace(/[-\s]+$/,"").trim(),u:x.url.replace(/^http:/,"https:")})).sort((a,b)=>a.n.localeCompare(b.n,"ar"));renderRadio();renderGauges()}).catch(()=>{$("radList").innerHTML='<div class="loading">قائمة إذاعات القراء تعمل في النسخة المنشورة من المنصة.</div>'});
 
 /* ===== الأحاديث ===== */
 let HI=null;const HB={};let HV={view:"books",k:null,ch:null,list:[],shown:0,q:""};
@@ -1165,7 +1201,7 @@ async function hSearch(){const q=$("hQ").value.trim();if(q.length<2)return toast
   box.firstChild&&(box.firstChild.textContent="جارٍ البحث… "+ar(res.length)+" نتيجة")}
  if(HV.view!=="search")return;box.innerHTML="";const h=document.createElement("div");h.className="muted";h.textContent=res.length?"عدد النتائج: "+ar(res.length):"لا توجد نتائج. جرّب كلمات أخرى.";box.appendChild(h);HV.list=res;HV.shown=0;hShowMore()}
 $("hGo").onclick=hSearch;$("hQ").addEventListener("keydown",e=>{if(e.key==="Enter")hSearch()});
-fetch("hadith/index.json").then(r=>r.json()).then(j=>{HI=j;const tot=j.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(j.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
+fetch("hadith/index.json").then(r=>r.json()).then(j=>{HI=j;renderGauges();const tot=j.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(j.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
  Promise.all(["nawawi40","qudsi40"].map(hLoad)).then(([a,b])=>{const all=a.map(r=>[r,"nawawi40"]).concat(b.map(r=>[r,"qudsi40"]));const dn=Math.floor(Date.now()/864e5)%all.length;const [r,k]=all[dn];$("hDayT").textContent=r[2];$("hDayS").textContent=hBook(k).t+" · رقم "+ar(r[1]);$("hDay").hidden=HV.view!=="books"}).catch(()=>{})}).catch(()=>{$("hStat").textContent="تعذّر تحميل كتب الحديث. تحقق من الاتصال."});
 
 /* ===== ملء الشاشة للمصحف ===== */
@@ -1176,7 +1212,7 @@ $("pFull").onclick=()=>setReading(true);$("pFsX").onclick=e=>{e.stopPropagation(
 $("fsNext").onclick=e=>{e.stopPropagation();stepP(1);setTimeout(updFsNum,0)};$("fsPrev").onclick=e=>{e.stopPropagation();stepP(-1);setTimeout(updFsNum,0)};
 document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("reading")){document.body.classList.remove("reading");lastP=0;openPage(curP,false)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("reading"))setReading(false)});
-function render(){renderToday();renderAdhkar();renderRuqya();renderTasbeeh();renderWird();renderReciters();renderRadio();renderAdhan();renderPrayer()}
+function render(){renderToday();renderAdhkar();renderRuqya();renderTasbeeh();renderWird();renderReciters();renderRadio();renderAdhan();renderPrayer();renderGauges()}
 render();
 /* ===== قوائم القراء المحدّثة من mp3quran ===== */
 const GORDER=["حفص عن عاصم","مجوّد ومعلّم","ورش عن نافع","قالون عن نافع","الدوري عن أبي عمرو","السوسي عن أبي عمرو","الدوري عن الكسائي","أبو الحارث عن الكسائي","البزي عن ابن كثير","قنبل عن ابن كثير","البزي وقنبل عن ابن كثير","شعبة عن عاصم","خلف عن حمزة","ابن ذكوان عن ابن عامر","هشام عن ابن عامر","ابن جماز عن أبي جعفر","يعقوب الحضرمي (رويس وروح)"];
@@ -1194,7 +1230,7 @@ async function loadLive(){try{
  const timed=rd.map(x=>{const u=x.folder_url.replace(/^http:/,"https:");return {id:"tm:"+x.id,n:x.name.trim(),g:grp(x.rewaya),u,read:x.id,s:fs[u]||null,t:1}});
  const tk=new Set(timed.map(x=>nrm(x.n)+"|"+x.g));
  AYR=timed.concat(AYR.filter(x=>!tk.has(nrm(x.n)+"|"+x.g))).sort(gsort);
- $("rGroups").innerHTML="";renderReciters();if(PL.on)updPlayer()}catch(e){}}
+ $("rGroups").innerHTML="";renderReciters();renderGauges();if(PL.on)updPlayer()}catch(e){}}
 loadLive();
 
 fetch("https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json").then(r=>r.json()).then(j=>{Q=j.map(c=>[c.name,c.type,c.verses.map(v=>v.text)]);buildSST();renderJuz();renderModes();
