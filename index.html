@@ -960,8 +960,20 @@ function showView(id){["mList","mPage","mRead"].forEach(v=>$(v).hidden=v!==id);d
 function showIndex(){showView("mList");renderModes()}
 function renderModes(){document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.mode))}
 document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;save();renderModes()});
-let curP=1;const SVGB="https://raw.githubusercontent.com/batoulapps/quran-svg/main/svg/";const uC={};
-function pageURL(p){if(!uC[p]){const u=SVGB+pad3(p)+".svg";const im=new Image();im.src=u;uC[p]=Promise.resolve(u)}return uC[p]}
+let curP=1;const GRAD='<linearGradient id="kFr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4a017"/><stop offset=".2" stop-color="#0e9f6e"/><stop offset=".4" stop-color="#1d6fd8"/><stop offset=".6" stop-color="#9333ea"/><stop offset=".8" stop-color="#e0245e"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>'+
+'<radialGradient id="kMk" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff3c4"/><stop offset=".55" stop-color="#f7c948"/><stop offset="1" stop-color="#c88a04"/></radialGradient>'+
+'<linearGradient id="kHz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset=".5" stop-color="#3b82f6"/><stop offset="1" stop-color="#e0245e"/></linearGradient>';
+function recolorSVG(t){
+ t=t.replace(/<defs\b([^>]*)>/,(m)=>m+GRAD);
+ return t.replace(/<path\b[^>]*>/g,tag=>{const d=/\sd="([^"]*)"/.exec(tag);const L=d?d[1].length:0;
+  if(tag.includes("fill:#bfe8c1"))return tag.replace("fill:#bfe8c1",L>=15000?"fill:url(#kFr)":L>=2500?"fill:url(#kHz)":"fill:url(#kMk)");
+  if(tag.includes("fill:#231f20")&&L<100000)return tag.replace("fill:#231f20",L<1500?"fill:#b4122f":"fill:#123c8c");
+  return tag})}
+const SVGB="https://raw.githubusercontent.com/batoulapps/quran-svg/main/svg/";const uC={};
+function pageURL(p){if(!uC[p]){const u=SVGB+pad3(p)+".svg";
+ uC[p]=fetch(u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t)],{type:"image/svg+xml"})))
+  .catch(()=>fetch("https://cdn.jsdelivr.net/gh/batoulapps/quran-svg@main/svg/"+pad3(p)+".svg").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t)],{type:"image/svg+xml"}))))
+  .catch(()=>{delete uC[p];return u})}return uC[p]}
 const mqWide=matchMedia("(min-width:780px)");
 function spreadOf(p){return p%2?p:p-1}
 function setLeaf(img,p){if(p<1||p>604){img.removeAttribute("src");img.parentNode.style.visibility="hidden";return}
