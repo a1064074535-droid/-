@@ -382,6 +382,10 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .surahs button:hover{background:color-mix(in srgb,var(--sc) 7%,var(--surface))!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .surahs .nm,:root:not([data-theme="light"]) .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}}
 :root[data-theme="dark"] .surahs .nm,:root[data-theme="dark"] .surahs .no::after{color:color-mix(in srgb,var(--sc) 55%,#fff)!important}
+.mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
+.mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+.mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.mstyle button[aria-pressed="true"]{border-color:var(--brass);box-shadow:0 0 0 2px var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--surface))}
 </style>
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head><body>
@@ -461,7 +465,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
         <div class="info"><b id="pSurah"></b><span id="pInfo"></span></div>
         <button class="btn ghost sm" id="pToText" type="button">نص وتفسير</button>
       </div>
-      <div class="row" style="justify-content:center"><button class="btn sm" id="pFull" type="button">⛶ قراءة بملء الشاشة</button></div>
+      <div class="row" style="justify-content:center"><button class="btn sm" id="pFull" type="button">⛶ قراءة بملء الشاشة</button></div><div class="mstyle" id="mStyle" role="group" aria-label="شكل المصحف"></div>
       <div class="book" id="pWrap"><button class="fsx" id="pFsX" type="button" aria-label="إغلاق ملء الشاشة">✕</button><div class="fsnav"><button type="button" id="fsPrev" aria-label="السابقة">‹</button><span id="fsNum"></span><button type="button" id="fsNext" aria-label="التالية">›</button></div>
         <div class="leaf right" id="leafR"><img id="pImgR" alt="صفحة من المصحف" decoding="async"></div>
         <div class="spine" aria-hidden="true"></div>
@@ -960,19 +964,30 @@ function showView(id){["mList","mPage","mRead"].forEach(v=>$(v).hidden=v!==id);d
 function showIndex(){showView("mList");renderModes()}
 function renderModes(){document.querySelectorAll(".mode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===S.mode))}
 document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;save();renderModes()});
-let curP=1;const GRAD='<linearGradient id="kFr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4a017"/><stop offset=".2" stop-color="#0e9f6e"/><stop offset=".4" stop-color="#1d6fd8"/><stop offset=".6" stop-color="#9333ea"/><stop offset=".8" stop-color="#e0245e"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>'+
-'<radialGradient id="kMk" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fff3c4"/><stop offset=".55" stop-color="#f7c948"/><stop offset="1" stop-color="#c88a04"/></radialGradient>'+
-'<linearGradient id="kHz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset=".5" stop-color="#3b82f6"/><stop offset="1" stop-color="#e0245e"/></linearGradient>';
-function recolorSVG(t){
- t=t.replace(/<defs\b([^>]*)>/,(m)=>m+GRAD);
+let curP=1;const MSH={
+ madina:{n:"مصحف المدينة",paper:"#fbf5e2",fr:["#1d6b4a","#d9b55a","#2a7f9e","#f3e2a6"],hz:["#e9cf7a","#b8860b"],mk:["#fffaf0","#ecd27a","#b08a1e"],num:"#2b2110",lab:"#1d5c3f",ink:"#1a1612"},
+ qatar:{n:"مصحف قطر",paper:"#fdf8ee",fr:["#7a1426","#d4af37","#9c2a3c","#f4e3b0"],hz:["#c9a227","#7a1426"],mk:["#fff8e6","#e0bf5a","#9a7414"],num:"#6b0f1a",lab:"#6b0f1a",ink:"#1b1414"},
+ fahd:{n:"مصحف الملك فهد",paper:"#fffcf3",fr:["#0e2f63","#c9a227","#1d7a8c","#efe0a8"],hz:["#c9a227","#0e2f63"],mk:["#fffdf3","#e8cd6e","#a8841a"],num:"#0e2f63",lab:"#0e2f63",ink:"#141414"},
+ color:{n:"ملوّن",paper:"#fdfcf8",rainbow:1,hz:["#10b981","#e0245e"],mk:["#fff3c4","#f7c948","#c88a04"],num:"#b4122f",lab:"#123c8c",ink:"#231f20"}};
+function mshDefs(T){let fr;
+ if(T.rainbow)fr='<linearGradient id="kFr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4a017"/><stop offset=".2" stop-color="#0e9f6e"/><stop offset=".4" stop-color="#1d6fd8"/><stop offset=".6" stop-color="#9333ea"/><stop offset=".8" stop-color="#e0245e"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>';
+ else{const [a,b,c,d]=T.fr;
+  fr='<pattern id="kFr" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="'+a+'"/><path d="M6 .8L11.2 6 6 11.2.8 6z" fill="'+b+'"/><path d="M6 3.2L8.8 6 6 8.8 3.2 6z" fill="'+c+'"/><circle cx="6" cy="6" r="1.1" fill="'+d+'"/><circle cx="0" cy="0" r="1.6" fill="'+b+'"/><circle cx="12" cy="0" r="1.6" fill="'+b+'"/><circle cx="0" cy="12" r="1.6" fill="'+b+'"/><circle cx="12" cy="12" r="1.6" fill="'+b+'"/></pattern>'}
+ return fr+'<radialGradient id="kMk" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="'+T.mk[0]+'"/><stop offset=".55" stop-color="'+T.mk[1]+'"/><stop offset="1" stop-color="'+T.mk[2]+'"/></radialGradient><linearGradient id="kHz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+T.hz[0]+'"/><stop offset="1" stop-color="'+T.hz[1]+'"/></linearGradient>'}
+function recolorSVG(t,k,p){const T=MSH[k]||MSH.madina;const sp=p<=2&&!T.rainbow;
+ t=t.replace(/<defs\b([^>]*)>/,m=>m+mshDefs(T)).replace(/(<\/defs>)/,'$1<rect x="-50" y="-50" width="700" height="900" fill="'+T.paper+'"/>');
  return t.replace(/<path\b[^>]*>/g,tag=>{const d=/\sd="([^"]*)"/.exec(tag);const L=d?d[1].length:0;
-  if(tag.includes("fill:#bfe8c1"))return tag.replace("fill:#bfe8c1",L>=15000?"fill:url(#kFr)":L>=2500?"fill:url(#kHz)":"fill:url(#kMk)");
-  if(tag.includes("fill:#231f20")&&L<100000)return tag.replace("fill:#231f20",L<1500?"fill:#b4122f":"fill:#123c8c");
+  if(tag.includes("fill:#bfe8c1"))return tag.replace("fill:#bfe8c1",(L>=15000||(sp&&L>=2500))?"fill:url(#kFr)":L>=2500?"fill:url(#kHz)":"fill:url(#kMk)");
+  if(tag.includes("fill:#231f20"))return tag.replace("fill:#231f20","fill:"+(L>=100000?T.ink:L<1500?T.num:T.lab));
   return tag})}
 const SVGB="https://raw.githubusercontent.com/batoulapps/quran-svg/main/svg/";const uC={};
+function renderMStyle(){const box=$("mStyle");if(!box)return;box.innerHTML="";Object.entries(MSH).forEach(([k,T])=>{const b=document.createElement("button");b.type="button";b.setAttribute("aria-pressed",(S.ms||"madina")===k);
+ const sw=T.rainbow?"linear-gradient(135deg,#d4a017,#0e9f6e,#1d6fd8,#9333ea,#e0245e)":"linear-gradient(135deg,"+T.fr[0]+" 0 50%,"+T.fr[1]+" 50%)";b.innerHTML='<i style="background:'+sw+'"></i>';b.append(T.n);
+ b.onclick=()=>{if((S.ms||"madina")===k)return;S.ms=k;save();Object.keys(uC).forEach(p=>{uC[p].then(u=>{if(u.startsWith("blob:"))URL.revokeObjectURL(u)}).catch(()=>{});delete uC[p]});renderMStyle();try{openPage(curP)}catch(e){}};box.appendChild(b)})}
+setTimeout(renderMStyle,0);
 function pageURL(p){if(!uC[p]){const u=SVGB+pad3(p)+".svg";
- uC[p]=fetch(u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t)],{type:"image/svg+xml"})))
-  .catch(()=>fetch("https://cdn.jsdelivr.net/gh/batoulapps/quran-svg@main/svg/"+pad3(p)+".svg").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t)],{type:"image/svg+xml"}))))
+ uC[p]=fetch(u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"})))
+  .catch(()=>fetch("https://cdn.jsdelivr.net/gh/batoulapps/quran-svg@main/svg/"+pad3(p)+".svg").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>URL.createObjectURL(new Blob([recolorSVG(t,S.ms||"madina",p)],{type:"image/svg+xml"}))))
   .catch(()=>{delete uC[p];return u})}return uC[p]}
 const mqWide=matchMedia("(min-width:780px)");
 function spreadOf(p){return p%2?p:p-1}
