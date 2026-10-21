@@ -389,6 +389,11 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .ahl i{position:absolute;display:block;border-radius:5px;background:rgba(245,190,40,.30);box-shadow:0 0 0 1.5px rgba(214,150,10,.55);mix-blend-mode:multiply;animation:ahlIn .25s ease-out}
 @keyframes ahlIn{from{opacity:0}to{opacity:1}}
 .pghint{text-align:center;font-size:12px;color:var(--muted);margin-top:4px}
+
+.hbook.hfeat{grid-column:1/-1;border:1.5px solid var(--brass)!important;background:linear-gradient(135deg,color-mix(in srgb,#e0245e 8%,var(--surface)),color-mix(in srgb,var(--brass) 14%,var(--surface)))!important}
+.hbook.hfeat b{font-size:20px;color:#b4122f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hbook.hfeat b{color:#ff8fab}}
+:root[data-theme="dark"] .hbook.hfeat b{color:#ff8fab}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -1267,7 +1272,7 @@ setInterval(()=>{renderPrayer();if(!S.adhAuto)return;const t=prTimes(S.adhCity);
 const GV={};
 function gaugeData(){const nm=n=>strip(String(n).split(" — ")[0]).replace(/^(شيخ|الشيخ|القارئ)\s+/,"").replace(/\s+بن\s+/g," ").replace(/[ی]/g,"ي").replace(/\s+/g,"");
  const recNames=new Set(RECITERS.map(r=>nm(r.n)).concat(AYR.map(r=>nm(r.n))));
- const hTot=HI?HI.reduce((a,b)=>a+b.n,0):50759,hBooks=HI?HI.length:17;
+ const HR=HI?HI.filter(b=>!b.v):null;const hTot=HR?HR.reduce((a,b)=>a+b.n,0):50759,hBooks=HR?HR.length:17;
  const rads=(typeof RAD_FEAT!=="undefined"?RAD_FEAT.length:0)+(typeof RAD_LIST!=="undefined"?RAD_LIST.length:0);
  const muz=typeof ADH!=="undefined"?ADH.reduce((a,g)=>a+g.m.filter(m=>!/^تسجيل/.test(m.n)).length,0):0;
  return [
@@ -1332,15 +1337,15 @@ function hCard(row,k,q){const b=hBook(k),d=document.createElement("div");d.class
  const t=document.createElement("div");t.className="t";
  if(q){const n=strip(row[2]);const src=row[2];t.textContent=src;}else t.textContent=row[2];
  const m=document.createElement("div");m.className="meta";const chn=(b.ch.find(c=>c[0]===row[0])||[0,""])[1];
- m.innerHTML='<span></span><button class="copy" type="button">نسخ</button>';m.querySelector("span").textContent=b.t+" · "+(chn?chn+" · ":"")+"رقم "+ar(row[1]);
- m.querySelector("button").onclick=()=>{const txt=row[2]+"\n\n("+b.t+"، رقم "+row[1]+")";try{navigator.clipboard.writeText(txt).then(()=>toast("تم نسخ الحديث")).catch(()=>toast("انسخ النص يدوياً"))}catch(e){toast("انسخ النص يدوياً")}};
+ m.innerHTML='<span></span><button class="copy" type="button">نسخ</button>';m.querySelector("span").textContent=b.v?chn+" · رقم "+ar(row[1]):b.t+" · "+(chn?chn+" · ":"")+"رقم "+ar(row[1]);
+ m.querySelector("button").onclick=()=>{const txt=row[2]+"\n\n("+(b.v?chn:b.t)+"، رقم "+row[1]+")";try{navigator.clipboard.writeText(txt).then(()=>toast("تم نسخ الحديث")).catch(()=>toast("انسخ النص يدوياً"))}catch(e){toast("انسخ النص يدوياً")}};
  d.append(t,m);return d}
 function hShowMore(){const box=$("hBody");const part=HV.list.slice(HV.shown,HV.shown+HPAGE);part.forEach(([row,k])=>box.appendChild(hCard(row,k,HV.q)));HV.shown+=part.length;$("hMore").hidden=HV.shown>=HV.list.length}
 $("hMore").onclick=hShowMore;
 function hRender(){const box=$("hBody");box.innerHTML="";$("hMore").hidden=true;$("hNav").hidden=HV.view==="books";$("hDay").hidden=HV.view!=="books";
  if(!HI){box.innerHTML='<div class="loading">جارٍ تحميل كتب الحديث…</div>';return}
  if(HV.view==="books"){let g="";const grid=document.createElement("div");HI.forEach(b=>{if(b.g!==g){g=b.g;const h=document.createElement("div");h.className="hgroup";h.textContent=g;box.appendChild(h);const gr=document.createElement("div");gr.className="hbooks";box.appendChild(gr)}
-   const x=document.createElement("button");x.type="button";x.className="hbook";x.innerHTML="<b></b><span></span>";x.querySelector("b").textContent=b.t;x.querySelector("span").textContent=ar(b.n)+" حديث · "+(b.ch.length>1?ar(b.ch.length)+" كتاباً وباباً":"")+(b.a?" · "+b.a:"");
+   const x=document.createElement("button");x.type="button";x.className="hbook"+(b.v?" hfeat":"");x.innerHTML="<b></b><span></span>";x.querySelector("b").textContent=b.t;x.querySelector("span").textContent=ar(b.n)+" حديث · "+(b.ch.length>1?ar(b.ch.length)+" كتاباً وباباً":"")+(b.a?" · "+b.a:"");
    x.onclick=()=>{HV={view:"chapters",k:b.k,list:[],shown:0,q:""};S.hk=b.k;save();hRender();hLoad(b.k).catch(()=>{})};box.lastChild.appendChild(x)});return}
  const b=hBook(HV.k);
  if(HV.view==="chapters"){$("hTitle").textContent=b.t;if(b.ch.length===1){HV.view="hadiths";HV.ch=b.ch[0][0];return hRender()}
@@ -1351,12 +1356,12 @@ function hRender(){const box=$("hBody");box.innerHTML="";$("hMore").hidden=true;
  if(HV.view==="search"){$("hTitle").textContent="نتائج البحث: "+HV.q}}
 $("hBack").onclick=()=>{if(HV.view==="hadiths"&&hBook(HV.k).ch.length>1){HV.view="chapters"}else{HV={view:"books",list:[],shown:0,q:""}}hRender()};
 async function hSearch(){const q=$("hQ").value.trim();if(q.length<2)return toast("اكتب كلمتين أو أكثر للبحث");const nq=strip(q).replace(/[^ء-ي\s]/g,"").replace(/\s+/g," ").trim();if(!nq)return;
- const scope=$("hScope").value==="cur"&&HV.k?[HV.k]:HI.map(b=>b.k);HV={view:"search",k:HV.k,list:[],shown:0,q};hRender();const box=$("hBody");box.innerHTML='<div class="loading">جارٍ البحث…</div>';
+ const scope=$("hScope").value==="cur"&&HV.k?[HV.k]:HI.filter(b=>!b.v).map(b=>b.k);HV={view:"search",k:HV.k,list:[],shown:0,q};hRender();const box=$("hBody");box.innerHTML='<div class="loading">جارٍ البحث…</div>';
  const res=[];for(const k of scope){try{const rows=await hLoad(k);rows.forEach(r=>{if(!r.n)r.n=strip(r[2]).replace(/[^ء-ي\s]/g,"").replace(/\s+/g," ");if(r.n.includes(nq))res.push([r,k])})}catch(e){}
   box.firstChild&&(box.firstChild.textContent="جارٍ البحث… "+ar(res.length)+" نتيجة")}
  if(HV.view!=="search")return;box.innerHTML="";const h=document.createElement("div");h.className="muted";h.textContent=res.length?"عدد النتائج: "+ar(res.length):"لا توجد نتائج. جرّب كلمات أخرى.";box.appendChild(h);HV.list=res;HV.shown=0;hShowMore()}
 $("hGo").onclick=hSearch;$("hQ").addEventListener("keydown",e=>{if(e.key==="Enter")hSearch()});
-fetch("hadith/index.json").then(r=>r.json()).then(j=>{HI=j;renderGauges();const tot=j.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(j.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
+fetch("hadith/index.json").then(r=>r.json()).then(j=>{HI=j;renderGauges();const jr=j.filter(b=>!b.v);const tot=jr.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(jr.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
  Promise.all(["nawawi40","qudsi40"].map(hLoad)).then(([a,b])=>{const all=a.map(r=>[r,"nawawi40"]).concat(b.map(r=>[r,"qudsi40"]));const dn=Math.floor(Date.now()/864e5)%all.length;const [r,k]=all[dn];$("hDayT").textContent=r[2];$("hDayS").textContent=hBook(k).t+" · رقم "+ar(r[1]);$("hDay").hidden=HV.view!=="books"}).catch(()=>{})}).catch(()=>{$("hStat").textContent="تعذّر تحميل كتب الحديث. تحقق من الاتصال."});
 
 /* ===== ملء الشاشة للمصحف ===== */
