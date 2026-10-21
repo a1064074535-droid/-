@@ -1361,7 +1361,7 @@ async function hSearch(){const q=$("hQ").value.trim();if(q.length<2)return toast
   box.firstChild&&(box.firstChild.textContent="جارٍ البحث… "+ar(res.length)+" نتيجة")}
  if(HV.view!=="search")return;box.innerHTML="";const h=document.createElement("div");h.className="muted";h.textContent=res.length?"عدد النتائج: "+ar(res.length):"لا توجد نتائج. جرّب كلمات أخرى.";box.appendChild(h);HV.list=res;HV.shown=0;hShowMore()}
 $("hGo").onclick=hSearch;$("hQ").addEventListener("keydown",e=>{if(e.key==="Enter")hSearch()});
-fetch("hadith/index.json").then(r=>r.json()).then(j=>{HI=j;renderGauges();const jr=j.filter(b=>!b.v);const tot=jr.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(jr.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
+fetch("hadith/index.json?v=2",{cache:"no-cache"}).then(r=>r.json()).then(j=>{HI=j;renderGauges();const jr=j.filter(b=>!b.v);const tot=jr.reduce((a,b)=>a+b.n,0);$("hStat").textContent=ar(tot)+" حديثاً من "+ar(jr.length)+" كتاباً: الكتب التسعة والأربعينات ورياض الصالحين وغيرها، مقسّمة على الكتب والأبواب.";hRender();
  Promise.all(["nawawi40","qudsi40"].map(hLoad)).then(([a,b])=>{const all=a.map(r=>[r,"nawawi40"]).concat(b.map(r=>[r,"qudsi40"]));const dn=Math.floor(Date.now()/864e5)%all.length;const [r,k]=all[dn];$("hDayT").textContent=r[2];$("hDayS").textContent=hBook(k).t+" · رقم "+ar(r[1]);$("hDay").hidden=HV.view!=="books"}).catch(()=>{})}).catch(()=>{$("hStat").textContent="تعذّر تحميل كتب الحديث. تحقق من الاتصال."});
 
 /* ===== ملء الشاشة للمصحف ===== */
