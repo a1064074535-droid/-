@@ -1286,7 +1286,7 @@ function renderHifz(){if(!Q)return;const H=hzS();
   d.onclick=()=>{if(H.mode==="full")return;d.classList.toggle("hzrev");ay.innerHTML="";if(d.classList.contains("hzrev"))ay.textContent=t+" "+ar(v);else{ay.append(hzMask(t,H.mode,false));ay.append(" "+ar(v))}};
   d.append(ay,row);box.appendChild(d)}
  hzProgress();renderHzOn()}
-function hzProgress(){const H=hzS(),all=hzSet(),n=all.size;$("hzBar").style.width=(n/6236*100)+"%";$("hzCount").textContent="حفظت "+ar(n)+" آية من ٦٬٢٣٦";$("hzPct").textContent=(n?ar(Math.round(n/6236*1000)/10)+"٪ من القرآن":"ابدأ اليوم ولو بآية");
+function hzProgress(){const H=hzS(),all=hzSet(),n=all.size;$("hzBar").style.width=(n/6236*100)+"%";$("hzCount").textContent="حفظت "+ar(n)+(n>=3&&n<=10?" آيات":" آية")+" من ٦٬٢٣٦";$("hzPct").textContent=(n?ar(Math.round(n/6236*1000)/10)+"٪ من القرآن":"ابدأ اليوم ولو بآية");
  const per={};all.forEach(g=>{const [s]=saOf(g);per[s]=(per[s]||0)+1});const sb=$("hzSurahs");sb.innerHTML="";Object.keys(per).map(Number).sort((a,b)=>a-b).forEach(s=>{const c=document.createElement("button");c.type="button";const full=per[s]===Q[s-1][2].length;c.textContent=(full?"✓ ":"")+Q[s-1][0]+(full?"":" ("+ar(per[s])+"/"+ar(Q[s-1][2].length)+")");c.setAttribute("aria-pressed",full);c.onclick=()=>{H.s=s;H.a=1;H.b=Q[s-1][2].length;save();renderHifz()};sb.appendChild(c)});
  const rv=$("hzRev");rv.innerHTML="";const today=new Date().toDateString();const due=H.done.filter(c=>c.t!==today).sort((x,y)=>(x.r||0)-(y.r||0)).slice(0,3);$("hzRevCard").hidden=!H.done.length;
  if(H.done.length&&!due.length){rv.innerHTML='<div class="muted">أحسنت، أنهيت مراجعة اليوم. بارك الله فيك.</div>'}
