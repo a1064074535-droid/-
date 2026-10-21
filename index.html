@@ -1267,7 +1267,7 @@ function hzSet(){const H=hzS();const all=new Set();H.done.forEach(c=>{for(let v=
 function hzMask(t,mode,rev){const words=t.split(/\s+/).filter(Boolean);if(mode==="full"||rev)return null;
  const frag=document.createDocumentFragment();
  words.forEach((w,i)=>{if(/^[ۖ-ۭؕ-ؚ]+$/.test(w)){frag.append(" ");return}
-  let show="";if(mode==="first"&&i===0)show=w;else if(mode==="letters"){const m=w.match(/^[^ً-ٰٟۖ-ۭ]+[ً-ٰٟۖ-ۭ]*/);show=m?m[0]:w[0]}
+  let show="";if(mode==="first"&&i===0)show=w;else if(mode==="letters"){const m=w.match(/^(?:[\u0671\u0627][\u064B-\u065F\u0670\u06DF\u06E0]*\u0644[\u064B-\u065F\u0670\u06DF\u06E0\u06E1]*)?[^\u064B-\u065F\u0670\u06D6-\u06ED][\u064B-\u065F\u0670\u06D6-\u06ED]*/);show=m?m[0]:w[0]}
   if(show&&mode==="first"){frag.append(show+" ")}else if(show){const sp=document.createElement("span");sp.className="hint";sp.textContent=show+"ـ ";frag.append(sp)}
   else{const sp=document.createElement("span");sp.className="w";sp.textContent=w;frag.append(sp," ")}});return frag}
 const HZM=[["full","النص كاملاً","اقرأ مع النظر في المصحف."],["first","أول كلمة","تظهر أول كلمة من كل آية فقط. اضغط على الآية لإظهارها."],["letters","أوائل الكلمات","يظهر أول حرف من كل كلمة. اضغط على الآية لإظهارها."],["hide","تسميع (مخفي)","النص مخفي، سمّع من حفظك ثم اضغط على الآية للتأكد."]];
@@ -1277,7 +1277,7 @@ function renderHifz(){if(!Q)return;const H=hzS();
  const N=Q[H.s-1][2].length;H.a=Math.max(1,Math.min(N,H.a|0||1));H.b=Math.max(H.a,Math.min(N,H.b|0||H.a));
  sS.value=H.s;$("hzA").value=H.a;$("hzB").value=H.b;$("hzA").max=$("hzB").max=N;$("hzN").value=String(H.n);$("hzL").value=String(H.l);$("hzG").value=String(H.g);$("hzRec").value=hzRec().id;
  const mb=$("hzMode");mb.innerHTML="";HZM.forEach(([k,n,h])=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",H.mode===k);b.onclick=()=>{H.mode=k;save();renderHifz()};mb.appendChild(b);if(H.mode===k)$("hzModeHint").textContent=h});
- const cnt=H.b-H.a+1;$("hzPlan").textContent="المقطع: سورة "+Q[H.s-1][0]+" من الآية "+ar(H.a)+" إلى "+ar(H.b)+" ("+ar(cnt)+" آيات) · كل آية "+ar(H.n)+" مرات ثم الربط "+ar(H.l)+(H.l>1?" مرات":" مرة");
+ const cnt=H.b-H.a+1;$("hzPlan").textContent="المقطع: سورة "+Q[H.s-1][0]+" من الآية "+ar(H.a)+" إلى "+ar(H.b)+" ("+ar(cnt)+(cnt>10||cnt<3?" آية":" آيات")+") · كل آية "+ar(H.n)+(H.n>10?" مرة":" مرات")+" ثم الربط "+(H.l===1?"مرة واحدة":H.l===2?"مرتين":ar(H.l)+" مرات");
  const box=$("hzList");box.innerHTML="";const done=hzSet();
  for(let v=H.a;v<=H.b;v++){const d=document.createElement("div");d.className="dhikr";d.dataset.hz=v;const t=Q[H.s-1][2][v-1];
   const ay=document.createElement("div");ay.className="hzay";const fr=hzMask(t,H.mode,false);if(fr){ay.append(fr);ay.append(" "+ar(v))}else ay.textContent=t+" "+ar(v);
