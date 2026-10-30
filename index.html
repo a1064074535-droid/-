@@ -1630,7 +1630,7 @@ async function pushSync(){if(!pushOK()||Notification.permission!=="granted"||pus
  try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();const any=A2.list.some(a=>a.on);
   if(!any){if(sub)await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"unsubscribe",endpoint:sub.endpoint})}).catch(()=>{});A2.push=false;save();return false}
   if(!sub){const k=await fetch(PUSH_FN).then(r=>r.json());sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k.key)})}
-  const c=CITIES[S.adhCity||0];const reminders=A2.list.map(a=>({id:a.id,on:!!a.on,m:a.m,t:a.t,p:a.p,o:a.o,days:a.days,title:ALT[a.k].i+" "+ALT[a.k].n,body:ALT[a.k].b,go:ALT[a.k].go}));
+  const c=CITIES[S.adhCity||0];const reminders=A2.list.map(a=>{const T=alT(a);return {id:a.id,on:!!a.on,m:a.m,t:a.t,p:a.p,o:a.o,ev:a.ev,fr:a.fr,to:a.to,days:a.days,title:T.i+" "+T.n,body:T.b,go:T.go,say:T.say,mute:!!a.mute}});
   const r=await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"subscribe",sub:sub.toJSON(),reminders,tz_offset:-new Date().getTimezoneOffset(),lat:c[1],lng:c[2]})});
   A2.push=r.ok;A2.pc=S.adhCity||0;save();alPermBox();return r.ok}
  catch(e){A2.push=false;save();alPermBox();return false}finally{pushBusy=false}}
@@ -1644,13 +1644,21 @@ const ALT={
  hifz:{n:"حفظ القرآن",i:"🧠",c:"#65a30d",go:"hifz",b:"جلسة الحفظ اليومية: راجع القديم ثم احفظ الجديد",d:{m:"pr",p:"fajr",o:40}},
  radio:{n:"الاستماع إلى الإذاعة",i:"📻",c:"#ef4444",go:"radio",b:"استمع الآن إلى إذاعة القرآن الكريم",d:{m:"t",t:"17:00"}},
  kahf:{n:"سورة الكهف يوم الجمعة",i:"🕌",c:"#0ea5e9",go:"mushaf:18",b:"من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين",d:{m:"t",t:"10:00",days:[5]}},
- istighfar:{n:"الاستغفار والتسبيح",i:"📿",c:"#d97706",go:"tasbeeh",b:"أستغفر الله وأتوب إليه… سبحان الله وبحمده",d:{m:"t",t:"15:00"}}};
+ istighfar:{n:"الاستغفار والتسبيح",i:"📿",c:"#d97706",go:"tasbeeh",b:"أستغفر الله وأتوب إليه… سبحان الله وبحمده",d:{m:"t",t:"15:00"}},
+ dhikr:{n:"تذكير بذكر مع نطقه",i:"🕊️",c:"#0d9488",go:"tasbeeh",b:"",d:{m:"ev",ev:60,fr:"09:00",to:"21:00",ph:0}}};
+const DHK=[["اللهم صلِّ وسلم على نبينا محمد","من صلى عليّ صلاة صلى الله عليه بها عشراً"],["سبحان الله وبحمده، سبحان الله العظيم","كلمتان خفيفتان على اللسان، ثقيلتان في الميزان"],["أستغفر الله العظيم وأتوب إليه","والله إني لأستغفر الله وأتوب إليه في اليوم أكثر من سبعين مرة"],["لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير","أفضل ما قلت أنا والنبيون من قبلي"],["لا حول ولا قوة إلا بالله","كنز من كنوز الجنة"],["سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر","أحب الكلام إلى الله"],["سبحان الله وبحمده","من قالها غُرست له نخلة في الجنة"],["حسبي الله ونعم الوكيل","قالها إبراهيم حين أُلقي في النار"],["لا إله إلا أنت سبحانك إني كنت من الظالمين","لم يدعُ بها مسلم في شيء قط إلا استجاب الله له"],["اللهم إنك عفو تحب العفو فاعفُ عني",""],["الحمد لله","الحمد لله تملأ الميزان"],["سبحان الله والحمد لله والله أكبر",""]];
+const EVS=[[15,"ربع ساعة"],[30,"نصف ساعة"],[45,"٤٥ دقيقة"],[60,"ساعة"],[90,"ساعة ونصف"],[120,"ساعتين"],[180,"٣ ساعات"],[240,"٤ ساعات"]];
+function alT(a){if(a.k==="dhikr"){const D=DHK[a.ph||0]||DHK[0];return {...ALT.dhikr,n:D[0],b:D[1]||"ذكر الله",say:D[0]}}const T=ALT[a.k]||ALT.istighfar;return {...T,say:T.b}}
+const hm=t=>{const [h,m]=(t||"00:00").split(":").map(Number);return h*60+m};
+function speakAr(t){try{if(!("speechSynthesis" in window)||!t)return false;const vs=speechSynthesis.getVoices();const v=vs.find(x=>/^ar[-_]SA/i.test(x.lang))||vs.find(x=>/^ar/i.test(x.lang));const u=new SpeechSynthesisUtterance(t);u.lang=v?v.lang:"ar-SA";if(v)u.voice=v;u.rate=.85;u.pitch=1;speechSynthesis.cancel();speechSynthesis.speak(u);return true}catch(e){return false}}
+function hasArVoice(){try{return speechSynthesis.getVoices().some(x=>/^ar/i.test(x.lang))}catch(e){return false}}
 const PRN2={fajr:"الفجر",dhuhr:"الظهر",asr:"العصر",maghrib:"المغرب",isha:"العشاء"};
 const DAYN=["أحد","اثنين","ثلاثاء","أربعاء","خميس","جمعة","سبت"];
-function alS(){if(!S.al){S.al={list:["sabah","masa","nawm","wird","hifz","radio","kahf"].map((k,i)=>({id:"a"+i,k,on:false,...JSON.parse(JSON.stringify(ALT[k].d))})),fired:{}}}return S.al}
-function alWhen(a,date){const d=new Date(date||Date.now());if(a.m==="pr"){const t=typeof prTimes==="function"?prTimes(S.adhCity||0,d):null;if(!t)return null;return new Date(t[a.p].getTime()+(a.o||0)*6e4)}
+function alS(){if(!S.al){S.al={list:["sabah","masa","nawm","wird","hifz","radio","kahf"].map((k,i)=>({id:"a"+i,k,on:false,...JSON.parse(JSON.stringify(ALT[k].d))})),fired:{}}}if(!S.al.dv){S.al.dv=1;if(!S.al.list.some(a=>a.k==="dhikr"))S.al.list.unshift({id:"ad",k:"dhikr",on:false,...JSON.parse(JSON.stringify(ALT.dhikr.d))})}return S.al}
+function alWhen(a,date){const d=new Date(date||Date.now());if(a.m==="ev"){const f=hm(a.fr||"09:00"),to=hm(a.to||"21:00"),ev=Math.max(5,a.ev||60),nm=d.getHours()*60+d.getMinutes();let sl=nm<f?f:f+Math.floor((nm-f)/ev)*ev;if(sl>to)sl=f+Math.floor((to-f)/ev)*ev;d.setHours(0,sl,0,0);return d}if(a.m==="pr"){const t=typeof prTimes==="function"?prTimes(S.adhCity||0,d):null;if(!t)return null;return new Date(t[a.p].getTime()+(a.o||0)*6e4)}
  const [h,m]=(a.t||"08:00").split(":").map(Number);d.setHours(h,m,0,0);return d}
 function alDesc(a){const w=alWhen(a);const tm=w?w.toLocaleTimeString("ar-SA",{hour:"numeric",minute:"2-digit"}):"";
+ if(a.m==="ev"){const e=(EVS.find(x=>x[0]===a.ev)||[0,ar(a.ev)+" دقيقة"])[1];const f2=t=>{const d=new Date();d.setHours(...t.split(":").map(Number),0,0);return d.toLocaleTimeString("ar-SA",{hour:"numeric",minute:"2-digit"})};return "كل "+e+" من "+f2(a.fr||"09:00")+" إلى "+f2(a.to||"21:00")+(a.mute?" · 🔇 صامت":" · 🔊 بالصوت")+(a.days&&a.days.length&&a.days.length<7?" · "+a.days.map(x=>DAYN[x]).join("، "):"")}
  const base=a.m==="pr"?("بعد "+PRN2[a.p]+(a.o?" بـ"+ar(a.o)+" دقيقة":"")+(tm?" (≈ "+tm+")":"")):("الساعة "+tm);
  return base+(a.days&&a.days.length&&a.days.length<7?" · "+a.days.map(x=>DAYN[x]).join("، "):" · يومياً")}
 function alPermBox(){const b=$("alPerm");if(!b)return;b.innerHTML="";const has="Notification" in window;const st=has?Notification.permission:"unsupported";
@@ -1659,30 +1667,38 @@ function alPermBox(){const b=$("alPerm");if(!b)return;b.innerHTML="";const has="
  else if(st==="denied")sp.textContent="⛔ الإشعارات محظورة. فعّلها من إعدادات المتصفح لهذا الموقع، أو استخدم إضافة المنبهات إلى التقويم.";
  else if(st==="unsupported")sp.textContent="هذا المتصفح لا يدعم الإشعارات. سيظهر التذكير داخل المنصة، وأضف المنبهات إلى تقويم جوالك.";
  else sp.textContent="🔔 اسمح بالإشعارات ليصلك التذكير في وقته";
- b.appendChild(sp);if(isIOS&&!isStandalone){const h=document.createElement("div");h.style.cssText="width:100%;font-size:12px;color:var(--muted)";h.textContent="على الآيفون: اضغط زر المشاركة ⬆️ ثم «إضافة إلى الشاشة الرئيسية»، وافتح المنصة من أيقونتها ثم فعّل المنبهات، لتظهر التنبيهات على الشاشة.";b.appendChild(h)}if(st==="default"){const x=document.createElement("button");x.type="button";x.className="btn sm";x.textContent="السماح بالإشعارات";x.onclick=alAsk;b.appendChild(x)}}
+ b.appendChild(sp);if("speechSynthesis" in window&&!hasArVoice()){const vh=document.createElement("div");vh.style.cssText="width:100%;font-size:12px;color:var(--muted)";vh.textContent="لنطق الأذكار بالصوت: إن لم تسمع الصوت فثبّت اللغة العربية في إعدادات «تحويل النص إلى كلام» في جوالك.";b.appendChild(vh)}if(isIOS&&!isStandalone){const h=document.createElement("div");h.style.cssText="width:100%;font-size:12px;color:var(--muted)";h.textContent="على الآيفون: اضغط زر المشاركة ⬆️ ثم «إضافة إلى الشاشة الرئيسية»، وافتح المنصة من أيقونتها ثم فعّل المنبهات، لتظهر التنبيهات على الشاشة.";b.appendChild(h)}if(st==="default"){const x=document.createElement("button");x.type="button";x.className="btn sm";x.textContent="السماح بالإشعارات";x.onclick=alAsk;b.appendChild(x)}}
 async function alAsk(){if(!("Notification" in window))return false;try{const r=await Notification.requestPermission();alPermBox();if(r==="granted")pushSyncSoon();return r==="granted"}catch(e){return false}}
 function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerHTML="";alPermBox();
  const sel=$("alAddT");if(!sel.options.length)Object.entries(ALT).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.i+" "+v.n;sel.appendChild(o)});
- A2.list.forEach((a,idx)=>{const T=ALT[a.k];const r=document.createElement("div");r.className="alrow"+(a.on?" on":"");r.style.setProperty("--c",T.c);
+ A2.list.forEach((a,idx)=>{const T=alT(a);const r=document.createElement("div");r.className="alrow"+(a.on?" on":"");r.style.setProperty("--c",T.c);
   r.innerHTML='<div class="alhead"><span class="ico"></span><span class="tx"><b></b><span></span></span><label class="alsw" aria-label="تفعيل"><input type="checkbox"><i></i></label></div><div class="aled"></div><div class="alok" role="status"></div>';
   r.querySelector(".ico").textContent=T.i;r.querySelector(".tx b").textContent=T.n;r.querySelector(".tx span").textContent=alDesc(a);
   const cb=r.querySelector("input");cb.checked=!!a.on;cb.onchange=async()=>{a.on=cb.checked;if(a.on&&"Notification" in window&&Notification.permission==="default")await alAsk();save();renderAlarms();if(a.on)toast("تم تفعيل منبّه "+T.n)};
   const ed=r.querySelector(".aled");ed.hidden=!a.on;
-  const md=document.createElement("select");md.innerHTML='<option value="t">في وقت محدد</option><option value="pr">بعد صلاة</option>';md.value=a.m;md.onchange=()=>{a.m=md.value;if(a.m==="pr"&&!a.p){a.p="fajr";a.o=15}if(a.m==="t"&&!a.t)a.t="08:00";save();renderAlarms()};ed.appendChild(md);
+  const md=document.createElement("select");md.innerHTML='<option value="t">في وقت محدد</option><option value="pr">بعد صلاة</option><option value="ev">يتكرر كل فترة</option>';md.value=a.m;md.onchange=()=>{a.m=md.value;if(a.m==="ev"){a.ev=a.ev||60;a.fr=a.fr||"09:00";a.to=a.to||"21:00"}if(a.m==="pr"&&!a.p){a.p="fajr";a.o=15}if(a.m==="t"&&!a.t)a.t="08:00";save();renderAlarms()};ed.appendChild(md);
   const dsc=r.querySelector(".tx span");const saved=msg=>{save();dsc.textContent=alDesc(a);pushSyncSoon();const ok=r.querySelector(".alok");ok.textContent="✓ "+msg;ok.classList.add("show");clearTimeout(ok._t);ok._t=setTimeout(()=>ok.classList.remove("show"),2500)};
-  if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.step=60;ti.value=a.t||"08:00";const commit=()=>{const v=(ti.value||"").slice(0,5);if(/^\d{2}:\d{2}$/.test(v)&&v!==a.t){a.t=v;delete alS().fired[a.id];saved("حُفظ الوقت")}};ti.addEventListener("change",commit);ti.addEventListener("blur",commit);ti.addEventListener("input",()=>{clearTimeout(ti._t);ti._t=setTimeout(commit,1500)});ed.appendChild(ti)}
+  if(a.k==="dhikr"){const phs=document.createElement("select");phs.style.maxWidth="100%";DHK.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=d[0];phs.appendChild(o)});phs.value=a.ph||0;phs.onchange=()=>{a.ph=+phs.value;r.querySelector(".tx b").textContent=alT(a).n;saved("حُفظ الذكر");if(!a.mute)speakAr(alT(a).say)};ed.appendChild(phs)}
+  if(a.m==="ev"){const es=document.createElement("select");EVS.forEach(([v,n])=>{const o=document.createElement("option");o.value=v;o.textContent="كل "+n;es.appendChild(o)});es.value=a.ev||60;es.onchange=()=>{a.ev=+es.value;saved("حُفظ التكرار")};
+   const mk=(k,lbl)=>{const w=document.createElement("span");w.style.whiteSpace="nowrap";const ti=document.createElement("input");ti.type="time";ti.step=60;ti.value=a[k];const c=()=>{const v=(ti.value||"").slice(0,5);if(/^\d{2}:\d{2}$/.test(v)&&v!==a[k]){a[k]=v;saved("حُفظ الوقت")}};ti.addEventListener("change",c);ti.addEventListener("blur",c);w.append(lbl+" ",ti);return w};
+   ed.append(es,mk("fr","من"),mk("to","إلى"))}
+  else if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.step=60;ti.value=a.t||"08:00";const commit=()=>{const v=(ti.value||"").slice(0,5);if(/^\d{2}:\d{2}$/.test(v)&&v!==a.t){a.t=v;delete alS().fired[a.id];saved("حُفظ الوقت")}};ti.addEventListener("change",commit);ti.addEventListener("blur",commit);ti.addEventListener("input",()=>{clearTimeout(ti._t);ti._t=setTimeout(commit,1500)});ed.appendChild(ti)}
   else{const ps=document.createElement("select");Object.entries(PRN2).forEach(([k,n])=>{const o=document.createElement("option");o.value=k;o.textContent=n;ps.appendChild(o)});ps.value=a.p;ps.onchange=()=>{a.p=ps.value;delete alS().fired[a.id];saved("حُفظت الصلاة")};
    const of=document.createElement("input");of.type="number";of.min=0;of.max=180;of.inputMode="numeric";of.value=a.o||0;const oc=()=>{const v=Math.max(0,Math.min(180,parseInt(String(of.value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)),10)||0));if(v!==a.o){a.o=v;delete alS().fired[a.id];saved("حُفظ التوقيت")}};of.addEventListener("change",oc);of.addEventListener("blur",oc);
    const sp=document.createElement("span");sp.style.whiteSpace="nowrap";sp.append("بعدها بـ ",of," دقيقة");ed.append(ps,sp)}
+  const vb=document.createElement("button");vb.type="button";vb.className="btn sm"+(a.mute?" ghost":"");vb.textContent=a.mute?"🔇 صامت (نص فقط)":"🔊 نطق الذكر بالصوت";vb.title="اضغط للتبديل بين نطق الذكر وكتم صوته";
+  vb.onclick=()=>{a.mute=!a.mute;vb.className="btn sm"+(a.mute?" ghost":"");vb.textContent=a.mute?"🔇 صامت (نص فقط)":"🔊 نطق الذكر بالصوت";saved(a.mute?"كُتم صوت الذكر":"سيُنطق الذكر بالصوت");if(!a.mute)speakAr(alT(a).say)};
+  const lb=document.createElement("button");lb.type="button";lb.className="btn ghost sm";lb.textContent="▶ اسمع";lb.onclick=()=>{if(!speakAr(alT(a).say))toast("المتصفح لا يدعم نطق النص")};
+  const vr=document.createElement("div");vr.className="row";vr.style.gap="6px";vr.append(vb,lb);ed.appendChild(vr);
   const dy=document.createElement("div");dy.className="aldays";const days=a.days&&a.days.length?a.days:[0,1,2,3,4,5,6];
   DAYN.forEach((n,i)=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",days.includes(i));b.onclick=()=>{let ds=(a.days&&a.days.length?a.days:[0,1,2,3,4,5,6]).slice();ds=ds.includes(i)?ds.filter(x=>x!==i):ds.concat(i).sort();if(!ds.length)return;a.days=ds.length===7?null:ds;save();renderAlarms()};dy.appendChild(b)});
   ed.appendChild(dy);
   const del=document.createElement("button");del.type="button";del.className="btn ghost sm";del.textContent="حذف";del.onclick=()=>{A2.list.splice(idx,1);save();renderAlarms()};ed.appendChild(del);
   box.appendChild(r)});pushSyncSoon()}
-$("alAdd").onclick=()=>{const A2=alS(),k=$("alAddT").value;A2.list.push({id:"a"+Date.now(),k,on:true,...JSON.parse(JSON.stringify(ALT[k].d))});save();renderAlarms();if("Notification" in window&&Notification.permission==="default")alAsk();toast("أُضيف منبّه "+ALT[k].n)};
+$("alAdd").onclick=()=>{const A2=alS(),k=$("alAddT").value;A2.list.unshift({id:"a"+Date.now(),k,on:true,...JSON.parse(JSON.stringify(ALT[k].d))});save();renderAlarms();if("Notification" in window&&Notification.permission==="default")alAsk();toast("أُضيف منبّه "+ALT[k].n)};
 let SWR=null;
 if("serviceWorker" in navigator&&/github\.io|netlify|localhost|127\.0\.0\.1/.test(location.hostname)){navigator.serviceWorker.register("sw.js").then(r=>{SWR=r}).catch(()=>{});
- navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.go)alGo(e.data.go)})}
+ navigator.serviceWorker.addEventListener("message",e=>{if(!e.data)return;if(e.data.say)speakAr(e.data.say);else if(e.data.go)alGo(e.data.go)})}
 function alGo(go){const run=()=>{const [t,x]=String(go).split(":");document.querySelectorAll(".albanner").forEach(b=>b.remove());
   if(t==="adhkar"){S.cat=x||"sabah";save();tab("adhkar");try{renderAdhkar()}catch(e){}}
   else if(t==="mushaf"){tab("mushaf");if(x)try{openSurah(+x)}catch(e){}}
@@ -1693,24 +1709,25 @@ function alBanner(T,a){document.querySelectorAll(".albanner").forEach(b=>b.remov
  b.innerHTML='<span class="ico"></span><span class="tx"><b></b><span></span></span><button class="btn sm" type="button">ابدأ الآن</button><button class="btn ghost sm" type="button" aria-label="إغلاق">✕</button>';
  b.querySelector(".ico").textContent=T.i;b.querySelector("b").textContent=T.n;b.querySelector(".tx span").textContent=T.b;const [go,x]=b.querySelectorAll("button");go.onclick=()=>alGo(T.go);x.onclick=()=>b.remove();document.body.appendChild(b);setTimeout(()=>b.remove(),120000)}
 async function alNotify(T,a){const url=FULL+"?go="+encodeURIComponent(T.go);const opt={body:T.b,tag:"rafiq-"+(a?a.id:"test"),icon:"icon-192.png",badge:"icon-192.png",dir:"rtl",lang:"ar",renotify:true,data:{url,go:T.go}};
- alBanner(T,a);alChime();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+ alBanner(T,a);const pushOn=a&&alS().push&&Notification.permission==="granted";if(!(a&&a.mute)&&!pushOn&&T.say)setTimeout(()=>speakAr(T.say),700);if(!(a&&a.mute&&a.k==="dhikr"))alChime();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
  if(!("Notification" in window)||Notification.permission!=="granted")return;
  if(a&&alS().push)return;
  try{const r=SWR||(navigator.serviceWorker&&await navigator.serviceWorker.getRegistration());if(r){await r.showNotification(T.i+" "+T.n,opt);return}}catch(e){}
  try{const n=new Notification(T.i+" "+T.n,opt);n.onclick=()=>{window.focus();alGo(T.go);n.close()}}catch(e){}}
 function alCheck(){const A2=alS(),now=new Date(),dk=now.toDateString();let ch=false;if(A2.push&&A2.pc!==(S.adhCity||0))pushSyncSoon();
  A2.list.forEach(a=>{if(!a.on)return;if(a.days&&a.days.length&&!a.days.includes(now.getDay()))return;const w=alWhen(a,now);if(!w)return;const diff=now-w;
-  if(diff>=0&&diff<2*3600e3&&A2.fired[a.id]!==dk){A2.fired[a.id]=dk;ch=true;const T=ALT[a.k];if(diff<15*6e4)alNotify(T,a);else alBanner(T,a)}});
+  const key=dk+"|"+(w.getHours()*60+w.getMinutes());const win=a.m==="ev"?15*6e4:2*3600e3;
+  if(diff>=0&&diff<win&&A2.fired[a.id]!==key){A2.fired[a.id]=key;ch=true;const T=alT(a);if(diff<15*6e4)alNotify(T,a);else alBanner(T,a)}});
  if(ch)save()}
 $("alTest").onclick=async()=>{if("Notification" in window&&Notification.permission==="default")await alAsk();if(pushOK()&&Notification.permission==="granted"){if(!alS().push)await pushSync();if(alS().push){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){toast("سيصلك إشعار تجريبي على شاشة الجوال خلال ثوانٍ");await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"test",endpoint:sub.endpoint})});return}}catch(e){}}}alNotify({n:"تجربة التذكير",i:"🔔",b:"هكذا سيصلك التذكير في وقته بإذن الله",go:"today"},null)};
 function icsEsc(t){return String(t).replace(/[\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n")}
 $("alIcs").onclick=()=>{const A2=alS(),on=A2.list.filter(a=>a.on);if(!on.length){toast("فعّل منبّهاً واحداً على الأقل أولاً");return}
  const p2=n=>String(n).padStart(2,"0");const st=new Date();const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rafiq Althikr//AR","CALSCALE:GREGORIAN","X-WR-CALNAME:رفيق الذكر"];
- on.forEach((a,i)=>{const T=ALT[a.k],w=alWhen(a,st)||new Date();const ds=st.getFullYear()+p2(st.getMonth()+1)+p2(st.getDate())+"T"+p2(w.getHours())+p2(w.getMinutes())+"00";
+ on.forEach((a,i)=>{const T=alT(a);const slots=[];if(a.m==="ev"){for(let m=hm(a.fr||"09:00");m<=hm(a.to||"21:00")&&slots.length<48;m+=Math.max(15,a.ev||60)){const d=new Date(st);d.setHours(0,m,0,0);slots.push(d)}}else slots.push(alWhen(a,st)||new Date());slots.forEach((w,si)=>{const ds=st.getFullYear()+p2(st.getMonth()+1)+p2(st.getDate())+"T"+p2(w.getHours())+p2(w.getMinutes())+"00";
   const by=a.days&&a.days.length&&a.days.length<7?";BYDAY="+a.days.map(x=>["SU","MO","TU","WE","TH","FR","SA"][x]).join(","):"";
-  L.push("BEGIN:VEVENT","UID:rafiq-"+a.id+"-"+Date.now()+"@rafiq-althikr","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART:"+ds,"DURATION:PT15M","RRULE:FREQ="+(by?"WEEKLY":"DAILY")+by,
+  L.push("BEGIN:VEVENT","UID:rafiq-"+a.id+"-"+si+"-"+Date.now()+"@rafiq-althikr","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART:"+ds,"DURATION:PT15M","RRULE:FREQ="+(by?"WEEKLY":"DAILY")+by,
    "SUMMARY:"+icsEsc(T.i+" "+T.n),"DESCRIPTION:"+icsEsc(T.b+"\n"+FULL+"?go="+T.go+(a.m==="pr"?"\n(الوقت تقريبي لأنه مرتبط بالصلاة ويتغير خلال السنة)":"")),"URL:"+FULL+"?go="+encodeURIComponent(T.go),
-   "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(T.n),"TRIGGER:PT0M","END:VALARM","END:VEVENT")});
+   "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(T.n),"TRIGGER:PT0M","END:VALARM","END:VEVENT")})});
  L.push("END:VCALENDAR");const blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});const u=URL.createObjectURL(blob),x=document.createElement("a");x.href=u;x.download="rafiq-althikr-reminders.ics";document.body.appendChild(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
  toast("افتح الملف ليُضاف إلى تقويم جوالك")};
 window.addEventListener("storage",e=>{if(e.key!==KEY||!e.newValue)return;try{const n=JSON.parse(e.newValue);Object.keys(n).forEach(k=>{S[k]=n[k]});const ae=document.activeElement;if(!(ae&&$("alCard").contains(ae)))renderAlarms()}catch(_){}});
