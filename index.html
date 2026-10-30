@@ -446,6 +446,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .albanner{position:fixed;inset-inline:12px;top:12px;z-index:60;max-width:560px;margin:0 auto;background:var(--surface);border:2px solid var(--brass);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:12px 14px;display:flex;gap:12px;align-items:center;animation:alIn .3s ease-out}
 .albanner .ico{font-size:28px}.albanner .tx{flex:1;min-width:0}.albanner b{display:block;font-family:var(--f-quran);font-size:18px}.albanner span{font-size:13px;color:var(--muted)}
 @keyframes alIn{from{transform:translateY(-30px);opacity:0}}
+.alok{font-size:12px;color:#16a34a;height:0;overflow:hidden;opacity:0;transition:opacity .2s}.alok.show{height:auto;opacity:1}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -1663,14 +1664,15 @@ async function alAsk(){if(!("Notification" in window))return false;try{const r=a
 function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerHTML="";alPermBox();
  const sel=$("alAddT");if(!sel.options.length)Object.entries(ALT).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.i+" "+v.n;sel.appendChild(o)});
  A2.list.forEach((a,idx)=>{const T=ALT[a.k];const r=document.createElement("div");r.className="alrow"+(a.on?" on":"");r.style.setProperty("--c",T.c);
-  r.innerHTML='<div class="alhead"><span class="ico"></span><span class="tx"><b></b><span></span></span><label class="alsw" aria-label="تفعيل"><input type="checkbox"><i></i></label></div><div class="aled"></div>';
+  r.innerHTML='<div class="alhead"><span class="ico"></span><span class="tx"><b></b><span></span></span><label class="alsw" aria-label="تفعيل"><input type="checkbox"><i></i></label></div><div class="aled"></div><div class="alok" role="status"></div>';
   r.querySelector(".ico").textContent=T.i;r.querySelector(".tx b").textContent=T.n;r.querySelector(".tx span").textContent=alDesc(a);
   const cb=r.querySelector("input");cb.checked=!!a.on;cb.onchange=async()=>{a.on=cb.checked;if(a.on&&"Notification" in window&&Notification.permission==="default")await alAsk();save();renderAlarms();if(a.on)toast("تم تفعيل منبّه "+T.n)};
   const ed=r.querySelector(".aled");ed.hidden=!a.on;
   const md=document.createElement("select");md.innerHTML='<option value="t">في وقت محدد</option><option value="pr">بعد صلاة</option>';md.value=a.m;md.onchange=()=>{a.m=md.value;if(a.m==="pr"&&!a.p){a.p="fajr";a.o=15}if(a.m==="t"&&!a.t)a.t="08:00";save();renderAlarms()};ed.appendChild(md);
-  if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.value=a.t||"08:00";ti.onchange=()=>{a.t=ti.value;save();renderAlarms()};ed.appendChild(ti)}
-  else{const ps=document.createElement("select");Object.entries(PRN2).forEach(([k,n])=>{const o=document.createElement("option");o.value=k;o.textContent=n;ps.appendChild(o)});ps.value=a.p;ps.onchange=()=>{a.p=ps.value;save();renderAlarms()};
-   const of=document.createElement("input");of.type="number";of.min=0;of.max=180;of.value=a.o||0;of.onchange=()=>{a.o=Math.max(0,Math.min(180,+of.value||0));save();renderAlarms()};
+  const dsc=r.querySelector(".tx span");const saved=msg=>{save();dsc.textContent=alDesc(a);pushSyncSoon();const ok=r.querySelector(".alok");ok.textContent="✓ "+msg;ok.classList.add("show");clearTimeout(ok._t);ok._t=setTimeout(()=>ok.classList.remove("show"),2500)};
+  if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.step=60;ti.value=a.t||"08:00";const commit=()=>{const v=(ti.value||"").slice(0,5);if(/^\d{2}:\d{2}$/.test(v)&&v!==a.t){a.t=v;delete alS().fired[a.id];saved("حُفظ الوقت")}};ti.addEventListener("change",commit);ti.addEventListener("blur",commit);ti.addEventListener("input",()=>{clearTimeout(ti._t);ti._t=setTimeout(commit,1500)});ed.appendChild(ti)}
+  else{const ps=document.createElement("select");Object.entries(PRN2).forEach(([k,n])=>{const o=document.createElement("option");o.value=k;o.textContent=n;ps.appendChild(o)});ps.value=a.p;ps.onchange=()=>{a.p=ps.value;delete alS().fired[a.id];saved("حُفظت الصلاة")};
+   const of=document.createElement("input");of.type="number";of.min=0;of.max=180;of.inputMode="numeric";of.value=a.o||0;const oc=()=>{const v=Math.max(0,Math.min(180,parseInt(String(of.value).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)),10)||0));if(v!==a.o){a.o=v;delete alS().fired[a.id];saved("حُفظ التوقيت")}};of.addEventListener("change",oc);of.addEventListener("blur",oc);
    const sp=document.createElement("span");sp.style.whiteSpace="nowrap";sp.append("بعدها بـ ",of," دقيقة");ed.append(ps,sp)}
   const dy=document.createElement("div");dy.className="aldays";const days=a.days&&a.days.length?a.days:[0,1,2,3,4,5,6];
   DAYN.forEach((n,i)=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",days.includes(i));b.onclick=()=>{let ds=(a.days&&a.days.length?a.days:[0,1,2,3,4,5,6]).slice();ds=ds.includes(i)?ds.filter(x=>x!==i):ds.concat(i).sort();if(!ds.length)return;a.days=ds.length===7?null:ds;save();renderAlarms()};dy.appendChild(b)});
@@ -1711,6 +1713,7 @@ $("alIcs").onclick=()=>{const A2=alS(),on=A2.list.filter(a=>a.on);if(!on.length)
    "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(T.n),"TRIGGER:PT0M","END:VALARM","END:VEVENT")});
  L.push("END:VCALENDAR");const blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});const u=URL.createObjectURL(blob),x=document.createElement("a");x.href=u;x.download="rafiq-althikr-reminders.ics";document.body.appendChild(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
  toast("افتح الملف ليُضاف إلى تقويم جوالك")};
+window.addEventListener("storage",e=>{if(e.key!==KEY||!e.newValue)return;try{const n=JSON.parse(e.newValue);Object.keys(n).forEach(k=>{S[k]=n[k]});const ae=document.activeElement;if(!(ae&&$("alCard").contains(ae)))renderAlarms()}catch(_){}});
 renderAlarms();setInterval(alCheck,20000);setTimeout(alCheck,3000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)alCheck()});
 try{const g=new URLSearchParams(location.search).get("go");if(g)alGo(g)}catch(e){}
 </script>
