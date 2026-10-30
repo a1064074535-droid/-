@@ -414,6 +414,13 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .riqintro{border:1.5px solid var(--brass);background:color-mix(in srgb,var(--brass) 8%,var(--surface));border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
 .riqintro p{margin:0;font-family:var(--f-quran);font-size:19px;line-height:1.9;color:var(--ink)}
 .riqintro p span{display:block;font-size:13px;color:var(--muted)}
+
+.dhikr .fadl{font-size:13px;line-height:1.7;color:var(--brass);border-top:1px dashed var(--line2);padding-top:6px}
+.hisnsrch{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
+.hisnch{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:right;font:inherit;font-family:var(--f-quran);font-size:17px;font-weight:700;padding:10px 12px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.hisnch span{font-family:inherit;font-size:12px;font-weight:400;color:var(--muted);flex:0 0 auto}
+.hisnch i{font-style:normal;color:var(--brass);font-size:13px;flex:0 0 auto}
+.hisnsrc{font-size:12px;color:var(--muted);line-height:1.8}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -765,31 +772,63 @@ const REMINDERS=[
 ];
 // q:[سورة,من,إلى] تُعرض من نص المصحف
 const SABAH=[
- {l:"آية الكرسي",q:[2,255,255],n:1},
- {l:"سورة الإخلاص",q:[112,1,4],n:3},{l:"سورة الفلق",q:[113,1,5],n:3},{l:"سورة الناس",q:[114,1,6],n:3},
- {t:"أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:1,s:"رواه مسلم"},
+ {l:"آية الكرسي",q:[2,255,255],n:1,s:"رواه الحاكم",f:"من قالها حين يصبح أُجير من الجن حتى يمسي، ومن قالها حين يمسي أُجير منهم حتى يصبح"},
+ {l:"سورة الإخلاص",q:[112,1,4],n:3,s:"رواه أبو داود والترمذي",f:"من قالها مع المعوذتين حين يصبح وحين يمسي ثلاث مرات كفته من كل شيء"},
+ {l:"سورة الفلق",q:[113,1,5],n:3,s:"رواه أبو داود والترمذي"},
+ {l:"سورة الناس",q:[114,1,6],n:3,s:"رواه أبو داود والترمذي"},
+ {t:"أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، ربِّ أسألك خير ما في هذا اليوم وخير ما بعده، وأعوذ بك من شر ما في هذا اليوم وشر ما بعده، ربِّ أعوذ بك من الكسل وسوء الكبر، ربِّ أعوذ بك من عذاب في النار وعذاب في القبر",n:1,s:"رواه مسلم"},
  {t:"اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور",n:1,s:"رواه الترمذي"},
- {l:"سيد الاستغفار",t:"اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت",n:1,s:"رواه البخاري"},
- {t:"اللهم إني أسألك العفو والعافية في الدنيا والآخرة، اللهم إني أسألك العفو والعافية في ديني ودنياي وأهلي ومالي، اللهم استر عوراتي وآمن روعاتي",n:1,s:"رواه أبو داود وابن ماجه"},
- {t:"اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت",n:3,s:"رواه أبو داود"},
- {t:"بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم",n:3,s:"رواه أبو داود والترمذي"},
- {t:"رضيت بالله رباً، وبالإسلام ديناً، وبمحمد صلى الله عليه وسلم نبياً",n:3,s:"رواه أبو داود والترمذي"},
- {t:"يا حي يا قيوم برحمتك أستغيث، أصلح لي شأني كله، ولا تكلني إلى نفسي طرفة عين",n:1,s:"رواه الحاكم"},
- {t:"حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم",n:7,s:"رواه أبو داود"},
- {t:"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:10,s:"رواه أحمد"},
- {t:"سبحان الله وبحمده",n:100,s:"رواه مسلم"},
- {t:"أستغفر الله وأتوب إليه",n:100,s:"رواه البخاري ومسلم"},
- {t:"اللهم صل وسلم على نبينا محمد",n:10,s:"رواه الطبراني"}
+ {l:"سيد الاستغفار",t:"اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك عليّ، وأبوء بذنبي فاغفر لي، فإنه لا يغفر الذنوب إلا أنت",n:1,s:"رواه البخاري",f:"من قالها موقناً بها حين يصبح فمات من يومه دخل الجنة"},
+ {t:"اللهم إني أصبحت أُشهدك، وأُشهد حملة عرشك، وملائكتك، وجميع خلقك، أنك أنت الله لا إله إلا أنت وحدك لا شريك لك، وأن محمداً عبدك ورسولك",n:4,s:"رواه أبو داود",f:"من قالها أربعاً أعتقه الله من النار"},
+ {t:"اللهم ما أصبح بي من نعمة أو بأحد من خلقك فمنك وحدك لا شريك لك، فلك الحمد ولك الشكر",n:1,s:"رواه أبو داود",f:"من قالها حين يصبح فقد أدى شكر يومه"},
+ {t:"اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت، اللهم إني أعوذ بك من الكفر والفقر، اللهم إني أعوذ بك من عذاب القبر، لا إله إلا أنت",n:3,s:"رواه أبو داود وأحمد"},
+ {t:"حسبي الله لا إله إلا هو، عليه توكلت، وهو رب العرش العظيم",n:7,s:"رواه أبو داود",f:"من قالها كفاه الله ما أهمّه من أمر الدنيا والآخرة"},
+ {t:"اللهم إني أسألك العفو والعافية في الدنيا والآخرة، اللهم إني أسألك العفو والعافية في ديني ودنياي وأهلي ومالي، اللهم استر عوراتي، وآمن روعاتي، اللهم احفظني من بين يديّ، ومن خلفي، وعن يميني، وعن شمالي، ومن فوقي، وأعوذ بعظمتك أن أُغتال من تحتي",n:1,s:"رواه أبو داود وابن ماجه"},
+ {t:"اللهم عالم الغيب والشهادة، فاطر السماوات والأرض، رب كل شيء ومليكه، أشهد أن لا إله إلا أنت، أعوذ بك من شر نفسي، ومن شر الشيطان وشركه، وأن أقترف على نفسي سوءاً أو أجرّه إلى مسلم",n:1,s:"رواه أبو داود والترمذي"},
+ {t:"بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم",n:3,s:"رواه أبو داود والترمذي",f:"لم يضره شيء"},
+ {t:"رضيت بالله رباً، وبالإسلام ديناً، وبمحمد صلى الله عليه وسلم نبياً",n:3,s:"رواه أبو داود والترمذي",f:"كان حقاً على الله أن يرضيه يوم القيامة"},
+ {t:"يا حي يا قيوم برحمتك أستغيث، أصلح لي شأني كله، ولا تكلني إلى نفسي طرفة عين",n:1,s:"رواه الحاكم وصححه"},
+ {t:"أصبحنا وأصبح الملك لله رب العالمين، اللهم إني أسألك خير هذا اليوم: فتحه، ونصره، ونوره، وبركته، وهداه، وأعوذ بك من شر ما فيه وشر ما بعده",n:1,s:"رواه أبو داود"},
+ {t:"أصبحنا على فطرة الإسلام، وعلى كلمة الإخلاص، وعلى دين نبينا محمد صلى الله عليه وسلم، وعلى ملة أبينا إبراهيم حنيفاً مسلماً وما كان من المشركين",n:1,s:"رواه أحمد"},
+ {t:"سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته",n:3,s:"رواه مسلم"},
+ {t:"اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً",n:1,s:"رواه ابن ماجه"},
+ {t:"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:10,s:"رواه النسائي وأحمد",f:"كانت له عدل أربع رقاب، وكتبت له عشر حسنات، ومحيت عنه عشر سيئات، وكان في حرز من الشيطان"},
+ {t:"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:100,s:"متفق عليه",f:"كانت له عدل عشر رقاب، وكتبت له مائة حسنة، ومحيت عنه مائة سيئة، وكانت له حرزاً من الشيطان يومه ذلك حتى يمسي"},
+ {t:"سبحان الله وبحمده",n:100,s:"رواه مسلم",f:"لم يأت أحد يوم القيامة بأفضل مما جاء به إلا أحد قال مثل ما قال أو زاد عليه، وحُطّت خطاياه وإن كانت مثل زبد البحر"},
+ {t:"أستغفر الله وأتوب إليه",n:100,s:"متفق عليه"},
+ {t:"اللهم صلِّ وسلم على نبينا محمد",n:10,s:"رواه الطبراني",f:"من صلى عليّ حين يصبح عشراً وحين يمسي عشراً أدركته شفاعتي يوم القيامة"}
 ];
-const MASA=SABAH.map(d=>({...d}));
-MASA[4]={t:"أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:1,s:"رواه مسلم"};
-MASA[5]={t:"اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير",n:1,s:"رواه الترمذي"};
-MASA.splice(10,0,{t:"أعوذ بكلمات الله التامات من شر ما خلق",n:3,s:"رواه مسلم"});
-MASA.splice(1,0,{l:"آخر آيتين من سورة البقرة",q:[2,285,286],n:1,s:"من قرأهما في ليلة كفتاه (متفق عليه)"});
+const MASA=[
+ {l:"آية الكرسي",q:[2,255,255],n:1,s:"رواه الحاكم",f:"من قالها حين يمسي أُجير من الجن حتى يصبح"},
+ {l:"آخر آيتين من سورة البقرة",q:[2,285,286],n:1,s:"متفق عليه",f:"من قرأهما في ليلة كفتاه"},
+ {l:"سورة الإخلاص",q:[112,1,4],n:3,s:"رواه أبو داود والترمذي",f:"من قالها مع المعوذتين حين يصبح وحين يمسي ثلاث مرات كفته من كل شيء"},
+ {l:"سورة الفلق",q:[113,1,5],n:3,s:"رواه أبو داود والترمذي"},
+ {l:"سورة الناس",q:[114,1,6],n:3,s:"رواه أبو داود والترمذي"},
+ {t:"أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، ربِّ أسألك خير ما في هذه الليلة وخير ما بعدها، وأعوذ بك من شر ما في هذه الليلة وشر ما بعدها، ربِّ أعوذ بك من الكسل وسوء الكبر، ربِّ أعوذ بك من عذاب في النار وعذاب في القبر",n:1,s:"رواه مسلم"},
+ {t:"اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير",n:1,s:"رواه الترمذي"},
+ {l:"سيد الاستغفار",t:"اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك عليّ، وأبوء بذنبي فاغفر لي، فإنه لا يغفر الذنوب إلا أنت",n:1,s:"رواه البخاري",f:"من قالها موقناً بها حين يمسي فمات من ليلته دخل الجنة"},
+ {t:"اللهم إني أمسيت أُشهدك، وأُشهد حملة عرشك، وملائكتك، وجميع خلقك، أنك أنت الله لا إله إلا أنت وحدك لا شريك لك، وأن محمداً عبدك ورسولك",n:4,s:"رواه أبو داود",f:"من قالها أربعاً أعتقه الله من النار"},
+ {t:"اللهم ما أمسى بي من نعمة أو بأحد من خلقك فمنك وحدك لا شريك لك، فلك الحمد ولك الشكر",n:1,s:"رواه أبو داود",f:"من قالها حين يمسي فقد أدى شكر ليلته"},
+ {t:"اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت، اللهم إني أعوذ بك من الكفر والفقر، اللهم إني أعوذ بك من عذاب القبر، لا إله إلا أنت",n:3,s:"رواه أبو داود وأحمد"},
+ {t:"حسبي الله لا إله إلا هو، عليه توكلت، وهو رب العرش العظيم",n:7,s:"رواه أبو داود",f:"من قالها كفاه الله ما أهمّه من أمر الدنيا والآخرة"},
+ {t:"اللهم إني أسألك العفو والعافية في الدنيا والآخرة، اللهم إني أسألك العفو والعافية في ديني ودنياي وأهلي ومالي، اللهم استر عوراتي، وآمن روعاتي، اللهم احفظني من بين يديّ، ومن خلفي، وعن يميني، وعن شمالي، ومن فوقي، وأعوذ بعظمتك أن أُغتال من تحتي",n:1,s:"رواه أبو داود وابن ماجه"},
+ {t:"اللهم عالم الغيب والشهادة، فاطر السماوات والأرض، رب كل شيء ومليكه، أشهد أن لا إله إلا أنت، أعوذ بك من شر نفسي، ومن شر الشيطان وشركه، وأن أقترف على نفسي سوءاً أو أجرّه إلى مسلم",n:1,s:"رواه أبو داود والترمذي"},
+ {t:"بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم",n:3,s:"رواه أبو داود والترمذي",f:"لم يضره شيء"},
+ {t:"رضيت بالله رباً، وبالإسلام ديناً، وبمحمد صلى الله عليه وسلم نبياً",n:3,s:"رواه أبو داود والترمذي",f:"كان حقاً على الله أن يرضيه يوم القيامة"},
+ {t:"يا حي يا قيوم برحمتك أستغيث، أصلح لي شأني كله، ولا تكلني إلى نفسي طرفة عين",n:1,s:"رواه الحاكم وصححه"},
+ {t:"أمسينا وأمسى الملك لله رب العالمين، اللهم إني أسألك خير هذه الليلة: فتحها، ونصرها، ونورها، وبركتها، وهداها، وأعوذ بك من شر ما فيها وشر ما بعدها",n:1,s:"رواه أبو داود"},
+ {t:"أمسينا على فطرة الإسلام، وعلى كلمة الإخلاص، وعلى دين نبينا محمد صلى الله عليه وسلم، وعلى ملة أبينا إبراهيم حنيفاً مسلماً وما كان من المشركين",n:1,s:"رواه أحمد"},
+ {t:"أعوذ بكلمات الله التامات من شر ما خلق",n:3,s:"رواه مسلم وأحمد",f:"لم تضره حُمَة تلك الليلة"},
+ {t:"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير",n:10,s:"رواه النسائي وأحمد",f:"كانت له عدل أربع رقاب، وكتبت له عشر حسنات، ومحيت عنه عشر سيئات، وكان في حرز من الشيطان حتى يصبح"},
+ {t:"سبحان الله وبحمده",n:100,s:"رواه مسلم",f:"حُطّت خطاياه وإن كانت مثل زبد البحر"},
+ {t:"أستغفر الله وأتوب إليه",n:100,s:"متفق عليه"},
+ {t:"اللهم صلِّ وسلم على نبينا محمد",n:10,s:"رواه الطبراني",f:"أدركته شفاعتي يوم القيامة"}
+];
 
 const CATS=[
  {k:"sabah",n:"الصباح",note:"من بعد الفجر إلى ارتفاع الضحى",items:SABAH},
  {k:"masa",n:"المساء",note:"من بعد العصر إلى الليل",items:MASA},
+ {k:"hisn",n:"📖 حصن المسلم",note:"",items:[]},
  {k:"salah",n:"بعد الصلاة",note:"عقب كل صلاة مكتوبة",items:[
   {t:"أستغفر الله",n:3,s:"رواه مسلم"},
   {t:"اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام",n:1,s:"رواه مسلم"},
@@ -944,12 +983,12 @@ function dhikrCard(x,count,onTap){const left=x.n-count;const el=document.createE
  const lb=[x.l,x.q?qRef(x.q):""].filter(Boolean).join(" — ");el.innerHTML=(lb?'<div class="lbl"></div>':"")+'<div class="t'+(x.q?" q":"")+'"></div><div class="meta"><span class="src"></span><span class="cnt">'+(left<=0?"✓":ar(left))+'</span></div>';
  if(lb)el.querySelector(".lbl").textContent=lb;
  el.querySelector(".t").textContent=x.q?qText(x.q):x.t;
- el.querySelector(".src").textContent=(x.n>1?"يُقال "+ar(x.n)+" مرات":"مرة واحدة")+(x.s?" · "+x.s:"");
+ el.querySelector(".src").textContent=(x.n===1?"مرة واحدة":x.n===2?"يُقال مرتين":"يُقال "+ar(x.n)+(x.n>10?" مرة":" مرات"))+(x.s?" · "+x.s:"");if(x.f){const f=document.createElement("div");f.className="fadl";f.textContent="الفضل: "+x.f;el.querySelector(".meta").before(f)}
  el.onclick=onTap;return el}
 
 /* ===== الأذكار ===== */
 function curCat(){return S.cat||(period()==="masa"?"masa":"sabah")}
-function renderAdhkar(){const k=curCat(),c=CATS.find(x=>x.k===k),d=day(),m=d.adh[k]||(d.adh[k]={});
+function renderAdhkar(){const k=curCat();if(k==="hisn"){const cb0=$("aCats");if(!cb0.children.length){S.cat="sabah";renderAdhkar();S.cat="hisn"}[...cb0.children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.k==="hisn"));return renderHisn()}$("aProg").parentNode.hidden=false;$("aBar").parentNode.hidden=false;const c=CATS.find(x=>x.k===k),d=day(),m=d.adh[k]||(d.adh[k]={});
  const cb=$("aCats");if(!cb.children.length)CATS.forEach(x=>{const b=document.createElement("button");b.type="button";b.textContent=x.n;b.dataset.k=x.k;b.onclick=()=>{S.cat=x.k;save();renderAdhkar()};cb.appendChild(b)});
  [...cb.children].forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));
  $("aNote").textContent=(c.note?c.note+". ":"")+"اضغط على الذِّكر كلما قلته، وينقص العدّاد حتى يكتمل.";
@@ -957,7 +996,35 @@ function renderAdhkar(){const k=curCat(),c=CATS.find(x=>x.k===k),d=day(),m=d.adh
  c.items.forEach((x,i)=>box.appendChild(dhikrCard(x,m[i]||0,()=>{if((m[i]||0)>=x.n)return;m[i]=(m[i]||0)+1;buzz(15);save();
   if(m[i]>=x.n){buzz([30,40,30]);if(catDone(d,k))toast("أتممت أذكار "+c.n+"، تقبّل الله منك")}renderAdhkar()})));
  const n=catCount(d,k);$("aProg").textContent=ar(n)+" من "+ar(c.items.length)+" مكتملة";$("aBar").style.width=(n/c.items.length*100)+"%"}
-$("aReset").onclick=()=>{day().adh[curCat()]={};save();renderAdhkar()};
+$("aReset").onclick=()=>{const k=curCat();day().adh[k==="hisn"?"h"+hisnCh:k]={};save();renderAdhkar()};
+
+
+/* ===== حصن المسلم ===== */
+let HISN=null,hisnCh=null;const HISN_Q={"مرة":1,"مرتين":2,"مرتان":2,"ثلاث":3,"ثلاثا":3,"ثلاثاً":3,"أربع":4,"خمس":5,"سبع":7,"عشر":10,"مائة":100,"مئة":100};
+function hisnLoad(){if(!HISN)HISN=fetch("hisn.json").then(r=>{if(!r.ok)throw 0;return r.json()}).catch(e=>{HISN=null;throw e});return HISN}
+function hisnItems(c){return c.t.map((t,i)=>({t:t,n:c.n[i]||1,s:c.f&&c.f.length===c.t.length?c.f[i]:""}))}
+function renderHisn(){const box=$("aList");$("aProg").parentNode.hidden=hisnCh==null;$("aBar").parentNode.hidden=hisnCh==null;
+ box.innerHTML='<div class="loading">جارٍ تحميل حصن المسلم…</div>';
+ hisnLoad().then(H=>{if(curCat()!=="hisn")return;box.innerHTML="";
+  if(hisnCh==null){$("aNote").textContent="حصن المسلم من أذكار الكتاب والسنة للشيخ سعيد بن علي بن وهف القحطاني رحمه الله — "+ar(H.length)+" باباً. اختر الباب أو ابحث.";
+   const q=document.createElement("input");q.type="search";q.className="hisnsrch";q.placeholder="ابحث في أبواب وأذكار حصن المسلم…";q.value=S.hisnQ||"";box.appendChild(q);
+   const L=document.createElement("div");L.className="list";box.appendChild(L);
+   const draw=()=>{const v=strip(q.value.trim());S.hisnQ=q.value;L.innerHTML="";let n=0;
+    H.forEach((c,i)=>{if(v&&!strip(c.h).includes(v)&&!c.t.some(t=>strip(t).includes(v)))return;n++;const b=document.createElement("button");b.type="button";b.className="hisnch";
+     b.innerHTML="<i></i><b></b><span></span>";b.querySelector("i").textContent=ar(i+1);b.querySelector("b").textContent=c.h;b.querySelector("span").textContent=ar(c.t.length)+(c.t.length>2&&c.t.length<11?" أذكار":" ذكر");
+     b.style.cssText="";b.onclick=()=>{hisnCh=i;renderHisn();window.scrollTo({top:$("aCats").offsetTop-70})};L.appendChild(b)});
+    if(!n)L.innerHTML='<div class="muted">لا توجد نتائج.</div>'};
+   q.oninput=draw;draw();return}
+  const c=H[hisnCh],key="h"+hisnCh,d=day(),m=d.adh[key]||(d.adh[key]={}),items=hisnItems(c);
+  $("aNote").textContent="الباب "+ar(hisnCh+1)+" من حصن المسلم. اضغط على الذِّكر كلما قلته.";
+  const top=document.createElement("div");top.className="row";top.style.justifyContent="space-between";top.innerHTML='<button class="btn ghost sm" type="button">→ أبواب حصن المسلم</button><b style="font-family:var(--f-quran);font-size:19px;color:var(--green)"></b>';
+  top.querySelector("b").textContent=c.h;top.querySelector("button").onclick=()=>{hisnCh=null;renderHisn()};box.appendChild(top);
+  items.forEach((x,i)=>box.appendChild(dhikrCard(x,m[i]||0,()=>{if((m[i]||0)>=x.n)return;m[i]=(m[i]||0)+1;buzz(15);save();if(m[i]>=x.n)buzz([30,40,30]);renderHisn()})));
+  if(c.f&&c.f.length&&c.f.length!==c.t.length){const sr=document.createElement("div");sr.className="hisnsrc";sr.textContent="التخريج: "+c.f.join(" · ");box.appendChild(sr)}
+  const nav=document.createElement("div");nav.className="row";nav.style.justifyContent="space-between";nav.innerHTML='<button class="btn ghost sm" type="button">→ الباب السابق</button><button class="btn ghost sm" type="button">الباب التالي ←</button>';
+  const [pb,nb]=nav.querySelectorAll("button");pb.disabled=hisnCh===0;nb.disabled=hisnCh===H.length-1;pb.onclick=()=>{hisnCh--;renderHisn();window.scrollTo({top:$("aCats").offsetTop-70})};nb.onclick=()=>{hisnCh++;renderHisn();window.scrollTo({top:$("aCats").offsetTop-70})};box.appendChild(nav);
+  const n=items.filter((x,i)=>(m[i]||0)>=x.n).length;$("aProg").textContent=ar(n)+" من "+ar(items.length)+" مكتملة";$("aBar").style.width=(n/items.length*100)+"%"})
+ .catch(()=>{box.innerHTML='<div class="loading">تعذّر تحميل حصن المسلم. تحقق من الاتصال.</div>'})}
 
 /* ===== الرقية ===== */
 function renderRuqya(){const d=day(),m=d.ruq||(d.ruq={});const box=$("ruList");box.innerHTML="";
