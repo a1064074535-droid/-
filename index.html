@@ -1618,6 +1618,22 @@ fetch("https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json").then(r=>r
  const sel=$("lSurah");Q.forEach((s,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=ar(i+1)+". "+s[0];sel.appendChild(o)});
  renderSurahs();render()}).catch(()=>{$("surahs").innerHTML='<div class="loading">تعذّر تحميل المصحف. أعد فتح الصفحة.</div>'});
 
+
+/* ===== إشعارات على شاشة الجوال (Web Push) ===== */
+const PUSH_FN="https://lrojiuulqmucofspdqoq.supabase.co/functions/v1/push";
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent),isStandalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function b64u(s){const p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+function pushOK(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&/github\.io|netlify/.test(location.hostname)}
+let pushT=null,pushBusy=false;function pushSyncSoon(){clearTimeout(pushT);pushT=setTimeout(pushSync,1200)}
+async function pushSync(){if(!pushOK()||Notification.permission!=="granted"||pushBusy)return false;pushBusy=true;const A2=alS();
+ try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();const any=A2.list.some(a=>a.on);
+  if(!any){if(sub)await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"unsubscribe",endpoint:sub.endpoint})}).catch(()=>{});A2.push=false;save();return false}
+  if(!sub){const k=await fetch(PUSH_FN).then(r=>r.json());sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k.key)})}
+  const c=CITIES[S.adhCity||0];const reminders=A2.list.map(a=>({id:a.id,on:!!a.on,m:a.m,t:a.t,p:a.p,o:a.o,days:a.days,title:ALT[a.k].i+" "+ALT[a.k].n,body:ALT[a.k].b,go:ALT[a.k].go}));
+  const r=await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"subscribe",sub:sub.toJSON(),reminders,tz_offset:-new Date().getTimezoneOffset(),lat:c[1],lng:c[2]})});
+  A2.push=r.ok;A2.pc=S.adhCity||0;save();alPermBox();return r.ok}
+ catch(e){A2.push=false;save();alPermBox();return false}finally{pushBusy=false}}
+
 /* ===== المنبهات والإشعارات ===== */
 const ALT={
  sabah:{n:"أذكار الصباح",i:"🌅",c:"#f59e0b",go:"adhkar:sabah",b:"حان وقت أذكار الصباح، حصّن يومك بذكر الله",d:{m:"pr",p:"fajr",o:20}},
@@ -1638,12 +1654,12 @@ function alDesc(a){const w=alWhen(a);const tm=w?w.toLocaleTimeString("ar-SA",{ho
  return base+(a.days&&a.days.length&&a.days.length<7?" · "+a.days.map(x=>DAYN[x]).join("، "):" · يومياً")}
 function alPermBox(){const b=$("alPerm");if(!b)return;b.innerHTML="";const has="Notification" in window;const st=has?Notification.permission:"unsupported";
  const sp=document.createElement("span");
- if(st==="granted")sp.textContent="✅ الإشعارات مفعّلة على هذا الجهاز";
+ if(st==="granted")sp.textContent=alS().push?"📲 التنبيهات تظهر على شاشة جوالك في وقتها حتى والمتصفح مغلق":(alS().list.some(a=>a.on)?"✅ الإشعارات مسموحة، جارٍ ربط التنبيهات بشاشة الجوال…":"✅ الإشعارات مسموحة. فعّل منبّهاً ليظهر على شاشة جوالك");
  else if(st==="denied")sp.textContent="⛔ الإشعارات محظورة. فعّلها من إعدادات المتصفح لهذا الموقع، أو استخدم إضافة المنبهات إلى التقويم.";
  else if(st==="unsupported")sp.textContent="هذا المتصفح لا يدعم الإشعارات. سيظهر التذكير داخل المنصة، وأضف المنبهات إلى تقويم جوالك.";
  else sp.textContent="🔔 اسمح بالإشعارات ليصلك التذكير في وقته";
- b.appendChild(sp);if(st==="default"){const x=document.createElement("button");x.type="button";x.className="btn sm";x.textContent="السماح بالإشعارات";x.onclick=alAsk;b.appendChild(x)}}
-async function alAsk(){if(!("Notification" in window))return false;try{const r=await Notification.requestPermission();alPermBox();return r==="granted"}catch(e){return false}}
+ b.appendChild(sp);if(isIOS&&!isStandalone){const h=document.createElement("div");h.style.cssText="width:100%;font-size:12px;color:var(--muted)";h.textContent="على الآيفون: اضغط زر المشاركة ⬆️ ثم «إضافة إلى الشاشة الرئيسية»، وافتح المنصة من أيقونتها ثم فعّل المنبهات، لتظهر التنبيهات على الشاشة.";b.appendChild(h)}if(st==="default"){const x=document.createElement("button");x.type="button";x.className="btn sm";x.textContent="السماح بالإشعارات";x.onclick=alAsk;b.appendChild(x)}}
+async function alAsk(){if(!("Notification" in window))return false;try{const r=await Notification.requestPermission();alPermBox();if(r==="granted")pushSyncSoon();return r==="granted"}catch(e){return false}}
 function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerHTML="";alPermBox();
  const sel=$("alAddT");if(!sel.options.length)Object.entries(ALT).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.i+" "+v.n;sel.appendChild(o)});
  A2.list.forEach((a,idx)=>{const T=ALT[a.k];const r=document.createElement("div");r.className="alrow"+(a.on?" on":"");r.style.setProperty("--c",T.c);
@@ -1660,7 +1676,7 @@ function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerH
   DAYN.forEach((n,i)=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",days.includes(i));b.onclick=()=>{let ds=(a.days&&a.days.length?a.days:[0,1,2,3,4,5,6]).slice();ds=ds.includes(i)?ds.filter(x=>x!==i):ds.concat(i).sort();if(!ds.length)return;a.days=ds.length===7?null:ds;save();renderAlarms()};dy.appendChild(b)});
   ed.appendChild(dy);
   const del=document.createElement("button");del.type="button";del.className="btn ghost sm";del.textContent="حذف";del.onclick=()=>{A2.list.splice(idx,1);save();renderAlarms()};ed.appendChild(del);
-  box.appendChild(r)})}
+  box.appendChild(r)});pushSyncSoon()}
 $("alAdd").onclick=()=>{const A2=alS(),k=$("alAddT").value;A2.list.push({id:"a"+Date.now(),k,on:true,...JSON.parse(JSON.stringify(ALT[k].d))});save();renderAlarms();if("Notification" in window&&Notification.permission==="default")alAsk();toast("أُضيف منبّه "+ALT[k].n)};
 let SWR=null;
 if("serviceWorker" in navigator&&/github\.io|netlify|localhost|127\.0\.0\.1/.test(location.hostname)){navigator.serviceWorker.register("sw.js").then(r=>{SWR=r}).catch(()=>{});
@@ -1677,13 +1693,14 @@ function alBanner(T,a){document.querySelectorAll(".albanner").forEach(b=>b.remov
 async function alNotify(T,a){const url=FULL+"?go="+encodeURIComponent(T.go);const opt={body:T.b,tag:"rafiq-"+(a?a.id:"test"),icon:"icon-192.png",badge:"icon-192.png",dir:"rtl",lang:"ar",renotify:true,data:{url,go:T.go}};
  alBanner(T,a);alChime();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
  if(!("Notification" in window)||Notification.permission!=="granted")return;
+ if(a&&alS().push)return;
  try{const r=SWR||(navigator.serviceWorker&&await navigator.serviceWorker.getRegistration());if(r){await r.showNotification(T.i+" "+T.n,opt);return}}catch(e){}
  try{const n=new Notification(T.i+" "+T.n,opt);n.onclick=()=>{window.focus();alGo(T.go);n.close()}}catch(e){}}
-function alCheck(){const A2=alS(),now=new Date(),dk=now.toDateString();let ch=false;
+function alCheck(){const A2=alS(),now=new Date(),dk=now.toDateString();let ch=false;if(A2.push&&A2.pc!==(S.adhCity||0))pushSyncSoon();
  A2.list.forEach(a=>{if(!a.on)return;if(a.days&&a.days.length&&!a.days.includes(now.getDay()))return;const w=alWhen(a,now);if(!w)return;const diff=now-w;
   if(diff>=0&&diff<2*3600e3&&A2.fired[a.id]!==dk){A2.fired[a.id]=dk;ch=true;const T=ALT[a.k];if(diff<15*6e4)alNotify(T,a);else alBanner(T,a)}});
  if(ch)save()}
-$("alTest").onclick=async()=>{if("Notification" in window&&Notification.permission==="default")await alAsk();alNotify({n:"تجربة التذكير",i:"🔔",b:"هكذا سيصلك التذكير في وقته بإذن الله",go:"today"},null)};
+$("alTest").onclick=async()=>{if("Notification" in window&&Notification.permission==="default")await alAsk();if(pushOK()&&Notification.permission==="granted"){if(!alS().push)await pushSync();if(alS().push){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){toast("سيصلك إشعار تجريبي على شاشة الجوال خلال ثوانٍ");await fetch(PUSH_FN,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"test",endpoint:sub.endpoint})});return}}catch(e){}}}alNotify({n:"تجربة التذكير",i:"🔔",b:"هكذا سيصلك التذكير في وقته بإذن الله",go:"today"},null)};
 function icsEsc(t){return String(t).replace(/[\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n")}
 $("alIcs").onclick=()=>{const A2=alS(),on=A2.list.filter(a=>a.on);if(!on.length){toast("فعّل منبّهاً واحداً على الأقل أولاً");return}
  const p2=n=>String(n).padStart(2,"0");const st=new Date();const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rafiq Althikr//AR","CALSCALE:GREGORIAN","X-WR-CALNAME:رفيق الذكر"];
