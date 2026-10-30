@@ -1650,12 +1650,12 @@ function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerH
   r.innerHTML='<div class="alhead"><span class="ico"></span><span class="tx"><b></b><span></span></span><label class="alsw" aria-label="تفعيل"><input type="checkbox"><i></i></label></div><div class="aled"></div>';
   r.querySelector(".ico").textContent=T.i;r.querySelector(".tx b").textContent=T.n;r.querySelector(".tx span").textContent=alDesc(a);
   const cb=r.querySelector("input");cb.checked=!!a.on;cb.onchange=async()=>{a.on=cb.checked;if(a.on&&"Notification" in window&&Notification.permission==="default")await alAsk();save();renderAlarms();if(a.on)toast("تم تفعيل منبّه "+T.n)};
-  const ed=r.querySelector(".aled");
+  const ed=r.querySelector(".aled");ed.hidden=!a.on;
   const md=document.createElement("select");md.innerHTML='<option value="t">في وقت محدد</option><option value="pr">بعد صلاة</option>';md.value=a.m;md.onchange=()=>{a.m=md.value;if(a.m==="pr"&&!a.p){a.p="fajr";a.o=15}if(a.m==="t"&&!a.t)a.t="08:00";save();renderAlarms()};ed.appendChild(md);
   if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.value=a.t||"08:00";ti.onchange=()=>{a.t=ti.value;save();renderAlarms()};ed.appendChild(ti)}
   else{const ps=document.createElement("select");Object.entries(PRN2).forEach(([k,n])=>{const o=document.createElement("option");o.value=k;o.textContent=n;ps.appendChild(o)});ps.value=a.p;ps.onchange=()=>{a.p=ps.value;save();renderAlarms()};
    const of=document.createElement("input");of.type="number";of.min=0;of.max=180;of.value=a.o||0;of.onchange=()=>{a.o=Math.max(0,Math.min(180,+of.value||0));save();renderAlarms()};
-   ed.append(ps," بعدها بـ",of," دقيقة")}
+   const sp=document.createElement("span");sp.style.whiteSpace="nowrap";sp.append("بعدها بـ ",of," دقيقة");ed.append(ps,sp)}
   const dy=document.createElement("div");dy.className="aldays";const days=a.days&&a.days.length?a.days:[0,1,2,3,4,5,6];
   DAYN.forEach((n,i)=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",days.includes(i));b.onclick=()=>{let ds=(a.days&&a.days.length?a.days:[0,1,2,3,4,5,6]).slice();ds=ds.includes(i)?ds.filter(x=>x!==i):ds.concat(i).sort();if(!ds.length)return;a.days=ds.length===7?null:ds;save();renderAlarms()};dy.appendChild(b)});
   ed.appendChild(dy);
