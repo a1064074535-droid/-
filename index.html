@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1f5c4a"><meta name="description" content="المصحف مع التفسير والتلاوة، والأذكار والرقية الشرعية">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1f5c4a"><meta name="description" content="المصحف مع التفسير والتلاوة، والأذكار والرقية الشرعية"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
 <title>رفيق الذكر</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@600;700&family=Aref+Ruqaa:wght@400;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
@@ -421,6 +421,31 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .hisnch span{font-family:inherit;font-size:12px;font-weight:400;color:var(--muted);flex:0 0 auto}
 .hisnch i{font-style:normal;color:var(--brass);font-size:13px;flex:0 0 auto}
 .hisnsrc{font-size:12px;color:var(--muted);line-height:1.8}
+
+/* المنبهات */
+.alperm{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:6px;border:1px dashed var(--line2);font-size:13px}
+.alrow{border:1px solid var(--line2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.alrow.on{border-color:var(--brass);box-shadow:inset 3px 0 0 var(--brass)}
+.alhead{display:flex;align-items:center;gap:10px}
+.alhead .ico{font-size:22px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);flex:0 0 auto}
+.alhead .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.alhead .tx b{font-family:var(--f-quran);font-size:17px}
+.alhead .tx span{font-size:12px;color:var(--muted)}
+.alsw{position:relative;width:46px;height:26px;flex:0 0 auto}
+.alsw input{opacity:0;width:0;height:0;position:absolute}
+.alsw i{position:absolute;inset:0;border-radius:13px;background:var(--line);transition:.2s;cursor:pointer}
+.alsw i::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.alsw input:checked+i{background:#16a34a}
+.alsw input:checked+i::after{right:23px}
+.aled{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.aled select,.aled input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
+.aled input[type=number]{width:64px}
+.aldays{display:flex;gap:4px;flex-wrap:wrap}
+.aldays button{font:inherit;font-size:12px;padding:4px 8px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);cursor:pointer}
+.aldays button[aria-pressed="true"]{background:#16a34a;color:#fff;border-color:#16a34a}
+.albanner{position:fixed;inset-inline:12px;top:12px;z-index:60;max-width:560px;margin:0 auto;background:var(--surface);border:2px solid var(--brass);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:12px 14px;display:flex;gap:12px;align-items:center;animation:alIn .3s ease-out}
+.albanner .ico{font-size:28px}.albanner .tx{flex:1;min-width:0}.albanner b{display:block;font-family:var(--f-quran);font-size:18px}.albanner span{font-size:13px;color:var(--muted)}
+@keyframes alIn{from{transform:translateY(-30px);opacity:0}}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -467,6 +492,15 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
       <div class="stat"><span class="v" id="sMasa">—</span><span class="l">أذكار المساء</span></div>
       <div class="stat"><span class="v" id="sPages">0</span><span class="l">صفحات الورد اليوم</span></div>
       <div class="stat"><span class="v" id="sTasbeeh">0</span><span class="l">تسبيحات اليوم</span></div>
+    </div>
+    <div class="card" id="alCard">
+      <h2>⏰ المنبّهات والتذكير</h2>
+      <div class="muted">فعّل ما تريد، وسيصلك إشعار في وقته يذكّرك بالأذكار أو الإذاعة أو الحفظ أو التلاوة، وعند الضغط عليه تفتح المنصة على القسم مباشرة.</div>
+      <div class="alperm" id="alPerm"></div>
+      <div class="list" id="alList"></div>
+      <div class="row"><select id="alAddT" style="flex:1;min-width:0"></select><button class="btn ghost sm" id="alAdd" type="button">＋ إضافة منبه</button></div>
+      <div class="row"><button class="btn" id="alIcs" type="button">📅 أضف المنبهات إلى تقويم جوالك</button><button class="btn ghost sm" id="alTest" type="button">🔔 تجربة الإشعار</button></div>
+      <div class="muted" style="font-size:12px">تصل الإشعارات ما دامت المنصة مفتوحة أو تعمل في الخلفية. ولتصلك التنبيهات حتى والمتصفح مغلق، أضف المنبهات إلى تقويم جوالك بالزر أعلاه، أو ثبّت المنصة على الشاشة الرئيسية.</div>
     </div>
     <div class="card" id="resumeCard" hidden>
       <h2>تابع القراءة</h2>
@@ -1583,6 +1617,85 @@ loadLive();
 fetch("https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json").then(r=>r.json()).then(j=>{Q=j.map(c=>[c.name,c.type,c.verses.map(v=>v.text)]);buildSST();renderJuz();renderModes();
  const sel=$("lSurah");Q.forEach((s,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=ar(i+1)+". "+s[0];sel.appendChild(o)});
  renderSurahs();render()}).catch(()=>{$("surahs").innerHTML='<div class="loading">تعذّر تحميل المصحف. أعد فتح الصفحة.</div>'});
+
+/* ===== المنبهات والإشعارات ===== */
+const ALT={
+ sabah:{n:"أذكار الصباح",i:"🌅",c:"#f59e0b",go:"adhkar:sabah",b:"حان وقت أذكار الصباح، حصّن يومك بذكر الله",d:{m:"pr",p:"fajr",o:20}},
+ masa:{n:"أذكار المساء",i:"🌇",c:"#f97316",go:"adhkar:masa",b:"حان وقت أذكار المساء، لا تفوّتها",d:{m:"pr",p:"asr",o:20}},
+ nawm:{n:"أذكار النوم",i:"🌙",c:"#6366f1",go:"adhkar:nawm",b:"قبل أن تنام: آية الكرسي والمعوذات وأذكار النوم",d:{m:"t",t:"22:30"}},
+ wird:{n:"تلاوة الورد اليومي",i:"📖",c:"#10b981",go:"mushaf",b:"وردك من القرآن ينتظرك، اقرأ ولو صفحة",d:{m:"t",t:"21:00"}},
+ hifz:{n:"حفظ القرآن",i:"🧠",c:"#65a30d",go:"hifz",b:"جلسة الحفظ اليومية: راجع القديم ثم احفظ الجديد",d:{m:"pr",p:"fajr",o:40}},
+ radio:{n:"الاستماع إلى الإذاعة",i:"📻",c:"#ef4444",go:"radio",b:"استمع الآن إلى إذاعة القرآن الكريم",d:{m:"t",t:"17:00"}},
+ kahf:{n:"سورة الكهف يوم الجمعة",i:"🕌",c:"#0ea5e9",go:"mushaf:18",b:"من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين",d:{m:"t",t:"10:00",days:[5]}},
+ istighfar:{n:"الاستغفار والتسبيح",i:"📿",c:"#d97706",go:"tasbeeh",b:"أستغفر الله وأتوب إليه… سبحان الله وبحمده",d:{m:"t",t:"15:00"}}};
+const PRN2={fajr:"الفجر",dhuhr:"الظهر",asr:"العصر",maghrib:"المغرب",isha:"العشاء"};
+const DAYN=["أحد","اثنين","ثلاثاء","أربعاء","خميس","جمعة","سبت"];
+function alS(){if(!S.al){S.al={list:["sabah","masa","nawm","wird","hifz","radio","kahf"].map((k,i)=>({id:"a"+i,k,on:false,...JSON.parse(JSON.stringify(ALT[k].d))})),fired:{}}}return S.al}
+function alWhen(a,date){const d=new Date(date||Date.now());if(a.m==="pr"){const t=typeof prTimes==="function"?prTimes(S.adhCity||0,d):null;if(!t)return null;return new Date(t[a.p].getTime()+(a.o||0)*6e4)}
+ const [h,m]=(a.t||"08:00").split(":").map(Number);d.setHours(h,m,0,0);return d}
+function alDesc(a){const w=alWhen(a);const tm=w?w.toLocaleTimeString("ar-SA",{hour:"numeric",minute:"2-digit"}):"";
+ const base=a.m==="pr"?("بعد "+PRN2[a.p]+(a.o?" بـ"+ar(a.o)+" دقيقة":"")+(tm?" (≈ "+tm+")":"")):("الساعة "+tm);
+ return base+(a.days&&a.days.length&&a.days.length<7?" · "+a.days.map(x=>DAYN[x]).join("، "):" · يومياً")}
+function alPermBox(){const b=$("alPerm");if(!b)return;b.innerHTML="";const has="Notification" in window;const st=has?Notification.permission:"unsupported";
+ const sp=document.createElement("span");
+ if(st==="granted")sp.textContent="✅ الإشعارات مفعّلة على هذا الجهاز";
+ else if(st==="denied")sp.textContent="⛔ الإشعارات محظورة. فعّلها من إعدادات المتصفح لهذا الموقع، أو استخدم إضافة المنبهات إلى التقويم.";
+ else if(st==="unsupported")sp.textContent="هذا المتصفح لا يدعم الإشعارات. سيظهر التذكير داخل المنصة، وأضف المنبهات إلى تقويم جوالك.";
+ else sp.textContent="🔔 اسمح بالإشعارات ليصلك التذكير في وقته";
+ b.appendChild(sp);if(st==="default"){const x=document.createElement("button");x.type="button";x.className="btn sm";x.textContent="السماح بالإشعارات";x.onclick=alAsk;b.appendChild(x)}}
+async function alAsk(){if(!("Notification" in window))return false;try{const r=await Notification.requestPermission();alPermBox();return r==="granted"}catch(e){return false}}
+function renderAlarms(){const A2=alS(),box=$("alList");if(!box)return;box.innerHTML="";alPermBox();
+ const sel=$("alAddT");if(!sel.options.length)Object.entries(ALT).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.i+" "+v.n;sel.appendChild(o)});
+ A2.list.forEach((a,idx)=>{const T=ALT[a.k];const r=document.createElement("div");r.className="alrow"+(a.on?" on":"");r.style.setProperty("--c",T.c);
+  r.innerHTML='<div class="alhead"><span class="ico"></span><span class="tx"><b></b><span></span></span><label class="alsw" aria-label="تفعيل"><input type="checkbox"><i></i></label></div><div class="aled"></div>';
+  r.querySelector(".ico").textContent=T.i;r.querySelector(".tx b").textContent=T.n;r.querySelector(".tx span").textContent=alDesc(a);
+  const cb=r.querySelector("input");cb.checked=!!a.on;cb.onchange=async()=>{a.on=cb.checked;if(a.on&&"Notification" in window&&Notification.permission==="default")await alAsk();save();renderAlarms();if(a.on)toast("تم تفعيل منبّه "+T.n)};
+  const ed=r.querySelector(".aled");
+  const md=document.createElement("select");md.innerHTML='<option value="t">في وقت محدد</option><option value="pr">بعد صلاة</option>';md.value=a.m;md.onchange=()=>{a.m=md.value;if(a.m==="pr"&&!a.p){a.p="fajr";a.o=15}if(a.m==="t"&&!a.t)a.t="08:00";save();renderAlarms()};ed.appendChild(md);
+  if(a.m==="t"){const ti=document.createElement("input");ti.type="time";ti.value=a.t||"08:00";ti.onchange=()=>{a.t=ti.value;save();renderAlarms()};ed.appendChild(ti)}
+  else{const ps=document.createElement("select");Object.entries(PRN2).forEach(([k,n])=>{const o=document.createElement("option");o.value=k;o.textContent=n;ps.appendChild(o)});ps.value=a.p;ps.onchange=()=>{a.p=ps.value;save();renderAlarms()};
+   const of=document.createElement("input");of.type="number";of.min=0;of.max=180;of.value=a.o||0;of.onchange=()=>{a.o=Math.max(0,Math.min(180,+of.value||0));save();renderAlarms()};
+   ed.append(ps," بعدها بـ",of," دقيقة")}
+  const dy=document.createElement("div");dy.className="aldays";const days=a.days&&a.days.length?a.days:[0,1,2,3,4,5,6];
+  DAYN.forEach((n,i)=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",days.includes(i));b.onclick=()=>{let ds=(a.days&&a.days.length?a.days:[0,1,2,3,4,5,6]).slice();ds=ds.includes(i)?ds.filter(x=>x!==i):ds.concat(i).sort();if(!ds.length)return;a.days=ds.length===7?null:ds;save();renderAlarms()};dy.appendChild(b)});
+  ed.appendChild(dy);
+  const del=document.createElement("button");del.type="button";del.className="btn ghost sm";del.textContent="حذف";del.onclick=()=>{A2.list.splice(idx,1);save();renderAlarms()};ed.appendChild(del);
+  box.appendChild(r)})}
+$("alAdd").onclick=()=>{const A2=alS(),k=$("alAddT").value;A2.list.push({id:"a"+Date.now(),k,on:true,...JSON.parse(JSON.stringify(ALT[k].d))});save();renderAlarms();if("Notification" in window&&Notification.permission==="default")alAsk();toast("أُضيف منبّه "+ALT[k].n)};
+let SWR=null;
+if("serviceWorker" in navigator&&/github\.io|netlify|localhost|127\.0\.0\.1/.test(location.hostname)){navigator.serviceWorker.register("sw.js").then(r=>{SWR=r}).catch(()=>{});
+ navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.go)alGo(e.data.go)})}
+function alGo(go){const run=()=>{const [t,x]=String(go).split(":");document.querySelectorAll(".albanner").forEach(b=>b.remove());
+  if(t==="adhkar"){S.cat=x||"sabah";save();tab("adhkar");try{renderAdhkar()}catch(e){}}
+  else if(t==="mushaf"){tab("mushaf");if(x)try{openSurah(+x)}catch(e){}}
+  else tab(t);window.scrollTo({top:0})};
+ if(Q)run();else{let n=0;const iv=setInterval(()=>{if(Q||++n>40){clearInterval(iv);run()}},250)}}
+function alChime(){try{const C=new (window.AudioContext||window.webkitAudioContext)();[0,.18,.36].forEach((t,i)=>{const o=C.createOscillator(),g=C.createGain();o.type="sine";o.frequency.value=[660,880,990][i];g.gain.setValueAtTime(0,C.currentTime+t);g.gain.linearRampToValueAtTime(.18,C.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,C.currentTime+t+.5);o.connect(g).connect(C.destination);o.start(C.currentTime+t);o.stop(C.currentTime+t+.55)})}catch(e){}}
+function alBanner(T,a){document.querySelectorAll(".albanner").forEach(b=>b.remove());const b=document.createElement("div");b.className="albanner";b.setAttribute("role","alert");
+ b.innerHTML='<span class="ico"></span><span class="tx"><b></b><span></span></span><button class="btn sm" type="button">ابدأ الآن</button><button class="btn ghost sm" type="button" aria-label="إغلاق">✕</button>';
+ b.querySelector(".ico").textContent=T.i;b.querySelector("b").textContent=T.n;b.querySelector(".tx span").textContent=T.b;const [go,x]=b.querySelectorAll("button");go.onclick=()=>alGo(T.go);x.onclick=()=>b.remove();document.body.appendChild(b);setTimeout(()=>b.remove(),120000)}
+async function alNotify(T,a){const url=FULL+"?go="+encodeURIComponent(T.go);const opt={body:T.b,tag:"rafiq-"+(a?a.id:"test"),icon:"icon-192.png",badge:"icon-192.png",dir:"rtl",lang:"ar",renotify:true,data:{url,go:T.go}};
+ alBanner(T,a);alChime();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+ if(!("Notification" in window)||Notification.permission!=="granted")return;
+ try{const r=SWR||(navigator.serviceWorker&&await navigator.serviceWorker.getRegistration());if(r){await r.showNotification(T.i+" "+T.n,opt);return}}catch(e){}
+ try{const n=new Notification(T.i+" "+T.n,opt);n.onclick=()=>{window.focus();alGo(T.go);n.close()}}catch(e){}}
+function alCheck(){const A2=alS(),now=new Date(),dk=now.toDateString();let ch=false;
+ A2.list.forEach(a=>{if(!a.on)return;if(a.days&&a.days.length&&!a.days.includes(now.getDay()))return;const w=alWhen(a,now);if(!w)return;const diff=now-w;
+  if(diff>=0&&diff<2*3600e3&&A2.fired[a.id]!==dk){A2.fired[a.id]=dk;ch=true;const T=ALT[a.k];if(diff<15*6e4)alNotify(T,a);else alBanner(T,a)}});
+ if(ch)save()}
+$("alTest").onclick=async()=>{if("Notification" in window&&Notification.permission==="default")await alAsk();alNotify({n:"تجربة التذكير",i:"🔔",b:"هكذا سيصلك التذكير في وقته بإذن الله",go:"today"},null)};
+function icsEsc(t){return String(t).replace(/[\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n")}
+$("alIcs").onclick=()=>{const A2=alS(),on=A2.list.filter(a=>a.on);if(!on.length){toast("فعّل منبّهاً واحداً على الأقل أولاً");return}
+ const p2=n=>String(n).padStart(2,"0");const st=new Date();const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rafiq Althikr//AR","CALSCALE:GREGORIAN","X-WR-CALNAME:رفيق الذكر"];
+ on.forEach((a,i)=>{const T=ALT[a.k],w=alWhen(a,st)||new Date();const ds=st.getFullYear()+p2(st.getMonth()+1)+p2(st.getDate())+"T"+p2(w.getHours())+p2(w.getMinutes())+"00";
+  const by=a.days&&a.days.length&&a.days.length<7?";BYDAY="+a.days.map(x=>["SU","MO","TU","WE","TH","FR","SA"][x]).join(","):"";
+  L.push("BEGIN:VEVENT","UID:rafiq-"+a.id+"-"+Date.now()+"@rafiq-althikr","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART:"+ds,"DURATION:PT15M","RRULE:FREQ="+(by?"WEEKLY":"DAILY")+by,
+   "SUMMARY:"+icsEsc(T.i+" "+T.n),"DESCRIPTION:"+icsEsc(T.b+"\n"+FULL+"?go="+T.go+(a.m==="pr"?"\n(الوقت تقريبي لأنه مرتبط بالصلاة ويتغير خلال السنة)":"")),"URL:"+FULL+"?go="+encodeURIComponent(T.go),
+   "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(T.n),"TRIGGER:PT0M","END:VALARM","END:VEVENT")});
+ L.push("END:VCALENDAR");const blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});const u=URL.createObjectURL(blob),x=document.createElement("a");x.href=u;x.download="rafiq-althikr-reminders.ics";document.body.appendChild(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);
+ toast("افتح الملف ليُضاف إلى تقويم جوالك")};
+renderAlarms();setInterval(alCheck,20000);setTimeout(alCheck,3000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)alCheck()});
+try{const g=new URLSearchParams(location.search).get("go");if(g)alGo(g)}catch(e){}
 </script>
 
 </body></html>
