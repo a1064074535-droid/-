@@ -1669,7 +1669,7 @@ function alGo(go){const run=()=>{const [t,x]=String(go).split(":");document.quer
   if(t==="adhkar"){S.cat=x||"sabah";save();tab("adhkar");try{renderAdhkar()}catch(e){}}
   else if(t==="mushaf"){tab("mushaf");if(x)try{openSurah(+x)}catch(e){}}
   else tab(t);window.scrollTo({top:0})};
- if(Q)run();else{let n=0;const iv=setInterval(()=>{if(Q||++n>40){clearInterval(iv);run()}},250)}}
+ if(Q||!/^(adhkar|mushaf|hifz)/.test(go))run();else{let n=0;const iv=setInterval(()=>{if(Q||++n>40){clearInterval(iv);run()}},250)}}
 function alChime(){try{const C=new (window.AudioContext||window.webkitAudioContext)();[0,.18,.36].forEach((t,i)=>{const o=C.createOscillator(),g=C.createGain();o.type="sine";o.frequency.value=[660,880,990][i];g.gain.setValueAtTime(0,C.currentTime+t);g.gain.linearRampToValueAtTime(.18,C.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,C.currentTime+t+.5);o.connect(g).connect(C.destination);o.start(C.currentTime+t);o.stop(C.currentTime+t+.55)})}catch(e){}}
 function alBanner(T,a){document.querySelectorAll(".albanner").forEach(b=>b.remove());const b=document.createElement("div");b.className="albanner";b.setAttribute("role","alert");
  b.innerHTML='<span class="ico"></span><span class="tx"><b></b><span></span></span><button class="btn sm" type="button">ابدأ الآن</button><button class="btn ghost sm" type="button" aria-label="إغلاق">✕</button>';
