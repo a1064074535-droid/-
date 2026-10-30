@@ -448,6 +448,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 @keyframes alIn{from{transform:translateY(-30px);opacity:0}}
 .alok{font-size:12px;color:#16a34a;height:0;overflow:hidden;opacity:0;transition:opacity .2s}.alok.show{height:auto;opacity:1}
 .aloop{gap:6px}.aloop select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
+#aVoice,.vsel{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -499,6 +500,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
       <h2>⏰ المنبّهات والتذكير</h2>
       <div class="muted">فعّل ما تريد، وسيصلك إشعار في وقته يذكّرك بالأذكار أو الإذاعة أو الحفظ أو التلاوة، وعند الضغط عليه تفتح المنصة على القسم مباشرة.</div>
       <div class="alperm" id="alPerm"></div>
+      <div class="row" style="gap:6px;font-size:13px"><span class="muted">صوت نطق الأذكار:</span><select id="alVoice" class="vsel"><option value="human">🎙️ صوت رجل راقٍ</option><option value="device">📱 صوت الجوال</option></select></div>
       <div class="list" id="alList"></div>
       <div class="row"><select id="alAddT" style="flex:1;min-width:0"></select><button class="btn ghost sm" id="alAdd" type="button">＋ إضافة منبه</button></div>
       <div class="row"><button class="btn" id="alIcs" type="button">📅 أضف المنبهات إلى تقويم جوالك</button><button class="btn ghost sm" id="alTest" type="button">🔔 تجربة الإشعار</button></div>
@@ -646,7 +648,7 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
     <div class="row" style="justify-content:space-between"><span class="muted" id="aProg"></span><button class="btn ghost sm" id="aReset" type="button">إعادة البدء</button></div>
     <div class="bar"><i id="aBar" style="width:0"></i></div>
     <div class="muted" id="aNote"></div>
-    <div class="row aloop"><button class="btn sm" id="aLoop" type="button">🔁 ترديد الأذكار بالصوت بشكل متكرر</button><select id="aLoopN" aria-label="مرات ترديد كل ذكر"><option value="1">كل ذكر مرة</option><option value="3">كل ذكر ٣ مرات</option><option value="0">بعدد مراته</option></select></div>
+    <div class="row aloop"><button class="btn sm" id="aLoop" type="button">🔁 ترديد الأذكار بالصوت بشكل متكرر</button><select id="aLoopN" aria-label="مرات ترديد كل ذكر"><option value="1">كل ذكر مرة</option><option value="3">كل ذكر ٣ مرات</option><option value="0">بعدد مراته</option></select><select id="aVoice" aria-label="الصوت"><option value="human">🎙️ صوت القارئ (رجل)</option><option value="device">📱 صوت الجوال</option></select></div>
     <div class="list" id="aList"></div>
   </section>
 
@@ -1655,7 +1657,15 @@ const EVS=[[15,"ربع ساعة"],[30,"نصف ساعة"],[45,"٤٥ دقيقة"],
 function alRot(a,w){const lm=Math.floor((w.getTime()-w.getTimezoneOffset()*6e4)/6e4);return a.m==="ev"?Math.floor(lm/Math.max(5,a.ev||60))%DHK.length:Math.floor(lm/1440)%DHK.length}
 function alT(a,w){if(a.k==="dhikr"){if(a.ph===-1){const D=DHK[alRot(a,w||alWhen(a)||new Date())];return {...ALT.dhikr,n:D[0],b:D[1]||"ذكر الله",say:D[0],rot:true}}const D=DHK[a.ph||0]||DHK[0];return {...ALT.dhikr,n:D[0],b:D[1]||"ذكر الله",say:D[0]}}const T=ALT[a.k]||ALT.istighfar;return {...T,say:T.b}}
 const hm=t=>{const [h,m]=(t||"00:00").split(":").map(Number);return h*60+m};
-function speakAr(t){try{if(!("speechSynthesis" in window)||!t)return false;const vs=speechSynthesis.getVoices();const v=vs.find(x=>/^ar[-_]SA/i.test(x.lang))||vs.find(x=>/^ar/i.test(x.lang));const u=new SpeechSynthesisUtterance(t);u.lang=v?v.lang:"ar-SA";if(v)u.voice=v;u.rate=.85;u.pitch=1;speechSynthesis.cancel();speechSynthesis.speak(u);return true}catch(e){return false}}
+const VOICE_BASE="https://lrojiuulqmucofspdqoq.supabase.co/storage/v1/object/public/adhkar/v1/";const VMISS=new Set();let VAU=null;
+function fnv(t){let h=0x811c9dc5;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,"0")}
+function voiceStop(){try{if(VAU){VAU.onended=VAU.onerror=null;VAU.pause();VAU=null}speechSynthesis.cancel()}catch(e){}}
+function ttsAr(t,done){try{if(!("speechSynthesis" in window)||!t){done&&done();return false}const vs=speechSynthesis.getVoices();const v=vs.find(x=>/^ar[-_]SA/i.test(x.lang))||vs.find(x=>/^ar/i.test(x.lang));const u=new SpeechSynthesisUtterance(t);u.lang=v?v.lang:"ar-SA";if(v)u.voice=v;u.rate=.85;if(done){u.onend=done;u.onerror=done}speechSynthesis.cancel();speechSynthesis.speak(u);return true}catch(e){done&&done();return false}}
+function playVoice(t,done){voiceStop();if(!t){done&&done();return false}const id=fnv(t);if(S.voice==="device"||VMISS.has(id))return ttsAr(t,done);
+ const au=new Audio(VOICE_BASE+id+".mp3");VAU=au;let fell=false;const fb=()=>{if(fell)return;fell=true;VMISS.add(id);if(VAU===au)VAU=null;ttsAr(t,done)};
+ au.onended=()=>{if(VAU===au)VAU=null;done&&done()};au.onerror=fb;au.play().catch(e=>{if(e&&e.name==="NotAllowedError"){ttsAr(t,done)}else fb()});return true}
+function speakAr(t){return playVoice(t)}
+function speakAr_old(t){try{if(!("speechSynthesis" in window)||!t)return false;const vs=speechSynthesis.getVoices();const v=vs.find(x=>/^ar[-_]SA/i.test(x.lang))||vs.find(x=>/^ar/i.test(x.lang));const u=new SpeechSynthesisUtterance(t);u.lang=v?v.lang:"ar-SA";if(v)u.voice=v;u.rate=.85;u.pitch=1;speechSynthesis.cancel();speechSynthesis.speak(u);return true}catch(e){return false}}
 function hasArVoice(){try{return speechSynthesis.getVoices().some(x=>/^ar/i.test(x.lang))}catch(e){return false}}
 const PRN2={fajr:"الفجر",dhuhr:"الظهر",asr:"العصر",maghrib:"المغرب",isha:"العشاء"};
 const DAYN=["أحد","اثنين","ثلاثاء","أربعاء","خميس","جمعة","سبت"];
@@ -1743,16 +1753,17 @@ try{const g=new URLSearchParams(location.search).get("go");if(g)alGo(g)}catch(e)
 const LOOP={on:false,i:0,r:0,k:null};
 function loopItems(){const k=curCat();if(k==="hisn"){if(hisnCh==null||!HISN)return[];return null}const c=CATS.find(x=>x.k===k);return c?c.items:[]}
 function loopText(x){return x.q?qText(x.q):x.t}
-function loopStop(){LOOP.on=false;try{speechSynthesis.cancel()}catch(e){}const b=$("aLoop");if(b){b.textContent="🔁 ترديد الأذكار بالصوت بشكل متكرر";b.classList.remove("ghost")}document.querySelectorAll("#aList .dhikr.playing").forEach(e=>e.classList.remove("playing"))}
+function loopStop(){LOOP.on=false;voiceStop();const b=$("aLoop");if(b){b.textContent="🔁 ترديد الأذكار بالصوت بشكل متكرر";b.classList.remove("ghost")}document.querySelectorAll("#aList .dhikr.playing").forEach(e=>e.classList.remove("playing"))}
 async function loopStep(){if(!LOOP.on)return;let items=loopItems();if(items===null){try{const H=await HISN;items=hisnItems(H[hisnCh])}catch(e){items=[]}}
  if(!items.length){loopStop();return}if(LOOP.i>=items.length){LOOP.i=0;LOOP.r=0}const x=items[LOOP.i];const mode=+$("aLoopN").value;const reps=mode===0?Math.min(x.n||1,100):mode;
  const cards=document.querySelectorAll("#aList .dhikr");cards.forEach((e,j)=>e.classList.toggle("playing",j===LOOP.i));const el=cards[LOOP.i];if(el){const r=el.getBoundingClientRect();if(r.top<80||r.bottom>innerHeight-120)el.scrollIntoView({block:"center",behavior:"smooth"})}
- const vs=speechSynthesis.getVoices();const v=vs.find(z=>/^ar[-_]SA/i.test(z.lang))||vs.find(z=>/^ar/i.test(z.lang));const u=new SpeechSynthesisUtterance(loopText(x));u.lang=v?v.lang:"ar-SA";if(v)u.voice=v;u.rate=.85;
- u.onend=()=>{if(!LOOP.on)return;LOOP.r++;if(LOOP.r>=reps){LOOP.r=0;LOOP.i++}setTimeout(loopStep,600)};u.onerror=()=>{if(LOOP.on)setTimeout(()=>{LOOP.i++;LOOP.r=0;loopStep()},600)};
- try{speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){loopStop()}}
-$("aLoop").onclick=()=>{if(!("speechSynthesis" in window)){toast("المتصفح لا يدعم نطق النص");return}if(LOOP.on){loopStop();return}LOOP.on=true;LOOP.i=0;LOOP.r=0;LOOP.k=curCat();$("aLoop").textContent="⏹ إيقاف الترديد";$("aLoop").classList.add("ghost");if(!hasArVoice())toast("إن لم تسمع الصوت فثبّت اللغة العربية في إعدادات تحويل النص إلى كلام");loopStep()};
+ playVoice(loopText(x),()=>{if(!LOOP.on)return;LOOP.r++;if(LOOP.r>=reps){LOOP.r=0;LOOP.i++}setTimeout(loopStep,600)})}
+$("aLoop").onclick=()=>{if(LOOP.on){loopStop();return}LOOP.on=true;LOOP.i=0;LOOP.r=0;LOOP.k=curCat();$("aLoop").textContent="⏹ إيقاف الترديد";$("aLoop").classList.add("ghost");loopStep()};
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#aCats button");if(b&&LOOP.on)loopStop()},true);
 {const _ra=renderAdhkar;renderAdhkar=function(){_ra();if(LOOP.on&&LOOP.k===curCat()){const cards=document.querySelectorAll("#aList .dhikr");cards.forEach((e,j)=>e.classList.toggle("playing",j===LOOP.i))}}}
+
+/* ===== اختيار صوت الأذكار ===== */
+(function(){const set=v=>{S.voice=v;save();["aVoice","alVoice"].forEach(id=>{const e=$(id);if(e)e.value=v})};["aVoice","alVoice"].forEach(id=>{const e=$(id);if(!e)return;e.value=S.voice||"human";e.onchange=()=>{set(e.value);playVoice(e.value==="human"?"سبحان الله وبحمده، سبحان الله العظيم":"سبحان الله وبحمده")}})})();
 </script>
 
 </body></html>
