@@ -449,6 +449,13 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 .alok{font-size:12px;color:#16a34a;height:0;overflow:hidden;opacity:0;transition:opacity .2s}.alok.show{height:auto;opacity:1}
 .aloop{gap:6px}.aloop select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
 #aVoice,.vsel{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);color:var(--ink)}
+
+.instcard{display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid var(--brass);border-radius:10px;background:linear-gradient(135deg,color-mix(in srgb,var(--brass) 10%,var(--surface)),var(--surface))}
+.instcard img{border-radius:14px;flex:0 0 auto;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.instcard .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.instcard b{font-family:var(--f-quran);font-size:17px}.instcard span{font-size:12px;color:var(--muted)}
+.iosguide{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+.iosguide>div{background:var(--surface);color:var(--ink);border-radius:16px 16px 0 0;padding:18px 18px 28px;max-width:520px;width:100%;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.8}
+.iosguide b{font-family:var(--f-quran);font-size:19px}
 .mstyle{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 4px}
 .mstyle button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-family:var(--f-quran);font-weight:700;font-size:15px;padding:6px 12px 6px 14px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
 .mstyle button i{width:20px;height:20px;border-radius:4px;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
@@ -487,6 +494,11 @@ nav.tabs button[aria-selected="true"] .ti{color:#fff;background:rgba(255,255,255
 
   <!-- اليوم -->
   <section data-view="today" class="list">
+    <div class="instcard" id="instCard" hidden>
+      <img src="icon-192.png" alt="" width="56" height="56">
+      <div class="tx"><b>ثبّت «رفيق الذكر» تطبيقاً على جوالك</b><span id="instTxt">أيقونة على الشاشة الرئيسية، يفتح بملء الشاشة بدون المتصفح، وتصلك التنبيهات.</span></div>
+      <button class="btn sm" id="instBtn" type="button">📲 تثبيت</button><button class="btn ghost sm" id="instX" type="button" aria-label="إخفاء">✕</button>
+    </div>
     <button class="nextpr" id="todayPr" type="button" hidden></button>
     <div class="card"><h2>محتوى المنصة</h2><div class="gauges" id="gauges"></div></div>
     <div class="card next"><h2 id="nextTitle"></h2><div id="nextBody" class="muted"></div><div class="row"><button class="btn" id="nextGo" type="button"></button></div></div>
@@ -1764,6 +1776,21 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 
 /* ===== اختيار صوت الأذكار ===== */
 (function(){const set=v=>{S.voice=v;save();["aVoice","alVoice"].forEach(id=>{const e=$(id);if(e)e.value=v})};["aVoice","alVoice"].forEach(id=>{const e=$(id);if(!e)return;e.value=S.voice||"human";e.onchange=()=>{set(e.value);playVoice(e.value==="human"?"سبحان الله وبحمده، سبحان الله العظيم":"سبحان الله وبحمده")}})})();
+
+/* ===== تثبيت التطبيق ===== */
+let BIP=null;const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function instShow(){const c=$("instCard");if(!c)return;if(standalone()||S.instHide){c.hidden=true;return}
+ const android=/Android/i.test(navigator.userAgent);const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+ if(BIP||ios||android){c.hidden=false;if(ios)$("instTxt").textContent="على الآيفون: أضفه إلى الشاشة الرئيسية ليعمل كتطبيق وتصلك التنبيهات."}else c.hidden=true}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();BIP=e;instShow()});
+window.addEventListener("appinstalled",()=>{BIP=null;$("instCard").hidden=true;toast("تم تثبيت التطبيق، تجده على الشاشة الرئيسية")});
+$("instX").onclick=()=>{S.instHide=1;save();$("instCard").hidden=true};
+$("instBtn").onclick=async()=>{if(BIP){BIP.prompt();try{await BIP.userChoice}catch(e){}BIP=null;instShow();return}
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);const g=document.createElement("div");g.className="iosguide";
+ g.innerHTML=ios?'<div><b>تثبيت التطبيق على الآيفون</b><span>١. افتح الموقع في <b style="font-size:inherit">Safari</b>.</span><span>٢. اضغط زر المشاركة ⬆️ أسفل الشاشة.</span><span>٣. اختر «إضافة إلى الشاشة الرئيسية» ثم «إضافة».</span><span>٤. افتح «رفيق الذكر» من أيقونته، وفعّل المنبهات لتصلك التنبيهات.</span><button class="btn" type="button">فهمت</button></div>'
+  :'<div><b>تثبيت التطبيق</b><span>١. افتح الموقع في متصفح <b style="font-size:inherit">Chrome</b>.</span><span>٢. اضغط قائمة النقاط الثلاث ⋮ أعلى الشاشة.</span><span>٣. اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</span><span>سيظهر «رفيق الذكر» بين تطبيقات جوالك ويفتح بملء الشاشة.</span><button class="btn" type="button">فهمت</button></div>';
+ g.onclick=e=>{if(e.target===g||e.target.tagName==="BUTTON")g.remove()};document.body.appendChild(g)};
+setTimeout(instShow,1500);
 </script>
 
 </body></html>
