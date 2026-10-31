@@ -3340,11 +3340,29 @@ const _si=window.setInterval;
 window.setInterval=function(fn,ms){try{if(ms===1000&&typeof fn==="function"&&/countdownSeconds/.test(fn.toString()))return 0}catch(e){}return _si.apply(window,arguments)};
 
 const CITY_XY={};CITIES.forEach(c=>CITY_XY[c[0]]=[c[1],c[2]]);
+const SA_CITIES=[["الخرج",24.1556,47.3346],["الدرعية",24.7375,46.575],["المزاحمية",24.4667,46.2667],["ضرما",24.605,46.13],["الدوادمي",24.5077,44.3924],["عفيف",23.9065,42.9172],["القويعية",24.0737,45.2806],["الزلفي",26.2994,44.8156],["المجمعة",25.9039,45.3456],["الغاط",26.027,44.95],["شقراء",25.2483,45.2528],["رماح",25.5667,47.1667],["حوطة بني تميم",23.5,46.8333],["الحريق",23.62,46.52],["الأفلاج",22.2833,46.7333],["السليل",20.4607,45.5779],["وادي الدواسر",20.4697,44.8044],
+["الطائف",21.2703,40.4158],["رابغ",22.7986,39.0349],["الليث",20.15,40.2667],["القنفذة",19.1264,41.0789],["الجموم",21.6167,39.7],["خليص",22.15,39.3167],["الخرمة",21.9167,42.05],["رنية",21.2667,42.85],["تربة",21.2167,41.6333],
+["ينبع",24.0895,38.0618],["العلا",26.6085,37.9232],["بدر",23.78,38.79],["خيبر",25.695,39.29],["الحناكية",24.8833,40.5167],["مهد الذهب",23.495,40.855],
+["بريدة",26.326,43.975],["عنيزة",26.084,43.994],["الرس",25.8694,43.4973],["البكيرية",26.1393,43.6582],["المذنب",25.8601,44.2223],["البدائع",25.98,43.73],
+["الخبر",26.2172,50.1971],["الظهران",26.2361,50.0393],["الأحساء",25.3833,49.5833],["الجبيل",27.0174,49.6225],["القطيف",26.5196,50.0115],["حفر الباطن",28.4328,45.9708],["الخفجي",28.4391,48.4913],["رأس تنورة",26.65,50.16],["بقيق",25.935,49.668],["النعيرية",27.47,48.49],
+["خميس مشيط",18.3093,42.7453],["بيشة",20.0005,42.6052],["النماص",19.12,42.13],["محايل عسير",18.55,42.05],["سراة عبيدة",18.0833,43.1167],["ظهران الجنوب",17.6667,43.5167],["أحد رفيدة",18.2,42.85],["بلقرن",19.5833,41.9333],["تثليث",19.5333,43.5],
+["جازان",16.8892,42.5511],["صبيا",17.15,42.625],["أبو عريش",16.9689,42.8325],["صامطة",16.5964,42.9444],["بيش",17.3833,42.5333],["فرسان",16.702,42.118],
+["شرورة",17.4667,47.1167],["حبونا",17.79,44.29],["يدمة",18.53,44.21],["بدر الجنوب",17.89,43.73],
+["الباحة",20.0129,41.4677],["بلجرشي",19.8592,41.5594],["المخواة",19.7833,41.4333],["قلوة",19.93,41.3],
+["تيماء",27.6333,38.55],["الوجه",26.2333,36.4667],["ضباء",27.35,35.69],["أملج",25.0213,37.2685],["حقل",29.2833,34.9333],
+["حائل",27.5114,41.7208],["بقعاء",27.89,42.4],["الغزالة",26.7833,41.3333],
+["سكاكا",29.9697,40.2064],["دومة الجندل",29.8117,39.8681],["القريات",31.3317,37.3428],["طبرجل",30.5,38.2167],
+["عرعر",30.9753,41.0381],["رفحاء",29.6202,43.4948],["طريف",31.6725,38.6637]];
+SA_CITIES.forEach(c=>{if(!CITY_XY[c[0]])CITY_XY[c[0]]=[c[1],c[2]]});
+const LOC=LS.get("rafiq_loc",null);
+function addCity(name,lat,lng){CITY_XY[name]=[lat,lng];if(!cityPrayerTimes[name])cityPrayerTimes[name]={fajr:"",shuruq:"",dhuhr:"",asr:"",maghrib:"",isha:"",next:""}}
+if(LOC&&LOC.name&&isFinite(LOC.lat))addCity(LOC.name,LOC.lat,LOC.lng);
+(function(){try{const st=JSON.parse(localStorage.getItem("rafiq_aldhikr_state_v2")||"{}");if(st.selectedCity&&!cityPrayerTimes[st.selectedCity]){if(CITY_XY[st.selectedCity])addCity(st.selectedCity,CITY_XY[st.selectedCity][0],CITY_XY[st.selectedCity][1]);else{st.selectedCity="مكة المكرمة";localStorage.setItem("rafiq_aldhikr_state_v2",JSON.stringify(st))}}}catch(e){}})();
 const PRN={fajr:"الفجر",sunrise:"الشروق",dhuhr:"الظهر",asr:"العصر",maghrib:"المغرب",isha:"العشاء"};
-function fmt(d){if(!d)return "—";const p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Riyadh",hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(d);
+function fmt(d){if(!d)return "—";const p=new Intl.DateTimeFormat("en-US",{hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(d);
  const h=p.find(x=>x.type==="hour").value,m=p.find(x=>x.type==="minute").value,ap=p.find(x=>x.type==="dayPeriod").value;return h+":"+m+" "+(/AM/i.test(ap)?"ص":"م")}
 function pt(city,date){if(typeof adhan==="undefined")return null;const xy=CITY_XY[city]||CITY_XY["مكة المكرمة"];
- return new adhan.PrayerTimes(new adhan.Coordinates(xy[0],xy[1]),date||new Date(),adhan.CalculationMethod.UmmAlQura())}
+ return new adhan.PrayerTimes(new adhan.Coordinates(xy[0],xy[1]),date||new Date(),(xy[0]>15.5&&xy[0]<32.6&&xy[1]>34.4&&xy[1]<56)?adhan.CalculationMethod.UmmAlQura():adhan.CalculationMethod.MuslimWorldLeague())}
 function nextPrayer(city){const now=new Date();let t=pt(city,now);if(!t)return null;for(const k of ["fajr","dhuhr","asr","maghrib","isha"])if(t[k]>now)return {k,t:t[k]};
  t=pt(city,new Date(now.getTime()+864e5));return {k:"fajr",t:t.fajr}}
 function fillCityTimes(){Object.keys(cityPrayerTimes).forEach(c=>{const t=pt(c);if(!t)return;const n=nextPrayer(c);
@@ -3386,6 +3404,46 @@ window.renderHifzBoard=async function(){const selVal=$("hifzSurahSelect").value;
   return '<div data-raw-verse="'+esc(v.a)+'" class="hifz-verse-item p-3.5 rounded-xl bg-black/25 border border-white/10 flex items-center justify-between gap-3 cursor-pointer hover:border-amber-400/50 transition"><p class="font-quran text-xl sm:text-2xl text-amber-100">'+esc(d)+'</p><span class="text-xs font-bold text-amber-400 shrink-0">آية '+v.n+'</span></div>'}).join("");
  board.querySelectorAll(".hifz-verse-item").forEach(el=>el.addEventListener("click",()=>{el.querySelector("p").textContent=el.dataset.rawVerse;playSpiritualChime(620,.15)}))};
 const rs=$("hifzRangeSelect");if(rs){rs.options[1].textContent="السورة كاملة"}
+
+
+/* ---------- 13) الموقع الفعلي لمواقيت الصلاة ---------- */
+const BASE_CITIES=new Set(CITIES.map(c=>c[0]));
+function distKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 12742*Math.asin(Math.sqrt(x))}
+function nearestCity(lat,lng){let best=null,bd=1e9;Object.entries(CITY_XY).forEach(([n,xy])=>{const d=distKm(lat,lng,xy[0],xy[1]);if(d<bd){bd=d;best=n}});return {name:best,km:bd}}
+function selectCity(name){appState.selectedCity=name;try{savePersistedState()}catch(e){}fillCityTimes();renderAdhanSection();tickHeader();try{renderAlarms()}catch(e){}geoStatus()}
+function setExtra(name,lat,lng,auto){Object.keys(cityPrayerTimes).forEach(k=>{if(!BASE_CITIES.has(k)&&k!==name)delete cityPrayerTimes[k]});addCity(name,lat,lng);
+ LS.set("rafiq_loc",{name,lat,lng,auto:!!auto,t:Date.now()});selectCity(name)}
+function geoStatus(){const el=$("geoStatus");if(!el)return;const c=appState.selectedCity,xy=CITY_XY[c];const L=LS.get("rafiq_loc",null);
+ el.textContent=(L&&L.auto&&L.name===c?"📍 موقعك الحالي: ":"🕌 المدينة المختارة: ")+c+(xy?" — ("+xy[0].toFixed(3)+"، "+xy[1].toFixed(3)+")":"");
+ const sel=$("geoCitySel");if(sel)sel.value=CITY_XY[c]&&!BASE_CITIES.has(c)&&[...sel.options].some(o=>o.value===c)?c:""}
+async function reverseName(lat,lng){
+ try{const r=await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+lat+"&longitude="+lng+"&localityLanguage=ar");if(r.ok){const d=await r.json();const n=(d.city||d.locality||"").trim();if(n)return n}}catch(e){}
+ try{const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&accept-language=ar&lat="+lat+"&lon="+lng);if(r.ok){const d=await r.json();const a=d.address||{};const n=(a.city||a.town||a.village||a.county||a.state||"").trim();if(n)return n}}catch(e){}
+ return ""}
+async function useGeo(silent){if(!("geolocation" in navigator)){if(!silent)toast("جهازك لا يدعم تحديد الموقع","⚠️");return}
+ const btn=$("geoBtn");if(btn&&!silent){btn.disabled=true;btn.textContent="⏳ جارٍ تحديد موقعك…"}
+ navigator.geolocation.getCurrentPosition(async pos=>{const lat=+pos.coords.latitude.toFixed(4),lng=+pos.coords.longitude.toFixed(4);
+  const L=LS.get("rafiq_loc",null);if(silent&&L&&L.auto&&distKm(lat,lng,L.lat,L.lng)<5){if(btn){btn.disabled=false;btn.textContent="📍 استخدم موقعي الدقيق"}return}
+  const near=nearestCity(lat,lng);let name;
+  if(near.km<=12)name=near.name;else{name=await reverseName(lat,lng);if(!name)name=near.km<=40?near.name:"موقعي الحالي"}
+  if(BASE_CITIES.has(name)&&distKm(lat,lng,CITY_XY[name][0],CITY_XY[name][1])>12)name=name+" (موقعي)";
+  setExtra(name,lat,lng,true);if(btn){btn.disabled=false;btn.textContent="📍 استخدم موقعي الدقيق"}
+  if(!silent){toast("تم تحديد موقعك: "+name+" — حُسبت مواقيت الصلاة لموقعك الدقيق","📍");playSpiritualChime(660,.25)}},
+ err=>{if(btn){btn.disabled=false;btn.textContent="📍 استخدم موقعي الدقيق"}if(silent)return;
+  toast(err.code===1?"لم يُسمح بالوصول للموقع — فعّله من إعدادات المتصفح ثم أعد المحاولة، أو اختر مدينتك من القائمة":"تعذّر تحديد الموقع الآن، تأكّد من تشغيل GPS أو اختر مدينتك من القائمة","⚠️")},
+ {enableHighAccuracy:true,timeout:20000,maximumAge:300000})}
+(function geoUI(){const box=$("cityButtonsContainer");if(!box)return;const w=document.createElement("div");w.className="flex flex-col sm:flex-row sm:items-center gap-2.5 p-3 rounded-2xl bg-black/25 border border-amber-500/25";
+ const list=SA_CITIES.map(c=>c[0]).filter(n=>!BASE_CITIES.has(n)).sort((a,b)=>a.localeCompare(b,"ar"));
+ w.innerHTML='<button type="button" id="geoBtn" class="gold-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm shrink-0">📍 استخدم موقعي الدقيق</button>'+
+  '<select id="geoCitySel" class="bg-emerald-950 text-amber-300 text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-500/30" aria-label="مدن أخرى"><option value="">🏙️ مدن أخرى في المملكة ('+list.length+' مدينة)…</option>'+list.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join("")+'</select>'+
+  '<p id="geoStatus" class="text-xs text-emerald-300 font-semibold sm:mr-auto"></p>';
+ box.parentNode.insertBefore(w,box);
+ $("geoBtn").addEventListener("click",()=>useGeo(false));
+ $("geoCitySel").addEventListener("change",e=>{const n=e.target.value;if(!n)return;const xy=CITY_XY[n];LS.set("rafiq_loc",{name:n,lat:xy[0],lng:xy[1],auto:false});setExtra(n,xy[0],xy[1],false);toast("تم اختيار مواقيت "+n,"🕌")});
+ const h=document.querySelector("#tab-adhan h2");if(h&&h.lastChild)h.lastChild.textContent=" مواقيت الصلاة والأذان حسب موقعك";
+ const sub=h&&h.parentNode.querySelector("p");if(sub)sub.textContent="فعّل «موقعي الدقيق» لحساب المواقيت لمدينتك أينما كنت، أو اختر مدينة من القائمة، وفعّل الأذان التلقائي بأصوات مؤذني الحرمين"})();
+function geoAuto(){geoStatus();const L=LS.get("rafiq_loc",null);if(!L||!L.auto||!navigator.permissions)return;
+ navigator.permissions.query({name:"geolocation"}).then(p=>{if(p.state==="granted")useGeo(true)}).catch(()=>{})}
 
 
 /* ---------- 4) موسوعة الأحاديث (50,759 حديثاً) ---------- */
@@ -3780,7 +3838,7 @@ window.addEventListener("DOMContentLoaded",()=>{
  /* الأجزاء تفتح موضعها الحقيقي */
  $("juzSelect").addEventListener("change",e=>{const j=JUZS[+e.target.value-1];if(j)openAyah(j[0],j[1])});
  /* المدينة تُحدّث المواقيت والإشعارات */
- $("cityButtonsContainer").addEventListener("click",()=>setTimeout(()=>{tickHeader();renderAdhanSection();renderAlarms()},50));
+ $("cityButtonsContainer").addEventListener("click",()=>setTimeout(()=>{tickHeader();renderAdhanSection();renderAlarms();geoStatus()},50));geoAuto();
  /* بطاقة الوقت الحالي: صباح أو مساء حسب العصر */
  try{const t=pt(appState.selectedCity||"مكة المكرمة");const now=new Date();if(t&&(now<t.asr&&now>=t.fajr)){const card=$("startEveningAdhkarBtn").closest("div.lg\\:col-span-8");
   card.querySelector("h2").textContent="حان وقت أذكار الصباح — من بعد الفجر إلى ارتفاع الضحى";card.querySelector("p").textContent="ابدأ يومك بذكر الله؛ فهي حصنك الحصين وبركة يومك كله.";
