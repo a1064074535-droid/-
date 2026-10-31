@@ -3450,7 +3450,7 @@ function geoAuto(){geoStatus();const L=LS.get("rafiq_loc",null);if(!L||!L.auto||
 
 
 /* ---------- 4) موسوعة الأحاديث (50,759 حديثاً) ---------- */
-let HI=null;const HB={};const HV={k:"nawawi40",rows:[],shown:0,q:""};const HPAGE=30;
+let HI=null;const HB={};const HV={k:"nawawi40",ch:null,rows:[],shown:0,q:""};const HPAGE=30;
 function hIndex(){if(!HI)HI=fetch("hadith/index.json?v=2",{cache:"no-cache"}).then(r=>r.json()).catch(e=>{HI=null;throw e});return HI}
 function hLoad(k){if(!HB[k])HB[k]=fetch("hadith/"+k+".json").then(r=>{if(!r.ok)throw 0;return r.json()}).catch(e=>{delete HB[k];throw e});return HB[k]}
 const fmtN=n=>Number(n).toLocaleString("en-US");
@@ -3458,16 +3458,28 @@ function hCardHTML(row,b){const ch=(b.ch||[]).find(c=>c[0]===row[0]);const chn=c
  return '<div class="p-5 rounded-2xl bg-black/30 border border-white/10 space-y-3"><div class="flex items-center justify-between gap-2 text-xs text-amber-300"><span class="font-bold">📜 '+esc(b.v?chn:b.t)+' (#'+row[1]+')</span>'+
  '<button type="button" data-hcopy="'+row[0]+'|'+row[1]+'" class="hcopy text-emerald-300 hover:underline shrink-0">نسخ 📋</button></div>'+(chn&&!b.v?'<p class="text-[11px] text-slate-400">'+esc(chn)+'</p>':"")+
  '<p class="font-quran text-xl text-amber-100 leading-relaxed">'+esc(row[2])+'</p></div>'}
+function hNav(){let n=$("hadithNavBar");if(!n){n=document.createElement("div");n.id="hadithNavBar";n.className="flex flex-wrap items-center justify-between gap-2";const box=$("hadithListContainer");box.parentNode.insertBefore(n,box)}return n}
 async function hShow(){const I=await hIndex();const b=I.find(x=>x.k===HV.k)||I[0];const box=$("hadithListContainer");
- const head=$("selectedHadithBookHeading");const q=strip(HV.q.trim());
- let list=HV.rows;if(q)list=list.filter(r=>strip(r[2]).includes(q));
- head.textContent=(q?"نتائج البحث في: ":"أحاديث كتاب: ")+b.t+" — "+fmtN(list.length)+" حديث";
- const part=list.slice(0,HV.shown);box.innerHTML=part.length?part.map(r=>hCardHTML(r,b)).join(""):'<p class="text-sm text-slate-400">لا توجد نتائج مطابقة في هذا الكتاب.</p>';
+ const head=$("selectedHadithBookHeading");const q=strip(HV.q.trim());const nav=hNav();const chs=b.ch||[];const multi=chs.length>1;
  let more=$("hadithMoreBtn");if(!more){more=document.createElement("button");more.id="hadithMoreBtn";more.type="button";more.className="gold-btn w-full py-3 rounded-xl text-sm";more.textContent="عرض المزيد من الأحاديث";box.parentNode.appendChild(more);more.addEventListener("click",()=>{HV.shown+=HPAGE;hShow()})}
+ /* فهرس أقسام الكتاب */
+ if(multi&&HV.ch==null&&!q){head.textContent="📖 فهرس "+b.t+" — "+chs.length+" قسماً • "+fmtN(HV.rows.length)+" حديث";
+  nav.innerHTML='<p class="text-xs text-slate-300">اختر القسم لعرض أحاديثه، أو ابحث في الكتاب كله من مربع البحث بالأعلى</p>';
+  box.innerHTML=chs.map((c,i)=>'<button type="button" data-hch="'+c[0]+'" class="hch-btn p-4 rounded-2xl bg-black/30 border border-white/10 hover:border-amber-400/60 hover:bg-amber-500/15 flex items-center justify-between gap-3 text-right transition"><div class="flex items-center gap-3"><span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xs font-black text-amber-300">'+(i+1)+'</span><span class="font-bold text-sm text-amber-100">'+esc(c[1])+'</span></div><span class="text-xs font-bold text-emerald-300 shrink-0">'+fmtN(c[2])+' حديث ←</span></button>').join("");
+  more.hidden=true;box.querySelectorAll(".hch-btn").forEach(bt=>bt.addEventListener("click",()=>{HV.ch=+bt.dataset.hch;HV.shown=HPAGE;hShow();head.scrollIntoView({behavior:"smooth",block:"start"})}));return}
+ /* أحاديث القسم المختار أو نتائج البحث */
+ let list=HV.rows;const cur=HV.ch!=null?chs.find(c=>c[0]===HV.ch):null;if(cur)list=list.filter(r=>r[0]===HV.ch);if(q)list=list.filter(r=>strip(r[2]).includes(q));
+ head.textContent=(q?"🔎 نتائج البحث في: ":"📜 ")+(cur&&multi?b.t+" — "+cur[1]:b.t)+" ("+fmtN(list.length)+" حديث)";
+ const ci=cur?chs.indexOf(cur):-1;
+ nav.innerHTML=multi?('<button type="button" id="hchBack" class="gold-btn px-3.5 py-1.5 rounded-xl text-xs">📖 فهرس أقسام الكتاب</button>'+(cur?'<div class="flex gap-2">'+(ci>0?'<button type="button" id="hchPrev" class="px-3 py-1.5 rounded-xl glass-card text-xs font-bold text-amber-200">→ '+esc(chs[ci-1][1])+'</button>':"")+(ci<chs.length-1?'<button type="button" id="hchNext" class="px-3 py-1.5 rounded-xl glass-card text-xs font-bold text-amber-200">'+esc(chs[ci+1][1])+' ←</button>':"")+'</div>':"")):"";
+ const go=c=>{HV.ch=c;HV.shown=HPAGE;hShow();head.scrollIntoView({behavior:"smooth",block:"start"})};
+ if($("hchBack"))$("hchBack").addEventListener("click",()=>{HV.q="";$("hadithSearchInput").value="";go(null)});
+ if($("hchPrev"))$("hchPrev").addEventListener("click",()=>go(chs[ci-1][0]));if($("hchNext"))$("hchNext").addEventListener("click",()=>go(chs[ci+1][0]));
+ const part=list.slice(0,HV.shown);box.innerHTML=part.length?part.map(r=>hCardHTML(r,b)).join(""):'<p class="text-sm text-slate-400">لا توجد نتائج مطابقة.</p>';
  more.hidden=list.length<=HV.shown;
  box.querySelectorAll(".hcopy").forEach(bt=>bt.addEventListener("click",()=>{const [c,n]=bt.dataset.hcopy.split("|").map(Number);const row=HV.rows.find(r=>r[0]===c&&r[1]===n);if(!row)return;
-  const txt=row[2]+"\n\n("+b.t+"، رقم "+row[1]+")\n✨ رفيق الذكر";try{navigator.clipboard.writeText(txt)}catch(e){}toast("تم نسخ الحديث","📋")}))}
-async function hOpen(k){HV.k=k;HV.shown=HPAGE;$("hadithListContainer").innerHTML='<div class="p-6 text-center text-sm text-amber-300 animate-pulse">جارٍ تحميل الأحاديث…</div>';
+  const cn=(chs.find(x=>x[0]===row[0])||[0,""])[1];const txt=row[2]+"\n\n("+b.t+(cn&&multi?" — "+cn:"")+"، رقم "+row[1]+")\n✨ رفيق الذكر";try{navigator.clipboard.writeText(txt)}catch(e){}toast("تم نسخ الحديث","📋")}))}
+async function hOpen(k){HV.k=k;HV.ch=null;HV.shown=HPAGE;$("hadithListContainer").innerHTML='<div class="p-6 text-center text-sm text-amber-300 animate-pulse">جارٍ تحميل الأحاديث…</div>';
  try{HV.rows=await hLoad(k)}catch(e){HV.rows=[];$("hadithListContainer").innerHTML='<p class="text-sm text-rose-300">تعذّر تحميل الكتاب، أعد المحاولة.</p>';return}hShow()}
 let hCatsDone=false;
 window.renderHadithSection=async function(){let I;try{I=await hIndex()}catch(e){return}
