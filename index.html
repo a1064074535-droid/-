@@ -3367,8 +3367,8 @@ function loadQuran(){if(!QP)QP=(async()=>{const srcs=["https://cdn.jsdelivr.net/
   if(Array.isArray(j)&&Array.isArray(j[0]))return j}catch(e){}}
  throw new Error("quran")})().catch(e=>{QP=null;throw e});return QP}
 const TFC={};
-function loadTafsir(s){if(!TFC[s])TFC[s]=(async()=>{const urls=["https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/ar-tafsir-muyassar/"+s+".json","https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/ar-tafsir-muyassar/"+s+".json","t/m/"+s+".json"];
- for(const u of urls){try{const r=await fetch(u);if(!r.ok)continue;const d=await r.json();const arr=[];
+function loadTafsir(s){if(!TFC[s])TFC[s]=(async()=>{const urls=["t/"+s+".json","https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/ar-tafsir-muyassar/"+s+".json","https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/ar-tafsir-muyassar/"+s+".json"];
+ for(const u of urls){try{const r=await fetch(u);if(!r.ok)continue;const d=await r.json();if(d&&Array.isArray(d.m))return d.m;const arr=[];
   const list=Array.isArray(d)?d:(d.ayahs||[]);list.forEach((e,i)=>{if(typeof e==="string"){arr[i]=e;return}const a=e.ayah||e.a||i+1;arr[a-1]=(arr[a-1]?arr[a-1]+" ":"")+String(e.text||e.t||"").trim()});
   return arr}catch(e){}}return []})();return TFC[s]}
 Object.keys(surahSamples).forEach(k=>delete surahSamples[k]);
