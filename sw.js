@@ -1,4 +1,4 @@
-const V="rafiq-v12",SHELL=["./","./index.html","./old.html","./mihrab.webp","./icon-192.png","./icon-512.png","./manifest.webmanifest","./hisn.json"];
+const V="rafiq-v13",SHELL=["./","./index.html","./old.html","./mihrab.webp","./icon-192.png","./icon-512.png","./manifest.webmanifest","./hisn.json"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting()});
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!=="rafiq-rt").map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 const RT=/^https:\/\/(cdn\.jsdelivr\.net|raw\.githubusercontent\.com|fonts\.(googleapis|gstatic)\.com|lrojiuulqmucofspdqoq\.supabase\.co\/storage)\//;
